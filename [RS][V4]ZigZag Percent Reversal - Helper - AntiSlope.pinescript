@@ -1,0 +1,319 @@
+//@version=4
+//  |{-------------------------------------------------------------------------||
+//  ||  author: RicardoSantos
+//  ||-------------------------------------------------------------------------||
+//  ||  description:
+//  ||      • Zig Zag indicator plots points on the chart whenever prices reverse 
+//	||			by a percentage greater than a pre-chosen variable.
+//	||		• Forecasts Slope and Antislope.
+//  ||      • Tags: zigzag, range, average, forecast, pattern, time, levels
+//  ||---}---------------------------------------------------------------------||
+//  |{-------------------------------------------------------------------------||
+study( 
+     title="[RS][V4]ZigZag Percent Reversal - Helper - AntiSlope", 
+     shorttitle="H", 
+     overlay=true
+     )
+//  ||---}---------------------------------------------------------------------||
+
+//  |--------------------------------------------------------------------------||
+//  |   ZigZag:                                                                ||
+//  |--------------------------------------------------------------------------||
+//  |{
+string percent_method_description = "Method to use for the zigzag reversal range:"
+string percent_description = "Percent of last pivot price for zigzag reversal:"
+string percent_multiplier_description = "Multiplier to apply to ATR if applicable:"
+
+string percent_method = input(
+         defval="MANUAL", 
+         title=percent_method_description, 
+         options=[
+             "MANUAL", 
+             "ATR005 * X", "ATR010 * X", "ATR020 * X", "ATR050 * X", "ATR100 * X", "ATR250 * X"
+             ]
+         )
+
+var float percent = input(defval=0.25, title=percent_description, minval=0.0, maxval=99.0) / 100
+float percent_multiplier = input(defval=1.0, title=percent_multiplier_description)
+if percent_method == "ATR005 * X"
+    percent := atr(005) / open * percent_multiplier
+if percent_method == "ATR010 * X"
+    percent := atr(010) / open * percent_multiplier
+if percent_method == "ATR020 * X"
+    percent := atr(020) / open * percent_multiplier
+if percent_method == "ATR050 * X"
+    percent := atr(050) / open * percent_multiplier
+if percent_method == "ATR100 * X"
+    percent := atr(100) / open * percent_multiplier
+if percent_method == "ATR250 * X"
+    percent := atr(250) / open * percent_multiplier
+
+bool show_real_pivots_zz = input(defval=true, title="Show real pivots:", type=input.bool)
+
+//  ||-------------------------------------------------------------------------||
+//  ||  zigzag function:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_zz(_percent)=>
+
+    //  direction after last pivot
+    var bool _is_direction_up = na
+    //  track highest price since last lower pivot
+    var float _htrack = na
+    //  track lowest price since last higher pivot
+    var float _ltrack = na
+    //  zigzag variable for ploting
+    var float _pivot = na
+    //  range needed for reaching reversal threshold
+    float _reverse_range = 0.0
+    //  real pivot time
+    var int _real_pivot_time = na
+    var int _htime = na
+    var int _ltime = na
+    //  reverse line
+    var float _reverse_line = 0.0
+    if bar_index >= 1
+        
+        if na(_is_direction_up)
+            _is_direction_up := true
+        
+        _reverse_range := nz(_pivot[1]) * _percent
+        
+        if _is_direction_up
+            _ltrack := na
+            _ltime := time
+            
+            if na(_htrack)
+                if high > high[1]
+                    _htrack := high
+                    _htime := time
+                else
+                    _htrack := high[1]
+                    _htime := time[1]
+            else
+                if high > _htrack
+                    _htrack := high
+                    _htime := time
+
+            _reverse_line := (_htrack - _reverse_range)
+            
+            if close <= _reverse_line
+                _pivot := _htrack
+                _real_pivot_time := _htime
+                _is_direction_up := false
+
+        if not _is_direction_up
+            _htrack := na
+            _htime := na
+            
+            if na(_ltrack)
+                if low < low[1]
+                    _ltrack := low
+                    _ltime := time
+                else
+                    _ltrack := low[1]
+                    _ltime := time[1]
+            else
+                if low < _ltrack
+                    _ltrack := low
+                    _ltime := time
+                
+            _reverse_line := (_ltrack + _reverse_range)
+                
+            if close >= _reverse_line
+                _pivot := _ltrack
+                _real_pivot_time := _ltime
+                _is_direction_up := true
+
+    [_pivot, _is_direction_up, _reverse_line, _real_pivot_time]
+
+// ||   |}---------------------------------------------------------------------<•
+
+//  ||-------------------------------------------------------------------------||
+//  ||  zigzag data:
+//  ||-------------------------------------------------------------------------||
+//  |{
+[price_a, is_up, reverse, _rl_time] = f_zz(percent)
+alt_time = show_real_pivots_zz ? _rl_time : time
+
+zz_color = is_up ? color.orange : color.teal
+is_new_zig = change(price_a) != 0 ? price_a : na
+//  
+//plot(is_new_zig, title="Z", color=zz_color, linewidth=1, transp=80)
+
+//plot(reverse, title="R", color=color.gray, style=plot.style_stepline, linewidth=1, transp=40, offset=1)
+//plot(reverse, title="R", color=color.white, style=plot.style_circles, linewidth=4, transp=40, offset=1, show_last=1)
+
+//  |   Get Pivots:
+var int time_a = na
+var int time_b = na, var float price_b = na
+var int time_c = na, var float price_c = na
+var int time_d = na, var float price_d = na
+var int time_e = na, var float price_e = na
+var int time_f = na, var float price_f = na
+var int time_g = na, var float price_g = na
+
+if is_new_zig
+	time_a := alt_time
+	time_b := time_a[1], price_b := price_a[1]
+	time_c := time_b[1], price_c := price_b[1]
+	time_d := time_c[1], price_d := price_c[1]
+	time_e := time_d[1], price_e := price_d[1]
+	time_f := time_e[1], price_f := price_e[1]
+	time_g := time_f[1], price_g := price_f[1]
+	
+
+float AB_price_difference = abs(price_a - price_b)
+//float AC_price_difference = abs(price_a - price_c)
+
+int AB_time_difference = time_a - time_b
+//int AC_time_difference = time_a - time_c
+
+// ||   |}---------------------------------------------------------------------<•
+
+
+// ||   |}---------------------------------------------------------------------<•
+
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Function to process data, return range, avg, +/- dev, max to be ploted:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_mode_process_stats(_weight, _data)=>
+    float _avg_range = _data, float _max_range = 0.0
+    if bar_index < 1
+        // on 1st bar, make it equal to _data
+        _avg_range := _data
+    else
+        if change(_data) != 0
+            _weight_data = _weight * _data
+            _weight_previous = (1 - _weight) * nz(_avg_range[1], _data[1])
+            _avg_range := _weight_data + _weight_previous
+        else
+            _avg_range := _avg_range[1]
+    
+        _max_range := max(nz(_max_range[1], _data), _data)
+        
+    _pos_range = max(0.0, _data - _avg_range)
+    _neg_range = min(0.0, _data - _avg_range)
+    
+    var float _pos_dev = 0.0, var float _neg_dev = 0.0
+    if bar_index >= 1
+        if change(_pos_range) != 0
+            _pos_dev := _weight * _pos_range + (1 - _weight) * _pos_dev[1]
+        else
+            _pos_dev := _pos_dev[1]
+        if change(_neg_range) != 0
+            _neg_dev := _weight * _neg_range + (1 - _weight) * _neg_dev[1]
+        else
+            _neg_dev := _neg_dev[1]
+
+    [_avg_range, _max_range, _pos_dev, _neg_dev]
+//  |}---------------------------------------------------------------------<•
+//  |{
+weight = 2 / (input(defval=10, title="Length weight for Average leg stats:") + 1)
+[price_avg_range, price_max_range, price_pos_dev, price_neg_dev] = f_mode_process_stats(weight, AB_price_difference)
+[time_avg_range, time_max_range, time_pos_dev, time_neg_dev] = f_mode_process_stats(weight, AB_time_difference)
+
+target_avg_price = price_a > price_b ? price_a - price_avg_range : price_a + price_avg_range
+target_price_upper_dev = price_a > price_b ? price_a - price_avg_range - price_neg_dev : price_a + price_avg_range + price_neg_dev
+target_price_lower_dev = price_a > price_b ? price_a - price_avg_range - price_pos_dev : price_a + price_avg_range + price_pos_dev
+target_price_0618_dev = price_a > price_b ? price_a - (price_avg_range + price_neg_dev) * 0.618 : price_a + (price_avg_range + price_neg_dev) * 0.618
+target_price_1618_dev = price_a > price_b ? price_a - (price_avg_range + price_pos_dev) * 1.618 : price_a + (price_avg_range + price_pos_dev) * 1.618
+
+target_avg_time = int(time_a + time_avg_range)
+target_time_upper_dev = int(target_avg_time + time_pos_dev)
+target_time_lower_dev = int(target_avg_time + time_neg_dev)
+target_time_0618_dev = int(time_a + (time_avg_range + time_neg_dev) * 0.618)
+target_time_1618_dev = int(time_a + (time_avg_range + time_pos_dev) * 1.618)
+//  ||  |}---------------------------------------------------------------------<•
+
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Line projection:
+//  ||-------------------------------------------------------------------------||
+//  |{
+
+f_cast_projections()=>
+    var line line_midline = na
+    var line line_price_dev = na
+    var line line_time_dev = na
+    //  ||  Style abreviation:
+    xtend = extend.right
+    st_dash = line.style_dashed
+    st_arrow = line.style_arrow_both
+
+    //  |   clear past lines:
+    line.delete(line_midline)
+    line.delete(line_price_dev)
+    line.delete(line_time_dev)
+    
+    line_midline := line.new( 
+                 time_a, price_a, 
+                 target_avg_time, target_avg_price, 
+                 xloc.bar_time, extend=xtend, color=color.orange, style=st_dash, width=1
+                 )
+    line_price_dev := line.new(
+                 target_avg_time, target_price_lower_dev, 
+                 target_avg_time, target_price_upper_dev, 
+                 xloc.bar_time, color=#0066ff, style=st_arrow, width=1
+                 )
+    line_time_dev := line.new( 
+                 target_time_lower_dev, target_avg_price, 
+                 target_time_upper_dev, target_avg_price, 
+                 xloc.bar_time, color=#0066ff, style=st_arrow, width=1
+                 )
+
+
+first_realtime_bar = (barstate.islast and barstate.ishistory[1])
+    
+show_basis = true
+if show_basis and (is_new_zig or first_realtime_bar)
+    f_cast_projections()
+//  ||  |}---------------------------------------------------------------------<•
+
+string xtend = input(defval="right", title="Extend anti lines:", type=input.string, options=["right", "left", "both"])
+
+f_antiline(_perc)=>
+    int out_vec_x = time_a + (target_time_upper_dev - target_avg_time)
+    float out_vec_y = price_a + (target_price_upper_dev - target_avg_price)
+    int in_vec_x = time_a + (target_time_lower_dev - target_avg_time)
+    float in_vec_y = price_a + (target_price_lower_dev - target_avg_price)
+    int a_x1 = target_time_lower_dev + round((in_vec_x - target_time_lower_dev) * _perc)
+    float a_y1 = target_price_lower_dev + ((in_vec_y - target_price_lower_dev) * _perc)
+    int a_x2 = target_time_upper_dev + round((out_vec_x - target_time_upper_dev) * _perc)
+    float a_y2 = target_price_upper_dev + ((out_vec_y - target_price_upper_dev) * _perc)
+
+
+    var line _li = na
+    line.delete(_li)
+    _li := line.new( 
+                 x1=a_x1, y1=a_y1, x2=a_x2, y2=a_y2,
+                 xloc=xloc.bar_time, extend=extend.right, color=color.orange, style=line.style_dashed, width=1
+                 )
+    if xtend == "left"
+        line.set_extend(id=_li, extend=extend.left)
+    if xtend == "both"
+        line.set_extend(id=_li, extend=extend.both)
+
+anti00_show = input(true)
+anti00_value = input(-161.8)/100
+anti01_show = input(true)
+anti01_value = input(-61.8)/100
+anti02_show = input(true)
+anti02_value = input(0.0)/100
+anti03_show = input(true)
+anti03_value = input(61.8)/100
+anti04_show = input(true)
+anti04_value = input(100.0)/100
+
+if anti00_show
+    f_antiline(anti00_value)
+if anti01_show
+    f_antiline(anti01_value)
+if anti02_show
+    f_antiline(anti02_value)
+if anti03_show
+    f_antiline(anti03_value)
+if anti04_show
+    f_antiline(anti04_value)

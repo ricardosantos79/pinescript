@@ -1,0 +1,772 @@
+//@version=4
+//  |{-------------------------------------------------------------------------||
+//  ||  author: RicardoSantos
+//  ||-------------------------------------------------------------------------||
+//  ||  description:
+//  ||      • Zig Zag indicator plots points on the chart whenever prices reverse 
+//	||			by a percentage greater than a pre-chosen variable.
+//	||		• Forecasts area based on zigzag statistics.
+//	||		• Displays labels with detected patterns.
+//	||		• Displays slope information rate of price, time diferentials and angle(experimental)
+//  ||      • Tags: zigzag, range, average, forecast, pattern, time, levels
+//  ||---}---------------------------------------------------------------------||
+//  |{-------------------------------------------------------------------------||
+study( 
+     title="[RS]ZigZag Percent Reversal - Forecast - patterns - labels", 
+     shorttitle="ZZ", 
+     overlay=true
+     )
+//  ||---}---------------------------------------------------------------------||
+
+//  |--------------------------------------------------------------------------||
+//  |   ZigZag:                                                                ||
+//  |--------------------------------------------------------------------------||
+//  |{
+string percent_method = input(
+         defval="MANUAL", 
+         title="Method to use for the zigzag reversal range:", 
+         options=[
+             "MANUAL", 
+             "ATR005 * X", "ATR010 * X", "ATR020 * X", "ATR050 * X", "ATR100 * X", "ATR250 * X"
+             ]
+         )
+
+var float percent = input(
+         defval=0.25, 
+         title="Percent of last pivot price for zigzag reversal:", 
+         minval=0.0, maxval=99.0
+         ) / 100
+
+float percent_multiplier = input(
+         defval=1.0, 
+         title="Multiplier to apply to ATR if applicable:"
+         )
+if percent_method == "ATR005 * X"
+    percent := atr(005) / open * percent_multiplier
+if percent_method == "ATR010 * X"
+    percent := atr(010) / open * percent_multiplier
+if percent_method == "ATR020 * X"
+    percent := atr(020) / open * percent_multiplier
+if percent_method == "ATR050 * X"
+    percent := atr(050) / open * percent_multiplier
+if percent_method == "ATR100 * X"
+    percent := atr(100) / open * percent_multiplier
+if percent_method == "ATR250 * X"
+    percent := atr(250) / open * percent_multiplier
+
+// ZigZag options:
+bool show_real_pivots = input(defval=true, title="Show real zigzag pivots:", type=input.bool)
+bool show_zigzag_lines = input(defval=true, title="Show zigzag lines:", type=input.bool)
+// Label options:
+bool show_pivot_price = input(defval=true, title="Show price labels on zigzag:", type=input.bool)
+bool show_triangle_rates = input(defval=true, title="Show rate labels on triangles:", type=input.bool)
+bool show_angles = input(defval=false, title="Show Angle Degree information(EXPERIMENTAL):", type=input.bool)
+bool show_patterns = input(defval=true, title="Show Patterns:", type=input.bool)
+bool show_harmonic = input(defval=true, title="Show Harmonic Triangle Pattern:", type=input.bool)
+bool show_tap = input(defval=true, title="Show 2/3/4 Tap Patterns:", type=input.bool)
+bool show_abcd = input(defval=true, title="Show AB=CD Pattern:", type=input.bool)
+bool show_bat = input(defval=true, title="Show Bat Pattern:", type=input.bool)
+bool show_butterfly = input(defval=true, title="Show Butterfly Pattern:", type=input.bool)
+bool show_gartley = input(defval=true, title="Show Gartley Pattern:", type=input.bool)
+bool show_crab = input(defval=true, title="Show Crab Pattern:", type=input.bool)
+bool show_shark = input(defval=true, title="Show Shark Pattern:", type=input.bool)
+bool show_5o = input(defval=true, title="Show 5o Pattern:", type=input.bool)
+bool show_wolfe = input(defval=true, title="Show wolfe Pattern:", type=input.bool)
+bool show_contria = input(defval=true, title="Show Contracting Triangle Pattern:", type=input.bool)
+bool show_exptria = input(defval=true, title="Show Expanding Triangle Pattern:", type=input.bool)
+bool show_hns = input(defval=true, title="Show Head and Shoulders Pattern:", type=input.bool)
+// Forecast options:
+bool show_projections = input(defval=true, title="Show projections forecast of zigzag:", type=input.bool)
+bool show_projections_square = input(defval=true, title="Show projections forecast Bounds:", type=input.bool)
+bool show_projections_square_rates = input(defval=false, title="Show projections target rates:", type=input.bool)
+
+//  ||-------------------------------------------------------------------------||
+//  ||  zigzag function:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_zz(_percent)=>
+
+    //  direction after last pivot
+    var bool _is_direction_up = na
+    //  track highest price since last lower pivot
+    var float _htrack = na
+    //  track lowest price since last higher pivot
+    var float _ltrack = na
+    //  zigzag variable for ploting
+    var float _pivot = na
+    //  range needed for reaching reversal threshold
+    float _reverse_range = 0.0
+    //  real pivot time
+    var int _real_pivot_time = na
+    var int _htime = na
+    var int _ltime = na
+    //  reverse line
+    var float _reverse_line = 0.0
+    if bar_index >= 1
+        
+        if na(_is_direction_up)
+            _is_direction_up := true
+        
+        _reverse_range := nz(_pivot[1]) * _percent
+        
+        if _is_direction_up
+            _ltrack := na
+            _ltime := time
+            
+            if na(_htrack)
+                if high > high[1]
+                    _htrack := high
+                    _htime := time
+                else
+                    _htrack := high[1]
+                    _htime := time[1]
+            else
+                if high > _htrack
+                    _htrack := high
+                    _htime := time
+
+            _reverse_line := (_htrack - _reverse_range)
+            
+            if close <= _reverse_line
+                _pivot := _htrack
+                _real_pivot_time := _htime
+                _is_direction_up := false
+
+        if not _is_direction_up
+            _htrack := na
+            _htime := na
+            
+            if na(_ltrack)
+                if low < low[1]
+                    _ltrack := low
+                    _ltime := time
+                else
+                    _ltrack := low[1]
+                    _ltime := time[1]
+            else
+                if low < _ltrack
+                    _ltrack := low
+                    _ltime := time
+                
+            _reverse_line := (_ltrack + _reverse_range)
+                
+            if close >= _reverse_line
+                _pivot := _ltrack
+                _real_pivot_time := _ltime
+                _is_direction_up := true
+
+    [_pivot, _is_direction_up, _reverse_line, _real_pivot_time]
+
+// ||   |}---------------------------------------------------------------------<•
+
+//  ||-------------------------------------------------------------------------||
+//  ||  zigzag data:
+//  ||-------------------------------------------------------------------------||
+//  |{
+[price_a, is_up, reverse, _rl_time] = f_zz(percent)
+alt_time = show_real_pivots ? _rl_time : time
+
+zz_color = is_up ? color.orange : color.teal
+is_new_zig = change(price_a) != 0 ? price_a : na
+//  
+//plot(is_new_zig, title="Z", color=zz_color, linewidth=1, transp=80)
+
+plot(reverse, title="R", color=color.gray, style=plot.style_stepline, linewidth=1, transp=40, offset=1)
+plot(reverse, title="R", color=color.white, style=plot.style_circles, linewidth=4, transp=40, offset=1, show_last=1)
+
+//  |   Get Pivots:
+var int time_a = na
+var int time_b = na, var float price_b = na
+var int time_c = na, var float price_c = na
+var int time_d = na, var float price_d = na
+var int time_e = na, var float price_e = na
+var int time_f = na, var float price_f = na
+var int time_g = na, var float price_g = na
+
+if is_new_zig
+	time_a := alt_time
+	time_b := time_a[1], price_b := price_a[1]
+	time_c := time_b[1], price_c := price_b[1]
+	time_d := time_c[1], price_d := price_c[1]
+	time_e := time_d[1], price_e := price_d[1]
+	time_f := time_e[1], price_f := price_e[1]
+	time_g := time_f[1], price_g := price_f[1]
+	
+
+float AB_price_difference = abs(price_a - price_b)
+//float AC_price_difference = abs(price_a - price_c)
+
+int AB_time_difference = time_a - time_b
+//int AC_time_difference = time_a - time_c
+
+// ||   |}---------------------------------------------------------------------<•
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Draw zigzag:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_draw_zigzag_lines()=>
+    var line _li = na
+    _li_color = price_a > price_b ? color.teal : color.orange
+    if is_new_zig
+        _li := line.new(
+             time_a, price_a, 
+             time_b, price_b, 
+             xloc.bar_time, extend=extend.none, color=_li_color, width=2
+             )
+
+if show_zigzag_lines
+    f_draw_zigzag_lines()
+//  ||  |}---------------------------------------------------------------------<•
+
+// ||   |}---------------------------------------------------------------------<•
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Pivot Labels:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_draw_zigzag_labels(_text)=>
+    var label _la = na
+    color _la_color = price_a > price_b ? color.orange : color.teal
+    string _la_style = price_a > price_b ? label.style_labeldown : label.style_labelup
+    string _la_text = na
+    if show_pivot_price
+        _la_text := price_a > price_b ? tostring(price_a, "#.#####") + _text : _text + tostring(price_a, "#.#####")
+    else
+        _la_text := _text
+    if is_new_zig
+        _la := label.new(
+             x=time_a, y=price_a, 
+             text=_la_text, 
+             xloc=xloc.bar_time, yloc=yloc.price, 
+             style=_la_style, 
+             color=_la_color, textcolor=color.black, size=size.small
+             )
+
+// if show_zigzag_labels
+//     f_plot_zigzag_labels("")
+//  ||  |}---------------------------------------------------------------------<•
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Function to process data, return range, avg, +/- dev, max to be ploted:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_mode_process_stats(_weight, _data)=>
+    float _avg_range = _data, float _max_range = 0.0
+    if bar_index < 1
+        // on 1st bar, make it equal to _data
+        _avg_range := _data
+    else
+        if change(_data) != 0
+            _weight_data = _weight * _data
+            _weight_previous = (1 - _weight) * nz(_avg_range[1], _data[1])
+            _avg_range := _weight_data + _weight_previous
+        else
+            _avg_range := _avg_range[1]
+    
+        _max_range := max(nz(_max_range[1], _data), _data)
+        
+    _pos_range = max(0.0, _data - _avg_range)
+    _neg_range = min(0.0, _data - _avg_range)
+    
+    var float _pos_dev = 0.0, var float _neg_dev = 0.0
+    if bar_index >= 1
+        if change(_pos_range) != 0
+            _pos_dev := _weight * _pos_range + (1 - _weight) * _pos_dev[1]
+        else
+            _pos_dev := _pos_dev[1]
+        if change(_neg_range) != 0
+            _neg_dev := _weight * _neg_range + (1 - _weight) * _neg_dev[1]
+        else
+            _neg_dev := _neg_dev[1]
+
+    [_avg_range, _max_range, _pos_dev, _neg_dev]
+//  |}---------------------------------------------------------------------<•
+//  |{
+weight = 2 / (input(10) + 1)
+[price_avg_range, price_max_range, price_pos_dev, price_neg_dev] = f_mode_process_stats(weight, AB_price_difference)
+[time_avg_range, time_max_range, time_pos_dev, time_neg_dev] = f_mode_process_stats(weight, AB_time_difference)
+
+target_avg_price = price_a > price_b ? price_a - price_avg_range : price_a + price_avg_range
+target_price_upper_dev = price_a > price_b ? price_a - price_avg_range - price_neg_dev : price_a + price_avg_range + price_neg_dev
+target_price_lower_dev = price_a > price_b ? price_a - price_avg_range - price_pos_dev : price_a + price_avg_range + price_pos_dev
+target_price_0618_dev = price_a > price_b ? price_a - (price_avg_range + price_neg_dev) * 0.618 : price_a + (price_avg_range + price_neg_dev) * 0.618
+target_price_1618_dev = price_a > price_b ? price_a - (price_avg_range + price_pos_dev) * 1.618 : price_a + (price_avg_range + price_pos_dev) * 1.618
+
+target_avg_time = int(time_a + time_avg_range)
+target_time_upper_dev = int(target_avg_time + time_pos_dev)
+target_time_lower_dev = int(target_avg_time + time_neg_dev)
+target_time_0618_dev = int(time_a + (time_avg_range + time_neg_dev) * 0.618)
+target_time_1618_dev = int(time_a + (time_avg_range + time_pos_dev) * 1.618)
+//  ||  |}---------------------------------------------------------------------<•
+
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Line projection:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_cast_projections()=>
+    var line line_midline = na
+    var line line_price_dev = na
+    var line line_time_dev = na
+    var label _la0618 = na
+    var label _la1618 = na
+    //  ||  Style abreviation:
+    xtend = extend.right
+    st_dash = line.style_dashed
+    st_arrow = line.style_arrow_both
+
+    //  |   clear past lines:
+    line.delete(line_midline)
+    line.delete(line_price_dev)
+    line.delete(line_time_dev)
+    label.delete(_la0618)
+    label.delete(_la1618)
+    
+    line_midline := line.new( 
+                 time_a, price_a, 
+                 target_avg_time, target_avg_price, 
+                 xloc.bar_time, extend=xtend, color=color.orange, style=st_dash, width=1
+                 )
+    line_price_dev := line.new(
+                 target_avg_time, target_price_lower_dev, 
+                 target_avg_time, target_price_upper_dev, 
+                 xloc.bar_time, color=#0066ff, style=st_arrow, width=1
+                 )
+    line_time_dev := line.new( 
+                 target_time_lower_dev, target_avg_price, 
+                 target_time_upper_dev, target_avg_price, 
+                 xloc.bar_time, color=#0066ff, style=st_arrow, width=1
+                 )
+
+    if show_projections_square_rates
+        _la0618 := label.new(
+                 x=target_time_1618_dev, y=target_price_1618_dev, 
+                 text="Target 1.618 @ " + tostring(target_price_1618_dev, "#.#####"), 
+                 xloc=xloc.bar_time, yloc=yloc.price, 
+                 style=is_up ? label.style_labeldown : label.style_labelup, 
+                 color=color.new(color.silver, 20), textcolor=color.black, size=size.small
+                 )
+        _la1618 := label.new(
+                 x=target_time_0618_dev, y=target_price_0618_dev, 
+                 text="Target 0.618 @ " + tostring(target_price_0618_dev, "#.#####"), 
+                 xloc=xloc.bar_time, yloc=yloc.price, 
+                 style=is_up ? label.style_labelup : label.style_labeldown, 
+                 color=color.new(color.silver, 20), textcolor=color.black, size=size.small
+                 )
+
+first_realtime_bar = (barstate.islast and barstate.ishistory[1])
+    
+if show_projections and (is_new_zig or first_realtime_bar)
+    f_cast_projections()
+//  ||  |}---------------------------------------------------------------------<•
+
+f_line_rectangle(_x1, _y1, _x2, _y2, _xloc, _extend, _color, _style, _width)=>
+    //    (x1,y2) Side2 (x2, y2)
+    //          +-------+
+    //          ¦       ¦
+    //   Side1  ¦       ¦ Side3
+    //          ¦       ¦
+    //          +-------+
+    //    (x1,y1) Side4 (x2, y1)
+    var line _side1 = na
+    var line _side2 = na
+    var line _side3 = na
+    var line _side4 = na
+    //  clear previous lines: 
+    line.delete(_side1)
+    line.delete(_side2)
+    line.delete(_side3)
+    line.delete(_side4)
+            
+    //  draw the lines:
+    _side1 := line.new(
+         x1 = _x1, y1 = _y1, 
+         x2 = _x1, y2 = _y2, 
+         xloc = _xloc, extend = _extend, 
+         color = _color, style = _style, width = _width 
+         )
+    _side2 := line.new(
+         x1 = _x1, y1 = _y2, 
+         x2 = _x2, y2 = _y2, 
+         xloc = _xloc, extend = _extend, 
+         color = _color, style = _style, width = _width 
+         )
+    _side3 := line.new(
+         x1 = _x2, y1 = _y2, 
+         x2 = _x2, y2 = _y1, 
+         xloc = _xloc, extend = _extend, 
+         color = _color, style = _style, width = _width 
+         )
+    _side4 := line.new(
+         x1 = _x2, y1 = _y1, 
+         x2 = _x1, y2 = _y1, 
+         xloc = _xloc, extend = _extend, 
+         color = _color, style = _style, width = _width 
+         )
+
+if show_projections and show_projections_square and (is_new_zig or first_realtime_bar)
+    f_line_rectangle(
+         target_time_0618_dev, target_price_0618_dev, 
+         target_time_1618_dev, target_price_1618_dev, 
+         xloc.bar_time, extend.none, 
+         color.gray,  line.style_dashed, 2 
+         )
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Detect patterns:
+//  ||-------------------------------------------------------------------------||
+//  |{
+//  ||  Pattern Functions:
+
+//TODO: may need further tweeks
+//f_slope_to_degree(_x)=>atan(_x)
+
+f_rate(_c, _b, _a)=> ((_a - _b) / (_b - _c))
+f_timerate(_c, _b, _a)=> ((0-(_a - _b)) / (_b - _c))
+
+f_is_inrange(_value, _min, _max)=>_value <= _max and _value >= _min
+
+f_draw_rate_lines_and_label(_price_rate, _time_rate, _x1, _y1, _x2, _y2, _is_up)=>
+    if show_triangle_rates
+        _text = "Price: " + tostring(_price_rate, "#.###") + (not show_angles ? "" : ", (sin:" + tostring(nz(asin(_price_rate)*(180/3.1416), 0), "#") + "º, cos:" + tostring(nz(acos(_price_rate)*(180/3.1416), 0), "#") + "º" + ", tan:" + tostring(nz(atan(_price_rate)*(180/3.1416), 0), "#") + "º)")
+        _text := _text + "\nTime: " + tostring(_time_rate, "#.###") + (not show_angles ? "" : ", (sin:" + tostring(nz(asin(_time_rate)*(180/3.1416), 0), "#.###") + "º, cos:" + tostring(nz(acos(_time_rate)*(180/3.1416), 0), "#.###") + "º" + ", tan:" + tostring(nz(atan(_time_rate)*(180/3.1416), 0), "#.###") + "º)")
+        
+        var line _li = na
+        var label _la = na
+        line.delete(_li)
+        label.delete(_la)
+        _li := line.new(
+            x1 = _x1, y1 = _y1, 
+            x2 = _x2, y2 = _y2, 
+            xloc = xloc.bar_time, extend = extend.none, 
+            color = color.gray, style = line.style_dashed, width = 1 
+            )
+        _la := label.new(
+            x=round((_x1 + _x2) / 2), y=(_y1 + _y2) / 2, 
+            text=_text, 
+            xloc=xloc.bar_time, yloc=yloc.price, 
+            style=_is_up ? label.style_labelup : label.style_labeldown, 
+            color=color.new(color.silver, 0), textcolor=color.black, size=size.small
+            )
+
+
+isHarmonicTriangle(_cba, _margin_of_error)=>
+    bool _return = false
+    //  return true if its rate is near a harmonic rate:
+	//	0.146, 0.236, 0.382, 0.618, 1, 1.618, 2.618, 4.236, 6.854, 11.089, 17.942, 29.03
+    for _i = 1 to 12
+        if f_is_inrange(_cba, (-pow(1.618, -5+_i) - _margin_of_error), (-pow(1.618, -5+_i) + _margin_of_error))
+            _return := true
+    _return
+
+is2Tap(_cba, _margin_of_error)=>
+    _is_cba = f_is_inrange(_cba, -1.000 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_cba
+
+is3Tap(_edc, _cba, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -1.000 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -1.000 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_edc and _is_cba
+
+is4Tap(_gfe, _edc, _cba, _margin_of_error)=>
+    _is_gfe = f_is_inrange(_gfe, -1.000 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_edc = f_is_inrange(_edc, -1.000 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -1.000 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_gfe and _is_edc and _is_cba
+
+isABCD(_cba, _dcb, _margin_of_error)=>
+    _is_cba = f_is_inrange(_cba, -1.618 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -0.786 - _margin_of_error, -0.618 + _margin_of_error)
+    _is_cba and _is_dcb
+
+isBat(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -0.500 - _margin_of_error, -0.382 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -0.886 - _margin_of_error, -0.382 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -2.618 - _margin_of_error, -1.618 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -0.886 - _margin_of_error, -0.886 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isButterfly(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -0.786 - _margin_of_error, -0.786 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -0.886 - _margin_of_error, -0.382 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -2.618 - _margin_of_error, -1.618 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -1.618 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isGartley(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -0.618 - _margin_of_error, -0.618 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -0.886 - _margin_of_error, -0.382 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -2.618 - _margin_of_error, -1.130 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -0.786 - _margin_of_error, -0.786 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isCrab(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -0.886 - _margin_of_error, -0.886 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -0.886 - _margin_of_error, -0.382 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -3.618 - _margin_of_error, -2.000 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -1.618 - _margin_of_error, -1.618 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isShark(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -0.886 - _margin_of_error, -0.886 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -1.618 - _margin_of_error, -1.130 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -2.240 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -1.130 - _margin_of_error, -0.886 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+is5o(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -1.618 - _margin_of_error, -1.130 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -2.240 - _margin_of_error, -1.618 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -0.500 - _margin_of_error, -0.500 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -0.236 - _margin_of_error, +0.236 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isWolfe(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -1.618 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -5.000 - _margin_of_error, -0.000 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -1.618 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -5.000 - _margin_of_error, -0.000 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+is3Driver(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -1.618 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -5.000 - _margin_of_error, -0.000 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -1.618 - _margin_of_error, -1.270 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -5.000 - _margin_of_error, -0.000 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isConTria(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -0.886 - _margin_of_error, -0.236 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -0.886 - _margin_of_error, -0.236 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -0.886 - _margin_of_error, -0.236 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -0.886 - _margin_of_error, -0.236 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isExpTria(_edc, _dcb, _cba, _eda, _margin_of_error)=>
+    _is_edc = f_is_inrange(_edc, -2.618 - _margin_of_error, -1.125 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -2.618 - _margin_of_error, -1.125 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -2.618 - _margin_of_error, -1.125 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -2.618 - _margin_of_error, -1.125 + _margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+
+isHnS(_fed, _feb, _dcb, _edc, _eda, _cba, _margin_of_error)=>
+    _is_fed = f_is_inrange(_fed, -0.618 - _margin_of_error, -0.090 + _margin_of_error)
+    _is_feb = f_is_inrange(_feb, -0.886 - _margin_of_error, -0.090 + _margin_of_error)
+    _is_edc = f_is_inrange(_edc, -9.999 - _margin_of_error, -1.000 + _margin_of_error)
+    _is_eda = f_is_inrange(_eda, -1.618 - _margin_of_error, -0.090 + _margin_of_error)
+    _is_dcb = f_is_inrange(_dcb, -1.250 - _margin_of_error, -0.750 + _margin_of_error)
+    _is_cba = f_is_inrange(_cba, -0.886 - _margin_of_error, -0.090 + _margin_of_error)
+    _is_fed and _is_feb and _is_edc and _is_eda and _is_dcb and _is_cba
+
+
+//  |}
+//  |{-------------------------------------------------------------------------||
+//  ||  Parameters:
+//  ||      _percent_of_error   (float)     : Margin of error in percentage.
+f_Detect_Patterns(_percent_of_error)=>
+    //  Placeholder for pattern label
+    string _pattern_label_placeholder = ""
+    // adjust margin of error into multiplier
+    float _margin_of_error = _percent_of_error / 100
+	//	Placeholders for pivot rates:
+    var float price_gfe = na,  var float time_gfe = na 
+    var float price_gfc = na,  var float time_gfc = na 
+    var float price_gfa = na,  var float time_gfa = na 
+    var float price_gdc = na,  var float time_gdc = na
+    var float price_gda = na,  var float time_gda = na
+    var float price_gba = na,  var float time_gba = na
+
+    var float price_fed = na,  var float time_fed = na 
+    var float price_feb = na,  var float time_feb = na 
+    var float price_fcb = na,  var float time_fcb = na 
+  
+    var float price_edc = na,  var float time_edc = na
+    var float price_eda = na,  var float time_eda = na
+    var float price_eba = na,  var float time_eba = na
+ 
+    var float price_dcb = na,  var float time_dcb = na
+    var float price_cba = na,  var float time_cba = na
+    
+    //  triangulate pivots into rates:
+    //  note:
+    //      • pattern rates should be negative
+    //      • if rate is positive center is inside the edges.
+    //---------------------PRICE------------------| |-------------------TIME-----------------|
+    price_gfc := f_rate(price_g, price_f, price_c), time_gfc := f_timerate(time_g, time_f, time_c)
+    price_gfa := f_rate(price_g, price_f, price_a), time_gfa := f_timerate(time_g, time_f, time_a)
+    price_gdc := f_rate(price_g, price_d, price_c), time_gdc := f_timerate(time_g, time_d, time_c)
+    price_gda := f_rate(price_g, price_d, price_a), time_gda := f_timerate(time_g, time_d, time_a)
+    price_gfe := f_rate(price_g, price_f, price_e), time_gfe := f_timerate(time_g, time_f, time_e)
+    price_gba := f_rate(price_g, price_b, price_a), time_gba := f_timerate(time_g, time_b, time_a)
+    
+    price_fed := f_rate(price_f, price_e, price_d), time_fed := f_timerate(time_f, time_e, time_d)
+    price_feb := f_rate(price_f, price_e, price_b), time_feb := f_timerate(time_f, time_e, time_b)
+    price_fcb := f_rate(price_f, price_c, price_b), time_fcb := f_timerate(time_f, time_c, time_b)
+            
+    price_edc := f_rate(price_e, price_d, price_c), time_edc := f_timerate(time_e, time_d, time_c)
+    price_eda := f_rate(price_e, price_d, price_a), time_eda := f_timerate(time_e, time_d, time_a)
+    price_eba := f_rate(price_e, price_b, price_a), time_eba := f_timerate(time_e, time_b, time_a)
+    
+    price_dcb := f_rate(price_d, price_c, price_b), time_dcb := f_timerate(time_d, time_c, time_b)
+    price_cba := f_rate(price_c, price_b, price_a), time_cba := f_timerate(time_c, time_b, time_a)
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Pattern check block:
+//  ||-------------------------------------------------------------------------||
+//  |{-------------------------------------------------------------------------||
+    if show_patterns
+        bool _isvalid_gfa = price_fed >= -1 and price_feb >= -1 and price_cba <= -1 and price_eda <= -1
+        bool _isvalid_gda = price_fed <= -1 and price_gfe >= -1 and price_cba <= -1 and price_dcb >= -1 
+        bool _isvalid_gba = price_feb <= -1 and price_gfe >= -1 and price_cba <= -1 and price_dcb <= -1
+        bool _isvalid_eba = price_cba <= -1 and price_dcb <= -1
+        bool _isvalid_eda = price_cba <= -1 and price_dcb >= -1
+        bool _isvalid_fcb = price_fed >= -1 and price_edc <= -1
+        bool _isvalid_feb = price_edc >= -1 and price_dcb <= -1
+        _pattern_list = "\n"
+        //  Check if its a harmonic triangle:
+        if show_harmonic
+            if isHarmonicTriangle(price_gfa, _margin_of_error) and _isvalid_gfa
+                _pattern_list := _pattern_list + "• Harmonic Triangle(GFA) •\n"
+            if isHarmonicTriangle(price_gda, _margin_of_error) and _isvalid_gda
+                _pattern_list := _pattern_list + "• Harmonic Triangle(GDA) •\n"
+            if isHarmonicTriangle(price_gba, _margin_of_error) and _isvalid_gba
+                _pattern_list := _pattern_list + "• Harmonic Triangle(GBA) •\n"
+            if isHarmonicTriangle(price_eba, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Harmonic Triangle(EBA) •\n"
+            if isHarmonicTriangle(price_eda, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Harmonic Triangle(EDA) •\n"
+            if isHarmonicTriangle(price_cba, _margin_of_error)
+                _pattern_list := _pattern_list + "• Harmonic Triangle(CBA) •\n"
+        //  Check if its Double Tap
+        if show_tap
+            if is2Tap(price_cba, _margin_of_error) 
+                _pattern_list := _pattern_list + "• Double Tap(CBA) •\n"
+            if is2Tap(price_eba, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Double Tap(EBA) •\n"
+            if is2Tap(price_eda, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Double Tap(EDA) •\n"
+        //  Check if its Triple Tap
+        if show_tap
+            if is3Tap(price_edc, price_cba, _margin_of_error)
+                _pattern_list := _pattern_list + "• Triple Tap(EDC, CBA) •\n"
+        //  Check if its Quadruple Tap
+        if show_tap
+            if is4Tap(price_gfe, price_edc, price_cba, _margin_of_error)
+                _pattern_list := _pattern_list + "• Quadruple Tap(GFE, EDC, CBA) •\n"
+        
+        //  check if its AB=CD
+        if show_abcd
+            if isABCD(price_cba, price_dcb, _margin_of_error) 
+                _pattern_list := _pattern_list + "• AB=CD(CBA, DCB) •\n"
+            if isABCD(price_cba, price_fcb, _margin_of_error) and _isvalid_fcb
+                _pattern_list := _pattern_list + "• AB=CD(CBA, FCB) •\n"
+            if isABCD(price_eba, price_feb, _margin_of_error) and _isvalid_feb
+                _pattern_list := _pattern_list + "• AB=CD(EBA, FEB) •\n"
+            if isABCD(price_eda, price_fed, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• AB=CD(EDA, FED) •\n"
+        //  check if its BAT:
+        if show_bat
+            if isBat(price_edc, price_dcb, price_cba, price_eda, _margin_of_error)
+                _pattern_list := _pattern_list + "• Bat(EDC, DCB, CBA, EDA) •\n"
+            if isBat(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Bat(GFE, FEB, EBA, GFA) •\n"
+            if isBat(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Bat(GFE, FED, EDA, GFA) •\n"
+        //  check if its BUTTERFLY
+        if show_butterfly
+            if isButterfly(price_edc, price_dcb, price_cba, price_eda, _margin_of_error) 
+                _pattern_list := _pattern_list + "• Butterfly(EDC, DCB, CBA, EDA) •\n"
+            if isButterfly(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba 
+                _pattern_list := _pattern_list + "• Butterfly(GFE, FEB, EBA, GFA) •\n"
+            if isButterfly(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Butterfly(GFE, FED, EDA, GFA) •\n"
+        //  check if its GARTLEY
+        if show_gartley
+            if isGartley(price_edc, price_dcb, price_cba, price_eda, _margin_of_error)
+                _pattern_list := _pattern_list + "• Gartley(EDC, DCB, CBA, EDA) •\n"
+            if isGartley(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Gartley(GFE, FEB, EBA, GFA) •\n"
+            if isGartley(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Gartley(GFE, FED, EDA, GFA) •\n"
+        //  check if its CRAB
+        if show_crab
+            if isCrab(price_edc, price_dcb, price_cba, price_eda, _margin_of_error)
+                _pattern_list := _pattern_list + "• Crab(EDC, DCB, CBA, EDA) •\n"
+            if isCrab(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Crab(GFE, FEB, EBA, GFA) •\n"
+            if isCrab(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Crab(GFE, FED, EDA, GFA) •\n"
+        //  check if its SHARK
+        if show_shark
+            if isShark(price_edc, price_dcb, price_cba, price_eda, _margin_of_error) 
+                _pattern_list := _pattern_list + "• Shark(EDC, DCB, CBA, EDA) •\n"
+            if isShark(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Shark(GFE, FEB, EBA, GFA) •\n"
+            if isShark(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Shark(GFE, FED, EDA, GFA) •\n"
+        //  check if its 5o
+        if show_5o
+            if is5o(price_edc, price_dcb, price_cba, price_eda, _margin_of_error)
+                _pattern_list := _pattern_list + "• 5o(EDC, DCB, CBA, EDA) •\n"
+            if is5o(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba 
+                _pattern_list := _pattern_list + "• 5o(GFE, FEB, EBA, GFA) •\n"
+            if is5o(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• 5o(GFE, FED, EDA, GFA) •\n"
+        //  check if its WOLF
+        if show_wolfe
+            if isWolfe(price_edc, price_dcb, price_cba, price_eda, _margin_of_error) 
+                _pattern_list := _pattern_list + "• Wolf(EDC, DCB, CBA, EDA) •\n"
+            if isWolfe(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Wolf(GFE, FEB, EBA, GFA) •\n"
+            if isWolfe(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Wolf(GFE, FED, EDA, GFA) •\n"
+        //  check if its Contracting Triangle
+        if show_contria
+            if isConTria(price_edc, price_dcb, price_cba, price_eda, _margin_of_error)
+                _pattern_list := _pattern_list + "• Contracting Triangle(EDC, DCB, CBA, EDA) •\n"
+            if isConTria(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Contracting Triangle(GFE, FEB, EBA, GFA) •\n"
+            if isConTria(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Contracting Triangle(GFE, FED, EDA, GFA) •\n"
+        //  check if its Expanding Triangle
+        if show_exptria
+            if isExpTria(price_edc, price_dcb, price_cba, price_eda, _margin_of_error)
+                _pattern_list := _pattern_list + "• Expanding Triangle(EDC, DCB, CBA, EDA) •\n"
+            if isExpTria(price_gfe, price_feb, price_eba, price_gfa, _margin_of_error) and _isvalid_eba
+                _pattern_list := _pattern_list + "• Expanding Triangle(GFE, FEB, EBA, GFA) •\n"
+            if isExpTria(price_gfe, price_fed, price_eda, price_gfa, _margin_of_error) and _isvalid_eda
+                _pattern_list := _pattern_list + "• Expanding Triangle(GFE, FED, EDA, GFA) •\n"
+        //  check if its Head and Shoulders
+        if show_hns
+            if isHnS(price_fed, price_feb, price_dcb, price_edc, price_eda, price_cba, _margin_of_error)
+                _pattern_list := _pattern_list + "• Head and Shoulders(FED, FEB, DCB, EDC, EDA, CBA) •\n"
+//  ||   }---------------------------------------------------------------------<•
+
+        f_draw_zigzag_labels(_pattern_list)
+    else
+    // Only shows price label:
+        if show_pivot_price
+            f_draw_zigzag_labels("")
+    
+        //  Draw rate lines and labels code:
+    if show_triangle_rates
+        if price_cba < price_edc and price_edc < price_gfe
+            f_draw_rate_lines_and_label(price_gfa, time_gfa, time_a, price_a, time_g, price_g, (price_a < price_f))
+            f_draw_rate_lines_and_label(price_gda, time_gda, time_a, price_a, time_g, price_g, (price_a < price_d))
+            f_draw_rate_lines_and_label(price_gba, time_gba, time_a, price_a, time_g, price_g, (price_a < price_b))
+        if price_cba < price_edc
+            f_draw_rate_lines_and_label(price_eda, time_eda, time_a, price_a, time_e, price_e, (price_a < price_d))
+            f_draw_rate_lines_and_label(price_eba, time_eba, time_a, price_a, time_e, price_e, (price_a < price_b))
+        f_draw_rate_lines_and_label(price_cba, time_cba, time_a, price_a, time_c, price_c, (price_a < price_b))
+        f_draw_rate_lines_and_label(price_dcb, time_dcb, time_b, price_b, time_d, price_d, (price_b < price_c))
+        if price_dcb < price_fed 
+            f_draw_rate_lines_and_label(price_feb, time_feb, time_b, price_b, time_f, price_f, (price_b < price_e))
+    
+
+float err = input(5.0)
+if (show_pivot_price or show_patterns) and (is_new_zig)// or first_realtime_bar)
+    f_Detect_Patterns(err)
+    
+    
+//  ||  |}---------------------------------------------------------------------<•
