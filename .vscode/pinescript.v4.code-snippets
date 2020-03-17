@@ -15,6 +15,221 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
+	// for reference: https://code.visualstudio.com/docs/editor/userdefinedsnippets
+	//
+	// Pinescript builtin variables:
+	//
+	"accdist" : {
+		"scope": "pinescript",
+		"prefix": "accdist",
+		"body": ["accdist"],
+		"description": "Accumulation/distribution index.\nType: float"
+	},
+	"adjustment.dividends" : {
+		"scope": "pinescript",
+		"prefix": "adjustment.dividends",
+		"body": ["adjustment.dividends"],
+		"description": "Constant for dividends adjustment type (dividends adjustment is applied).\nType: string"
+	},
+	"adjustment.none" : {
+		"scope": "pinescript",
+		"prefix": "adjustment.none",
+		"body": ["adjustment.none"],
+		"description": "Constant for none adjustment type (no adjustment is applied).\nType: string"
+	},
+	"adjustment.splits" : {
+		"scope": "pinescript",
+		"prefix": "adjustment.splits",
+		"body": ["adjustment.splits"],
+		"description": "Constant for splits adjustment type (splits adjustment is applied).\nType: string"
+	},
+	"bar_index" : {
+		"scope": "pinescript",
+		"prefix": "bar_index",
+		"body": ["bar_index"],
+		"description": "Current bar index. Numbering is zero-based, index of the first bar is 0.\nType: integer"
+	},
+	"barmerge.gaps_off" : {
+		"scope": "pinescript",
+		"prefix": "barmerge.gaps_off",
+		"body": ["barmerge.gaps_off"],
+		"description": "Merge strategy for requested data. Data is merged continuously without gaps, all the gaps are filled with the previous nearest existing value.\nType: bool"
+	},
+	"barmerge.gaps_on" : {
+		"scope": "pinescript",
+		"prefix": "barmerge.gaps_on",
+		"body": ["barmerge.gaps_on"],
+		"description": "Merge strategy for requested data. Data is merged with possible gaps (na values).\nType: bool"
+	},
+	"barmerge.lookahead_off" : {
+		"scope": "pinescript",
+		"prefix": "barmerge.lookahead_off",
+		"body": ["barmerge.lookahead_off"],
+		"description": "Merge strategy for the requested data position. Requested barset is merged with current barset in the order of sorting bars by their close time. This merge strategy disables effect of getting data from 'future' on calculation on history.\nType: bool"
+	},
+	"barmerge.lookahead_on" : {
+		"scope": "pinescript",
+		"prefix": "barmerge.lookahead_on",
+		"body": ["barmerge.lookahead_on"],
+		"description": "Merge strategy for the requested data position. Requested barset is merged with current barset in the order of sorting bars by their opening time. This merge strategy can lead to undesirable effect of getting data from 'future' on calculation on history. This is unacceptable in backtesting strategies, but can be useful in indicators.\nType: bool"
+	},
+	"barstate.isconfirmed" : {
+		"scope": "pinescript",
+		"prefix": "barstate.isconfirmed",
+		"body": ["barstate.isconfirmed"],
+		"description": "Returns true if the script is calculating the last (closing) update of the current bar. The next script calculation will be on the new bar data.\nType: bool"
+	},
+	"barstate.isfirst" : {
+		"scope": "pinescript",
+		"prefix": "barstate.isfirst",
+		"body": ["barstate.isfirst"],
+		"description": "Returns true if current bar is first bar in barset, false otherwise.\nType: bool"
+	},
+	"barstate.ishistory" : {
+		"scope": "pinescript",
+		"prefix": "barstate.ishistory",
+		"body": ["barstate.ishistory"],
+		"description": "Returns true if current bar is a historical bar, false otherwise.\nType: bool"
+	},
+	"barstate.islast" : {
+		"scope": "pinescript",
+		"prefix": "barstate.islast",
+		"body": ["barstate.islast"],
+		"description": "Returns true if current bar is the last bar in barset, false otherwise. This condition is true for all real-time bars in barset.\nType: bool"
+	},
+	"barstate.isnew" : {
+		"scope": "pinescript",
+		"prefix": "barstate.isnew",
+		"body": ["barstate.isnew"],
+		"description": "Returns true if script is currently calculating on new bar, false otherwise. This variable is true when calculating on historical bars or on first update of a newly generated real-time bar.\nType: bool"
+	},
+	"barstate.isrealtime" : {
+		"scope": "pinescript",
+		"prefix": "barstate.isrealtime",
+		"body": ["barstate.isrealtime"],
+		"description": "Returns true if current bar is a real-time bar, false otherwise.\nType: bool"
+	},
+	"close" : {
+		"scope": "pinescript",
+		"prefix": "close",
+		"body": ["close"],
+		"description": "Returns true if current bar is a real-time bar, false otherwise.\nType: bool"
+	},
+	"color.x" : {
+		"scope": "pinescript",
+		"prefix": "color.x",
+		"body": ["color.${1|aqua,black,silver,gray,white,maroon,red,purple,fuchsia,green,lime,olive,yellow,navy,blue,teal,orange|}"],
+		"description": "Is a named constant for a color.\nType: color"
+	},
+	"currency.x" : {
+		"scope": "pinescript",
+		"prefix": "currency.x",
+		"body": ["currency.${1|AUD,CAD,CHF,EUR,GBP,HKD,JPY,NOK,NONE,NZD,RUB,SEK,SGD,TRY,USD,ZAR|}"],
+		"description": "String representing a currency.\nType: string"
+	},
+	"dayofmonth" : {
+		"scope": "pinescript",
+		"prefix": "dayofmonth",
+		"body": ["dayofmonth"],
+		"description": "Date of current bar time in exchange timezone.\nType: integer"
+	},
+	"dayofweek" : {
+		"scope": "pinescript",
+		"prefix": "dayofweek",
+		"body": ["dayofweek"],
+		"description": "Day of week for current bar time in exchange timezone.\nType: integer"
+	},
+	"dayofweek.x" : {
+		"scope": "pinescript",
+		"prefix": "dayofweek.x",
+		"body": ["dayofweek.${1|friday,monday,saturday,sunday,thursday,tuesday,wednesday|}"],
+		"description": "Is a named constant for return value of dayofweek function and value of dayofweek variable.\nType: integer"
+	},
+	"display.x" : {
+		"scope": "pinescript",
+		"prefix": "display.x",
+		"body": ["display.${1|all,none|}"],
+		"description": "A named constant that specifies where the plot is displayed.\nType: integer"
+	},
+	"extend.x" : {
+		"scope": "pinescript",
+		"prefix": "extend.x",
+		"body": ["extend.${1|both,left,none,right|}"],
+		"description": "Named constant for line.new and line.set_extend functions.\nType: string"
+	},
+	"format.x" : {
+		"scope": "pinescript",
+		"prefix": "format.x",
+		"body": ["format.${1|inherit,price,volume|}"],
+		"description": "Named constant for selecting the formatting of the script output values.\nType: string"
+	},
+	"high" : {
+		"scope": "pinescript",
+		"prefix": "high",
+		"body": ["high"],
+		"description": "Current high price.\nType: float"
+	},
+	"hl2" : {
+		"scope": "pinescript",
+		"prefix": "hl2",
+		"body": ["hl2"],
+		"description": "Is a shortcut for (high + low)/2.\nType: float"
+	},
+	"hlc3" : {
+		"scope": "pinescript",
+		"prefix": "hlc3",
+		"body": ["hlc3"],
+		"description": "Is a shortcut for (high + low + close)/3.\nType: float"
+	},
+	"hline.x" : {
+		"scope": "pinescript",
+		"prefix": "hline.x",
+		"body": ["hline.${1|style_dashed,style_dotted,style_solid|}"],
+		"description": "Named constant for solid linestyle of hline function.\nType: integer"
+	},
+	"hour" : {
+		"scope": "pinescript",
+		"prefix": "hour",
+		"body": ["hour"],
+		"description": "Current bar hour in exchange timezone.\nType: integer"
+	},
+	"iii" : {
+		"scope": "pinescript",
+		"prefix": "iii",
+		"body": ["iii"],
+		"description": "Intraday Intensity Index.\nType: float"
+	},
+	"input.x" : {
+		"scope": "pinescript",
+		"prefix": "input.x",
+		"body": ["input.${1|bool,float,integer,resolution,session,source,string,symbol|}"],
+		"description": "Named constant for input type of input function.\nType: string"
+	},
+	"label.x" : {
+		"scope": "pinescript",
+		"prefix": "label.x",
+		"body": ["label.${1|style_arrowdown,style_arrowup,style_circle,style_cross,style_diamond,style_flag,style_label_center,style_label_down,style_label_left,style_label_right,style_label_up,style_none,style_square,style_triangledown,style_triangleup,style_xcross|}"],
+		"description": "Label style for label.new and label.set_style functions.\nType: string"
+	},
+	"line.x" : {
+		"scope": "pinescript",
+		"prefix": "line.x",
+		"body": ["line.${1|style_arrow_both,style_arrow_left,style_arrow_right,style_dashed,style_dotted,style_solid|}"],
+		"description": "Line style for line.new and line.set_style functions.\nType: string"
+	},
+	//
+	// custom functions:
+	"f_color_palette_black_to_white" : {
+		"scope": "pinescript",
+		"prefix": "f_color_palette_black_to_white",
+		"body": [
+			"// Black to White color palette.",
+			"// 41 color palette, index 0 to 40.",
+			"f_color_palette_black_to_white(_i)=>_i==0?#000000:(_i==1?#0d0d0d:(_i==2?#1a1a1a:(_i==3?#262626:(_i==4?#333333:(_i==5?#404040:(_i==6?#4d4d4d:(_i==7?#595959:(_i==8?#696969:(_i==9?#737373:(_i==10?#808080:(_i==11?#8d8d8d:(_i==12?#999999:(_i==13?#a6a6a6:(_i==14?#b3b3b3:(_i==15?#bfbfbf:(_i==16?#cccccc:(_i==17?#d9d9d9:(_i==18?#e6e6e6:(_i==19?#f2f2f2:#ffffff)))))))))))))))))))",
+			"//."
+		],
+		"description": "Black to White color palette with 41 colors."
+	},
 	"if else" : {
 		"scope": "pinescript",
 		"prefix": "if else statement",
