@@ -217,6 +217,204 @@
 		"body": ["line.${1|style_arrow_both,style_arrow_left,style_arrow_right,style_dashed,style_dotted,style_solid|}"],
 		"description": "Line style for line.new and line.set_style functions.\nType: string"
 	},
+	"location.x" : {
+		"scope": "pinescript",
+		"prefix": "location.x",
+		"body": ["location.${1|abovebar,absolute,belowbar,bottom,top|}"],
+		"description": "Location value for plotshape, plotchar functions.\nType: string"
+	},
+	"low" : {
+		"scope": "pinescript",
+		"prefix": "low",
+		"body": ["low"],
+		"description": "Current low price.\nType: float"
+	},
+	"minute" : {
+		"scope": "pinescript",
+		"prefix": "minute",
+		"body": ["minute"],
+		"description": "Current bar minute in exchange timezone.\nType: integer"
+	},
+	"month" : {
+		"scope": "pinescript",
+		"prefix": "month",
+		"body": ["month"],
+		"description": "Current bar month in exchange timezone.\nType: integer"
+	},
+	"na" : {
+		"scope": "pinescript",
+		"prefix": "na",
+		"body": ["na"],
+		"description": "Double. NaN value(Not a number).\nType: na"
+	},
+	"nvi" : {
+		"scope": "pinescript",
+		"prefix": "nvi",
+		"body": ["nvi"],
+		"description": "Negative Volume Index.\nType: float"
+	},
+	"obv" : {
+		"scope": "pinescript",
+		"prefix": "obv",
+		"body": ["obv"],
+		"description": "On Balance Volume.\nType: float"
+	},
+	"ohlc4" : {
+		"scope": "pinescript",
+		"prefix": "ohlc4",
+		"body": ["ohlc4"],
+		"description": "Is a shortcut for (open + high + low + close)/4.\nType: float"
+	},
+	"open" : {
+		"scope": "pinescript",
+		"prefix": "open",
+		"body": ["open"],
+		"description": "Current open price.\nType: float"
+	},
+	"plot.x" : {
+		"scope": "pinescript",
+		"prefix": "plot.x",
+		"body": ["plot.${1|style_area,style_areabr,style_circles,style_columns,style_cross,style_histogram,style_line,style_linebr,style_stepline|}"],
+		"description": "Named costant for plot() function property.\nType: string"
+	},
+	"pvi" : {
+		"scope": "pinescript",
+		"prefix": "pvi",
+		"body": ["pvi"],
+		"description": "Positive Volume Index.\nType: float"
+	},
+	"pvt" : {
+		"scope": "pinescript",
+		"prefix": "pvt",
+		"body": ["pvt"],
+		"description": "Price Volume Trend.\nType: float"
+	},
+	"scale.x" : {
+		"scope": "pinescript",
+		"prefix": "scale.x",
+		"body": ["scale.${1|left,none,right|}"],
+		"description": "Scale value for study() function.\nType: integer"
+	},
+	"second" : {
+		"scope": "pinescript",
+		"prefix": "second",
+		"body": ["second"],
+		"description": "Current bar second in exchange timezone.\nType: integer"
+	},
+	"session.x" : {
+		"scope": "pinescript",
+		"prefix": "session.x",
+		"body": ["session.${1|extended,regular|}"],
+		"description": "Constant for session type.\nType: string"
+	},
+	"shape.x" : {
+		"scope": "pinescript",
+		"prefix": "shape.x",
+		"body": ["shape.${1|arrowdown,arrowup,circle,cross,diamond,flag,labeldown,labelup,square,triangledown,triangleup,xcross|}"],
+		"description": "Shape style for plotshape() function.\nType: string"
+	},
+	"size.x" : {
+		"scope": "pinescript",
+		"prefix": "size.x",
+		"body": ["size.${1|auto,huge,large,normal,small,tiny|}"],
+		"description": "Size value for plotshape() function.\nType: string"
+	},
+	"strategy.x" : {
+		"scope": "pinescript",
+		"prefix": "strategy.x",
+		"body": ["strategy.${1|cash,closedtrades,comission.cash_per_contract,comission.cash_per_order,comission.percent,direction.all,direction.long,direction.short,equity,eventrades,fixed,grossloss,grossprofit,initial_capital,long,losstrades,max_contracts_held_all,max_contracts_held_long,max_contracts_held_short,max_drawdown,netprofit,oca.cancel,oca.none,oca.reduce,openprofit,opentrades,percent_of_equity,position_avg_price,position_entry_name,position_size,short,wintrades|}"],
+		"description": "Size value for plotshape() function.\nType: string"
+	},
+	"syminfo.x" : {
+		"scope": "pinescript",
+		"prefix": "syminfo.x",
+		"body": ["syminfo.${1|currency,description,mintick,pointvalue,prefix,root,session,ticker,tickerid,timezone,type|}"],
+		"description": "Properties of the underlying asset.\nType: ---"
+	},
+	"text.x" : {
+		"scope": "pinescript",
+		"prefix": "text.x",
+		"body": ["text.${1|align_center,align_left,align_right|}"],
+		"description": "Label text alignment for label.new() function.\nType: string"
+	},
+	"time" : {
+		"scope": "pinescript",
+		"prefix": "time",
+		"body": ["time"],
+		"description": "Current bar time in UNIX format.\nType: integer"
+	},
+	"time_close" : {
+		"scope": "pinescript",
+		"prefix": "time_close",
+		"body": ["time_close"],
+		"description": "Current bar close time in UNIX format.\nType: integer"
+	},
+	"timeframe.x" : {
+		"scope": "pinescript",
+		"prefix": "timeframe.x",
+		"body": ["timeframe.${1|isdaily,isdwm,isintraday,isminutes,ismonthly,isseconds,isweekly,multiplier,period|}"],
+		"description": "Properties of timeframe.\nType: ---"
+	},
+	"timenow" : {
+		"scope": "pinescript",
+		"prefix": "timenow",
+		"body": ["timenow"],
+		"description": "Current time in UNIX format.\nType: integer"
+	},
+	"tr" : {
+		"scope": "pinescript",
+		"prefix": "tr",
+		"body": ["tr"],
+		"description": "True range. Same as tr(false). It is max(high - low, abs(high - close[1]), abs(low - close[1])).\nType: float"
+	},
+	"volume" : {
+		"scope": "pinescript",
+		"prefix": "volume",
+		"body": ["volume"],
+		"description": "Current bar volume.\nType: float"
+	},
+	"vwap" : {
+		"scope": "pinescript",
+		"prefix": "vwap",
+		"body": ["vwap"],
+		"description": "Volume-weighted average price. It uses hlc3 as source.\nType: float"
+	},
+	"wad" : {
+		"scope": "pinescript",
+		"prefix": "wad",
+		"body": ["wad"],
+		"description": "Williams Accumulation/Distribution.\nType: float"
+	},
+	"weekofyear" : {
+		"scope": "pinescript",
+		"prefix": "weekofyear",
+		"body": ["weekofyear"],
+		"description": "Week number of current bar time in exchange timezone.\nType: integer"
+	},
+	"wvad" : {
+		"scope": "pinescript",
+		"prefix": "wvad",
+		"body": ["wvad"],
+		"description": "Williams Variable Accumulation/Distribution.\nType: float"
+	},
+	"xloc.x" : {
+		"scope": "pinescript",
+		"prefix": "xloc.x",
+		"body": ["xloc.${1|bar_index,bar_time|}"],
+		"description": "A named constant that specifies the algorithm of interpretation of x-value in functions line.new and label.new.\nType: string"
+	},
+	"year" : {
+		"scope": "pinescript",
+		"prefix": "year",
+		"body": ["year"],
+		"description": "Current bar year in exchange timezone.\nType: integer"
+	},
+	"yloc.x" : {
+		"scope": "pinescript",
+		"prefix": "yloc.x",
+		"body": ["yloc.${1|abovebar,belowbar,price|}"],
+		"description": "A named constant that specifies the algorithm of interpretation of y-value in function label.new.\nType: string"
+	},
 	//
 	// custom functions:
 	"f_color_palette_black_to_white" : {
@@ -234,10 +432,11 @@
 		"scope": "pinescript",
 		"prefix": "if else statement",
 		"body": [
-			"if $0true",
-			"    //do something",
+			"if ${1:true}",
+			"\t//do something",
+			"\t$0",
 			"else",
-			"    //do something else"
+			"\t//do something else"
 		],
 		"description": "conditional if () else () statement"
 	},
@@ -245,7 +444,7 @@
 		"scope": "pinescript",
 		"prefix": "for loop statement",
 		"body": [
-			"for i = 0 to 999 by 1",
+			"for _i = 0 to 999 by 1",
 			"    if true",
 			"        //do something",
 			"        break",
