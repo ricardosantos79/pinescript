@@ -416,6 +416,56 @@
 		"description": "A named constant that specifies the algorithm of interpretation of y-value in function label.new.\nType: string"
 	},
 	//
+	// builtin functions:
+	"abs()" : {
+		"scope": "pinescript",
+		"prefix": "abs()",
+		"body": ["abs($0)"],
+		"description": "Absolute value of input value."
+	},
+	"acos()" : {
+		"scope": "pinescript",
+		"prefix": "acos()",
+		"body": ["acos($0)"],
+		"description": "The acos function returns the arccosine (in radians) of number such that cos(acos(y)) = y for y in range [-1, 1]."
+	},
+	"alertcondition()" : {
+		"scope": "pinescript",
+		"prefix": "alertcondition()",
+		"body": ["alertcondition(condition=${1}, title='${2}', message='${3}')", "${0}"],
+		"description": "Creates alert condition, that is available in Create Alert dialog. Please note, that alertcondition does NOT create an alert, it just gives you more options in Create Alert dialog. Also, alertcondition effect is invisible on chart."
+	},
+	"alma()" : {
+		"scope": "pinescript",
+		"prefix": "alma()",
+		"body": ["alma(series=${1}, length=${2}, offset=${3}, sigma=${4})${0}"],
+		"description": "Arnaud Legoux Moving Average. It uses Gaussian distribution as weights for moving average."
+	},
+	"asin()" : {
+		"scope": "pinescript",
+		"prefix": "asin()",
+		"body": ["asin($0)"],
+		"description": "The asin function returns the arcsine (in radians) of number such that sin(asin(y)) = y for y in range [-1, 1]."
+	},
+	"atan()" : {
+		"scope": "pinescript",
+		"prefix": "atan()",
+		"body": ["atan($0)"],
+		"description": "The atan function returns the arctangent (in radians) of number such that tan(atan(y)) = y for any y."
+	},
+	"atr()" : {
+		"scope": "pinescript",
+		"prefix": "atr()",
+		"body": ["atr(length=$0)"],
+		"description": "Function atr (average true range) returns the RMA of true range. True range is max(high - low, abs(high - close[1]), abs(low - close[1]))"
+	},
+	"avg()" : {
+		"scope": "pinescript",
+		"prefix": "avg()",
+		"body": ["avg($0)"],
+		"description": "Calculates average of all given series (elementwise)."
+	},
+	//
 	// custom functions:
 	"f_color_palette_black_to_white" : {
 		"scope": "pinescript",
