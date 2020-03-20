@@ -671,7 +671,7 @@
 	"hline()" : {
 		"scope": "pinescript",
 		"prefix": "hline()",
-		"body": ["hline$(price=${1}, title='${2}', color=${3}, linestyle=${4}, linewidth=${5}, editable=${6})$0"],
+		"body": ["hline(price=${1}, title='${2}', color=${3}, linestyle=${4}, linewidth=${5}, editable=${6})$0"],
 		"description": "Renders a horizontal line at a given fixed price level."
 	},
 	"hma()" : {
@@ -685,6 +685,156 @@
 		"prefix": "hour()",
 		"body": ["hour(time=${1:time})$0"],
 		"description": "Hour in exchange timezone for provided UNIX time."
+	},
+	"iff()" : {
+		"scope": "pinescript",
+		"prefix": "iff()",
+		"body": ["iff(${1:condition}, ${2:then}, ${3:_else})$0"],
+		"description": "if true then/else function."
+	},
+	"input()" : {
+		"scope": "pinescript",
+		"prefix": "input()",
+		"body": ["input(defval=${1}, title='${2}', type=${3}, minval=${4}, maxval=${5}, confirm=${6}, step=${7}, options=${8})$0"],
+		"description": "Adds an input to your script indicator. User can see and edit inputs on the Format Object dialog of the script study. Script inputs look and behave exactly the same as inputs of built-in Technical Analysis indicators."
+	},
+	"int()" : {
+		"scope": "pinescript",
+		"prefix": "int()",
+		"body": ["int($0)"],
+		"description": "Casts na to int."
+	},
+	"kagi()" : {
+		"scope": "pinescript",
+		"prefix": "kagi()",
+		"body": ["kagi(symbol=${1}, reversal=${2})$0"],
+		"description": "Creates a ticker identifier for requesting kagi values."
+	},
+	"kc()" : {
+		"scope": "pinescript",
+		"prefix": "kc()",
+		"body": ["[${1:kcmiddle}, ${2:kcupper}, ${3:kclower}] = kc(series=${4}, length=${5}, mult=${6})$0"],
+		"description": "Keltner Channels. Keltner channel is a technical analysis indicator showing a central moving average line plus channel lines at a distance above and below."
+	},
+	"kcw()" : {
+		"scope": "pinescript",
+		"prefix": "kcw()",
+		"body": ["kcw(series=${1}, length=${2}, mult=${3}${4:, useTrueRange=true})$0"],
+		"description": "Adds an input to your script indicator. User can see and edit inputs on the Format Object dialog of the script study. Script inputs look and behave exactly the same as inputs of built-in Technical Analysis indicators."
+	},
+	"label()" : {
+		"scope": "pinescript",
+		"prefix": "label()",
+		"body": ["label($0)"],
+		"description": "Casts na to label."
+	},
+	"label.delete()" : {
+		"scope": "pinescript",
+		"prefix": "label.delete()",
+		"body": ["label.delete(id=${1})$0"],
+		"description": "Deletes the specified label object. If it has already been deleted, does nothing."
+	},
+	"label.get_text()" : {
+		"scope": "pinescript",
+		"prefix": "label.get_text()",
+		"body": ["label.get_text(id=${1})$0"],
+		"description": "Returns the text of this label object."
+	},
+	"label.get_x()" : {
+		"scope": "pinescript",
+		"prefix": "label.get_x()",
+		"body": ["label.get_x(id=${1})$0"],
+		"description": "Returns UNIX time or bar_index(depending on the last xloc value set) of this label's position'."
+	},
+	"label.get_y()" : {
+		"scope": "pinescript",
+		"prefix": "label.get_y()",
+		"body": ["label.get_y(id=${1})$0"],
+		"description": "Returns price of this label's position."
+	},
+	"label.new()" : {
+		"scope": "pinescript",
+		"prefix": "label.new()",
+		"body": ["label.new(x=${1}, y=${2}, text=${3}${4:, xloc=xloc.bar_time}${5:, yloc=yloc.price}${6:, color=}${7:, style=}${8:, textcolor=}${9:, size=size.small}${10:, textalign=text.align_center})$0"],
+		"description": "Creates a new label object."
+	},
+	"label.set_color()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_color()",
+		"body": ["label.set_color(id=${1}, color=${2})$0"],
+		"description": "Sets label border and arrow color."
+	},
+	"label.set_size()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_size()",
+		"body": ["label.set_size(id=${1}, color=${2|size.auto,size.tiny,size.small,size.normal,size.large,size.huge|})$0"],
+		"description": "Sets label border and arrow color."
+	},
+	"label.set_style()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_style()",
+		"body": ["label.set_style(id=${1}, style=${2|label.style_none,label.style_xcross,label.style_cross,label.style_triangleup,label.style_triangledown,label.style_flag,label.style_circle,label.style_arrowup,label.style_arrowdown,label.style_label_up,label.style_label_down,label.style_label_left,label.style_label_right,label.style_label_center,label.style_square,label.style_diamond|})$0"],
+		"description": "Sets label style."
+	},
+	"label.set_text()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_text()",
+		"body": ["label.set_text(id=${1}, text=${2})$0"],
+		"description": "Sets label text."
+	},
+	"label.set_textalign()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_textalign()",
+		"body": ["label.set_textalign(id=${1}, textalign=${2|text.align_left,text.align_center,text.align_right|})$0"],
+		"description": "Sets the alignment for the label text."
+	},
+	"label.set_textcolor()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_textcolor()",
+		"body": ["label.set_textcolor(id=${1}, textcolor=${2})$0"],
+		"description": "Sets color of the label text."
+	},
+	"label.set_x()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_x()",
+		"body": ["label.set_x(id=${1}, x=${2})$0"],
+		"description": "Sets bar index or bar time(depending on the xloc) of the label position."
+	},
+	"label.set_xloc()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_xloc()",
+		"body": ["label.set_xloc(id=${1}, x=${2}, xloc=xloc.${3|bar_index,bar_time|})$0"],
+		"description": "Sets x-location and new bar index/time value."
+	},
+	"label.set_xy()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_xy()",
+		"body": ["label.set_xy(id=${1}, x=${2}, y=${3})$0"],
+		"description": "Sets bar index/time of the label position."
+	},
+	"label.set_y()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_y()",
+		"body": ["label.set_y(id=${1}, y=${2})$0"],
+		"description": "Sets price of the label position."
+	},
+	"label.set_yloc()" : {
+		"scope": "pinescript",
+		"prefix": "label.set_yloc()",
+		"body": ["label.set_yloc(id=${1}, yloc=yloc.${2|price,abovebar,belowbar|})$0"],
+		"description": "Sets new y-location calculation algorithm."
+	},
+	"line()" : {
+		"scope": "pinescript",
+		"prefix": "line()",
+		"body": ["line($0)"],
+		"description": "Casts na to line."
+	},
+	"line.delete()" : {
+		"scope": "pinescript",
+		"prefix": "line.delete()",
+		"body": ["line.delete(id=${1})$0"],
+		"description": "Deletes the specified line object. If it has already been deleted, does nothing."
 	},
 	//-------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------
