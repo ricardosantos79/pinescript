@@ -16,9 +16,11 @@
 	// 	"description": "Log output to console"
 	// }
 	// for reference: https://code.visualstudio.com/docs/editor/userdefinedsnippets
-	//
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
 	// Pinescript builtin variables:
-	//
+	//-------------------------------------------------------------------------------
 	"accdist" : {
 		"scope": "pinescript",
 		"prefix": "accdist",
@@ -415,8 +417,11 @@
 		"body": ["yloc.${1|abovebar,belowbar,price|}"],
 		"description": "A named constant that specifies the algorithm of interpretation of y-value in function label.new.\nType: string"
 	},
-	//
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
 	// builtin functions:
+	//-------------------------------------------------------------------------------
 	"abs()" : {
 		"scope": "pinescript",
 		"prefix": "abs()",
@@ -465,8 +470,237 @@
 		"body": ["avg($0)"],
 		"description": "Calculates average of all given series (elementwise)."
 	},
-	//
+	"barcolor()" : {
+		"scope": "pinescript",
+		"prefix": "barcolor()",
+		"body": ["barcolor(color=${1}, offset=${2}, editable=${3}, show_last=${4}, title=${5})", "${0}"],
+		"description": "Set color of bars."
+	},
+	"barssince()" : {
+		"scope": "pinescript",
+		"prefix": "barssince()",
+		"body": ["barssince(condition=$0)"],
+		"description": "Counts the number of bars since condition was true."
+	},
+	"bb()" : {
+		"scope": "pinescript",
+		"prefix": "bb()",
+		"body": ["[${1|_,bb_middle|}, ${2|_,bb_upper|}, ${3|_,bb_lower|}] = bb(series=${4}, length=${5}, mult=${6})", "${0}"],
+		"description": "Bollinger Bands. A Bollinger Band is a technical analysis tool defined by a set of lines plotted two standard deviations (positively and negatively) away from a simple moving average (SMA) of the security's price, but can be adjusted to user preferences."
+	},
+	"bbw()" : {
+		"scope": "pinescript",
+		"prefix": "bbw()",
+		"body": ["bbw(series=${1}, length=${2}, mult=${3})$0"],
+		"description": "Bollinger Bands Width. The Bollinger Band Width is the difference between the upper and the lower Bollinger Bands divided by the middle band."
+	},
+	"bgcolor()" : {
+		"scope": "pinescript",
+		"prefix": "bgcolor()",
+		"body": ["bgcolor(color=${1}, transp=${2}, offset=${3}, editable=${4}, show_last=${5}, title=${6})", "${0}"],
+		"description": "Fill background color of bars with specified color."
+	},
+	"bool()" : {
+		"scope": "pinescript",
+		"prefix": "bool()",
+		"body": ["bool($0)"],
+		"description": "Casts na to bool."
+	},
+	"cci()" : {
+		"scope": "pinescript",
+		"prefix": "cci()",
+		"body": ["cci(source=${1}, length=${2})$0"],
+		"description": "The CCI (commodity channel index) is calculated as the difference between the typical price of a commodity and its simple moving average, divided by the mean absolute deviation of the typical price. The index is scaled by an inverse factor of 0.015 to provide more readable numbers."
+	},
+	"ceil()" : {
+		"scope": "pinescript",
+		"prefix": "ceil()",
+		"body": ["ceil($0)"],
+		"description": "The ceil function returns the smallest (closest to negative infinity) integer that is greater than or equal to the argument."
+	},
+	"change()" : {
+		"scope": "pinescript",
+		"prefix": "change()",
+		"body": ["change(source=${1}${2:, length=})$0"],
+		"description": "Difference between current value and previous, x - x[y]."
+	},
+	"cmo()" : {
+		"scope": "pinescript",
+		"prefix": "cmo()",
+		"body": ["cmo(series=${1}, length=${2})$0"],
+		"description": "Chande Momentum Oscillator. Calculates the difference between the sum of recent gains and the sum of recent losses and then divides the result by the sum of all price movement over the same period."
+	},
+	"cog()" : {
+		"scope": "pinescript",
+		"prefix": "cog()",
+		"body": ["cog(source=${1}, length=${2})$0"],
+		"description": "The cog (center of gravity) is an indicator based on statistics and the Fibonacci golden ratio."
+	},
+	"color()" : {
+		"scope": "pinescript",
+		"prefix": "color()",
+		"body": ["color($0)"],
+		"description": "Casts na to color."
+	},
+	"color.new()" : {
+		"scope": "pinescript",
+		"prefix": "color.new()",
+		"body": ["color.new(color=${1}, transp=${2})$0"],
+		"description": "Function color applies the specified transparency to the given color."
+	},
+	"correlation()" : {
+		"scope": "pinescript",
+		"prefix": "correlation()",
+		"body": ["correlation(source_a=${1}, source_b=${2}, length=${3})$0"],
+		"description": "Correlation coefficient. Describes the degree to which two series tend to deviate from their sma values."
+	},
+	"cos()" : {
+		"scope": "pinescript",
+		"prefix": "cos()",
+		"body": ["cos($0)"],
+		"description": "The cos function returns the trigonometric cosine of an angle."
+	},
+	"cross()" : {
+		"scope": "pinescript",
+		"prefix": "cross()",
+		"body": ["cross(x=${1}, y=${2})$0"],
+		"description": "returns 1 if two series have crossed each other, otherwise 0."
+	},
+	"crossover()" : {
+		"scope": "pinescript",
+		"prefix": "crossover()",
+		"body": ["crossover(x=${1}, y=${2})$0"],
+		"description": "returns 1 if series x have crossed over y, otherwise 0."
+	},
+	"crossunder()" : {
+		"scope": "pinescript",
+		"prefix": "crossunder()",
+		"body": ["crossunder(x=${1}, y=${2})$0"],
+		"description": "returns 1 if series x have crossed under y, otherwise 0."
+	},
+	"cum()" : {
+		"scope": "pinescript",
+		"prefix": "cum()",
+		"body": ["cum($0)"],
+		"description": "Cumulative (total) sum of x. In other words it's the sum of all elements of x."
+	},
+	"dayofmonth()" : {
+		"scope": "pinescript",
+		"prefix": "dayofmonth()",
+		"body": ["dayofmonth(time=${1:time})$0"],
+		"description": "Day  of month in exchange timezone for provided UNIX time."
+	},
+	"dayofweek()" : {
+		"scope": "pinescript",
+		"prefix": "dayofweek()",
+		"body": ["dayofweek(time=${1:time})$0"],
+		"description": "Day  of week in exchange timezone for provided UNIX time."
+	},
+	"dev()" : {
+		"scope": "pinescript",
+		"prefix": "dev()",
+		"body": ["dev(source=${1}, length=${2})$0"],
+		"description": "Measure of difference between the series and it's sma."
+	},
+	"dmi()" : {
+		"scope": "pinescript",
+		"prefix": "dmi()",
+		"body": ["[${1|_,diplus|}, ${2|_,diminus|}, ${3|_,adx|}] = dmi(diLength=${4}, adxSmoothing=${5})$0"],
+		"description": "Directional Movement Index function."
+	},
+	"ema()" : {
+		"scope": "pinescript",
+		"prefix": "ema()",
+		"body": ["ema(source=${1}, length=${2})$0"],
+		"description": "The ema function returns the exponentially weighted moving average. In ema weighting factors decrease exponentially. It calculates by sing a formula: EMA = alpha * x + (1 - alpha) * EMA[1], where alpha = 2 / (y + 1)"
+	},
+	"exp()" : {
+		"scope": "pinescript",
+		"prefix": "exp()",
+		"body": ["exp($0)"],
+		"description": "The exp function of x is e^x, where x is the argument and e is Euler's number."
+	},
+	"falling()" : {
+		"scope": "pinescript",
+		"prefix": "falling()",
+		"body": ["falling(source=${1}, length=${2})$0"],
+		"description": "Test if the source series is now falling for the number of length in bars long."
+	},
+	"fill()" : {
+		"scope": "pinescript",
+		"prefix": "fill()",
+		"body": ["fill(${1|hline1=,plot1=|}, ${2|hline2=, plot2=|}, color=${3}, transp=${4}, title='${5}', editable=${2})$0"],
+		"description": "Fills background between two plots or hlines with given color."
+	},
+	"fixnan()" : {
+		"scope": "pinescript",
+		"prefix": "fixnan()",
+		"body": ["fixnan($0)"],
+		"description": "For a given series replaces NaN values with previous nearest non-NaN value."
+	},
+	"float()" : {
+		"scope": "pinescript",
+		"prefix": "float()",
+		"body": ["float($0)"],
+		"description": "Casts na to float."
+	},
+	"floor()" : {
+		"scope": "pinescript",
+		"prefix": "floor()",
+		"body": ["floor($0)"],
+		"description": "Returns the largest integer less than or equal to the given number."
+	},
+	"heikinashi()" : {
+		"scope": "pinescript",
+		"prefix": "heikinashi()",
+		"body": ["heikinashi($0)"],
+		"description": "Create a ticker identifier for requesting Heikin Ashi bar values."
+	},
+	"highest()" : {
+		"scope": "pinescript",
+		"prefix": "highest()",
+		"body": ["highest${1|(,(source=\\, |}length=${2})$0"],
+		"description": "Highest value for a given number of bars back."
+	},
+	"highestbars()" : {
+		"scope": "pinescript",
+		"prefix": "highestbars()",
+		"body": ["highestbars${1|(,(source=\\, |}length=${2})$0"],
+		"description": "Highest value offset for a given number of bars back."
+	},
+	"hline()" : {
+		"scope": "pinescript",
+		"prefix": "hline()",
+		"body": ["hline$(price=${1}, title='${2}', color=${3}, linestyle=${4}, linewidth=${5}, editable=${6})$0"],
+		"description": "Renders a horizontal line at a given fixed price level."
+	},
+	"hma()" : {
+		"scope": "pinescript",
+		"prefix": "hma()",
+		"body": ["hma(source=${1}, length=${2})$0"],
+		"description": "Returns the Hull Moving Average."
+	},
+	"hour()" : {
+		"scope": "pinescript",
+		"prefix": "hour()",
+		"body": ["hour(time=${1:time})$0"],
+		"description": "Hour in exchange timezone for provided UNIX time."
+	},
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
 	// custom functions:
+	//-------------------------------------------------------------------------------
+	"Custom Function Initializer": {
+		"prefix": "CFI",
+		"body": [
+			"//\t\tFunction ${1}",
+			"${2/([^,]+)([,\\s]*|)/\\/\\/@param ${2}: [...]\n/g}",    
+			"${1:name}(${2:param})=>",
+			"\t//code..$0"
+		],
+		"description": "Custom Function Initializer"
+	},
 	"f_color_palette_black_to_white" : {
 		"scope": "pinescript",
 		"prefix": "f_color_palette_black_to_white",
