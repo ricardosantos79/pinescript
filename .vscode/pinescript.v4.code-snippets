@@ -836,6 +836,610 @@
 		"body": ["line.delete(id=${1})$0"],
 		"description": "Deletes the specified line object. If it has already been deleted, does nothing."
 	},
+	"line.get_x1()" : {
+		"scope": "pinescript",
+		"prefix": "line.get_x1()",
+		"body": ["line.get_x1(id=${1})$0"],
+		"description": "Returns UNIX time or bar index (depending on the last xloc value set) of the first point of the line."
+	},
+	"line.get_x2()" : {
+		"scope": "pinescript",
+		"prefix": "line.get_x2()",
+		"body": ["line.get_x2(id=${1})$0"],
+		"description": "Returns UNIX time or bar index (depending on the last xloc value set) of the second point of the line."
+	},
+	"line.get_y1()" : {
+		"scope": "pinescript",
+		"prefix": "line.get_y1()",
+		"body": ["line.get_y1(id=${1})$0"],
+		"description": "Returns price of the first point of the line."
+	},
+	"line.get_y2()" : {
+		"scope": "pinescript",
+		"prefix": "line.get_y2()",
+		"body": ["line.get_y2(id=${1})$0"],
+		"description": "Returns price of the second point of the line."
+	},
+	"line.new()" : {
+		"scope": "pinescript",
+		"prefix": "line.new()",
+		"body": ["line.new(x1=${1}, y1=${2}, x2=${3}, y2=${4}${5:, xloc=xloc.bar_time}${6:, extend=extend.none}${7:, color=color.blue}${8:, style=line.style_solid}${9:, width=1})$0"],
+		"description": "Creates new line object."
+	},
+	"line.set_color()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_color()",
+		"body": ["line.set_color(id=${1}, color=${2})$0"],
+		"description": "Sets the line color."
+	},
+	"line.set_extend()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_extend()",
+		"body": ["line.set_extend(id=${1}, extend=extend.${2|none,right,left,both|})$0"],
+		"description": "Sets the extending type of this line object."
+	},
+	"line.set_style()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_style()",
+		"body": ["line.set_style(id=${1}, style=line.style_${2|solid,dotted,dashed,arrow_left,arrow_right,arrow_both|})$0"],
+		"description": "Sets the style type of this line object."
+	},
+	"line.set_width()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_width()",
+		"body": ["line.set_width(id=${1}, width=${2})$0"],
+		"description": "Sets the line width."
+	},
+	"line.set_x1()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_x1()",
+		"body": ["line.set_x1(id=${1}, x=${2})$0"],
+		"description": "Sets bar index or bar time(depending on the xloc) of the first point."
+	},
+	"line.set_x2()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_x2()",
+		"body": ["line.set_x2(id=${1}, x=${2})$0"],
+		"description": "Sets bar index or bar time(depending on the xloc) of the second point."
+	},
+	"line.set_xloc()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_xloc()",
+		"body": ["line.set_xloc(id=${1}, x1=${2}, x2=${3}, xloc=xloc.bar_${4|index,time|})$0"],
+		"description": "Sets the x-location typand new bar index/time values."
+	},
+	"line.set_xy1()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_xy1()",
+		"body": ["line.set_xy1(id=${1}, x=${2}, y=${3})$0"],
+		"description": "Sets bar index/time and price of the first point."
+	},
+	"line.set_xy2()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_xy2()",
+		"body": ["line.set_xy2(id=${1}, x=${2}, y=${3})$0"],
+		"description": "Sets bar index/time and price of the second point."
+	},
+	"line.set_y1()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_y1()",
+		"body": ["line.set_y1(id=${1}, y=${2})$0"],
+		"description": "Sets price of the first point."
+	},
+	"line.set_y2()" : {
+		"scope": "pinescript",
+		"prefix": "line.set_y2()",
+		"body": ["line.set_y2(id=${1}, y=${2})$0"],
+		"description": "Sets price of the second point."
+	},
+	"linebreak()" : {
+		"scope": "pinescript",
+		"prefix": "linebreak()",
+		"body": ["linebreak(symbol=${1}, number_of_lines=${2})$0"],
+		"description": "Creates a ticker identifier for requesting line break values."
+	},
+	"linreg()" : {
+		"scope": "pinescript",
+		"prefix": "linreg()",
+		"body": ["linreg(source=${1}, length=${2}, offset=${3})$0"],
+		"description": "Linear regression curve. A line that best fits the prices specified over a user-defined time period. It is calculated using the least squares method. The result of this function is calculated using the formula: linreg = intercept + slope * (length - 1 - offset), where length is the y argument, offset is the z argument, intercept and slope are the values calculated with the least squares method on source series (x argument)."
+	},
+	"log()" : {
+		"scope": "pinescript",
+		"prefix": "log()",
+		"body": ["log($0)"],
+		"description": "Natural logarithm of any x > 0 is the unique 'y' such that e^y=x."
+	},
+	"log10()" : {
+		"scope": "pinescript",
+		"prefix": "log10()",
+		"body": ["log10($0)"],
+		"description": "Base 10 logarithm of any x > 0 is the unique 'y' such that 10^y=x."
+	},
+	"lowest()" : {
+		"scope": "pinescript",
+		"prefix": "lowest()",
+		"body": ["lowest${1|(,(source=\\, |}length=${2})$0"],
+		"description": "Lowest value for a given number of bars back."
+	},
+	"lowestbars()" : {
+		"scope": "pinescript",
+		"prefix": "lowestbars()",
+		"body": ["lowestbars${1|(,(source=\\, |}length=${2})$0"],
+		"description": "Lowest value offset for a given number of bars back."
+	},
+	"macd()" : {
+		"scope": "pinescript",
+		"prefix": "macd()",
+		"body": ["[${1:macd_line}, ${2:macd_signal}, ${3:macd_hist}] = macd(source=${4}, fastlen=${5}, slowlen=${6}, siglen=${7})$0"],
+		"description": "MACD (moving average convergence/divergence). It is supposed to reveal changes in the strength, direction, momentum, and duration of a trend in a stock's price."
+	},
+	"max()" : {
+		"scope": "pinescript",
+		"prefix": "max()",
+		"body": ["max($0)"],
+		"description": "Returns the greatest of multiple values."
+	},
+	"max_bars_back()" : {
+		"scope": "pinescript",
+		"prefix": "max_bars_back()",
+		"body": ["max_bars_back(var=${1}, num=${2})$0"],
+		"description": "Cap the stored series length."
+	},
+	"mfi()" : {
+		"scope": "pinescript",
+		"prefix": "mfi()",
+		"body": ["mfi(series=${1}, length=${2})$0"],
+		"description": "Money Flow Index."
+	},
+	"min()" : {
+		"scope": "pinescript",
+		"prefix": "min()",
+		"body": ["min($0)"],
+		"description": "Returns the smallest of multiple values."
+	},
+	"minute()" : {
+		"scope": "pinescript",
+		"prefix": "minute()",
+		"body": ["minute(time=${1})$0"],
+		"description": "Minute (in exchange timezone) for provided UNIX time."
+	},
+	"mom()" : {
+		"scope": "pinescript",
+		"prefix": "mom()",
+		"body": ["mom(source=${1}, length=${2})$0"],
+		"description": "Difference of x-x[y]."
+	},
+	"month()" : {
+		"scope": "pinescript",
+		"prefix": "month()",
+		"body": ["month(time=${1})$0"],
+		"description": "Month (in exchange timezone) for provided UNIX time."
+	},
+	"na()" : {
+		"scope": "pinescript",
+		"prefix": "na()",
+		"body": ["na($0)"],
+		"description": "Test value if its NaN."
+	},
+	"nz()" : {
+		"scope": "pinescript",
+		"prefix": "nz()",
+		"body": ["nz(x=${1}${2:, y=})$0"],
+		"description": "Replaces NaN values with zeros or given value."
+	},
+	"offset()" : {
+		"scope": "pinescript",
+		"prefix": "offset()",
+		"body": ["offset(source=${1}, offset=${2})$0"],
+		"description": "Shifts series x on the y bars to the right."
+	},
+	"percentile_linear_interpolation()" : {
+		"scope": "pinescript",
+		"prefix": "percentile_linear_interpolation()",
+		"body": ["percentile_linear_interpolation(source=${1}, length=${2}, percentage=${3})$0"],
+		"description": "Calculates percentile using method of linear interpolation between the two nearest ranks."
+	},
+	"percentile_nearest_rank()" : {
+		"scope": "pinescript",
+		"prefix": "percentile_nearest_rank()",
+		"body": ["percentile_nearest_rank(source=${1}, length=${2}, percentage=${3})$0"],
+		"description": "Calculates percentile using method of nearest rank."
+	},
+	"percentrank()" : {
+		"scope": "pinescript",
+		"prefix": "percentrank()",
+		"body": ["percentrank(source=${1}, length=${2})$0"],
+		"description": "Percent rank is the percents of how many previous values was less than or equal to the current value of given series."
+	},
+	"pivothigh()" : {
+		"scope": "pinescript",
+		"prefix": "pivothigh()",
+		"body": ["pivothigh${1|(,(source=\\, |}leftbars=${2}, rightbars=${3})$0"],
+		"description": "Returns price of the pivot high point. It returns 'NaN', if there was no pivot high point."
+	},
+	"pivotlow()" : {
+		"scope": "pinescript",
+		"prefix": "pivotlow()",
+		"body": ["pivotlow${1|(,(source=\\, |}leftbars=${2}, rightbars=${3})$0"],
+		"description": "Returns price of the pivot low point. It returns 'NaN', if there was no pivot low point."
+	},
+	"plot()" : {
+		"scope": "pinescript",
+		"prefix": "plot()",
+		"body": [
+			"plot(series=${1}${2:, title=''}${3:, color=color.blue}${4:, linewidth=1}${5:, style=plot.style_line}${6:, trackprice=true}${7:, transp=0}${8:, histbase=0}${9:, offset=0}${10:, join=true}${11:, editable=true}${12:, show_last=1}${13:, display=display.none})", 
+			"$0"
+		],
+		"description": "Plots a series of data on the chart."
+	},
+	"plotarrow()" : {
+		"scope": "pinescript",
+		"prefix": "plotarrow()",
+		"body": [
+			"plotarrow(series=${1}${2:, title=''}${3:, colorup=color.blue}${4:, colordown=color.navy}${5:, transp=0}${6:, offset=0}${7:, minheight=0}${8:, maxheight=0}${9:, editable=0}${10:, show_last=1}${11:, display=display.none})", 
+			"$0"
+		],
+		"description": "Plots a series of conditional up/down arrows on the chart."
+	},
+	"plotbar()" : {
+		"scope": "pinescript",
+		"prefix": "plotbar()",
+		"body": [
+			"plotbar(open=${1}, high=${2}, low=${3}, close=${4}${5:, title=''}${6:, color=color.blue}${7:, editable=true}${8:, show_last=1}${8:, display=display.none})", 
+			"$0"
+		],
+		"description": "Plots ohlc bars on the chart."
+	},
+	"plotcandle()" : {
+		"scope": "pinescript",
+		"prefix": "plotcandle()",
+		"body": [
+			"plotcandle(open=${1}, high=${2}, low=${3}, close=${4}${5:, title=''}${6:, color=color.blue}${7:, wickcolor=color.navy}${8:, editable=true}${9:, show_last=1}${10:, bordercolor=color.teal}${11:, display=display.none})", 
+			"$0"
+		],
+		"description": "Plots candles on the chart."
+	},
+	"plotchar()" : {
+		"scope": "pinescript",
+		"prefix": "plotchar()",
+		"body": [
+			"plotchar(series=${1}${2:, title=''}${3:, char=''}${4:, location=location.absolute}${5:, color=color.blue}${6:, transp=0}${7:, offset=0}${8:, text=''}${9:, textcolor=color.navy}${10:, editable=true}${11:, size=size.small}${12:, show_last=1}${11:, display=display.none})", 
+			"$0"
+		],
+		"description": "Plots a series of conditional shapes using Unicode characters on the chart."
+	},
+	"plotshape()" : {
+		"scope": "pinescript",
+		"prefix": "plotshape()",
+		"body": [
+			"plotshape(series=${1}${2:, title=''}${3:, style=shape.xcross}${4:, location=location.absolute}${5:, color=color.blue}${6:, transp=0}${7:, offset=0}${8:, text=''}${9:, textcolor=color.navy}${10:, editable=true}${11:, size=size.small}${12:, show_last=1}${11:, display=display.none})", 
+			"$0"
+		],
+		"description": "Plots visual shapes on the chart."
+	},
+	"pointfigure()" : {
+		"scope": "pinescript",
+		"prefix": "pointfigure()",
+		"body": ["pointfigure(symbol=${1}, source=${2}, style=${3}, param=${4}, reversal=${5})$0"],
+		"description": "Creates a ticker for requesting Point & Figure values."
+	},
+	"pow()" : {
+		"scope": "pinescript",
+		"prefix": "pow()",
+		"body": ["pow(base=${1}, exponent=${2})$0"],
+		"description": "Mathematical power function."
+	},
+	"renko()" : {
+		"scope": "pinescript",
+		"prefix": "renko()",
+		"body": ["renko(symbol=${1}, style=${2}, param=${3})$0"],
+		"description": "Creates a ticker for requesting Renko values."
+	},
+	"rising()" : {
+		"scope": "pinescript",
+		"prefix": "rising()",
+		"body": ["rising(source=${1}, length=${2})$0"],
+		"description": "Test if the x series is now rising for y bars long."
+	},
+	"rma()" : {
+		"scope": "pinescript",
+		"prefix": "rma()",
+		"body": ["rma(source=${1}, length=${2})$0"],
+		"description": "Moving average used in RSI. It is the exponentially weighted moving average with alpha = 1 / length."
+	},
+	"roc()" : {
+		"scope": "pinescript",
+		"prefix": "roc()",
+		"body": ["roc(source=${1}, length=${2})$0"],
+		"description": "Function roc (rate of change) showing the difference between current value of x and the value of x that was y days ago."
+	},
+	"round()" : {
+		"scope": "pinescript",
+		"prefix": "round()",
+		"body": ["round(${1})$0"],
+		"description": "The round function returns the value of the argument rounded to the nearest integer, with ties rounding up."
+	},
+	"rsi()" : {
+		"scope": "pinescript",
+		"prefix": "rsi()",
+		"body": ["rsi(x=${1}, y=${2})$0"],
+		"description": "Relative strength index. It is calculated based on rma's of upward and downward change of x."
+	},
+	"sar()" : {
+		"scope": "pinescript",
+		"prefix": "sar()",
+		"body": ["sar(start=${1}, inc=${2}, max=${3})$0"],
+		"description": "Parabolic SAR (parabolic stop and reverse) is a method devised by J. Welles Wilder, Jr., to find potential reversals in the market price direction of traded goods."
+	},
+	"second()" : {
+		"scope": "pinescript",
+		"prefix": "second()",
+		"body": ["second(time=${1})$0"],
+		"description": "Second (in exchange timezone) for provided UNIX time."
+	},
+	"security()" : {
+		"scope": "pinescript",
+		"prefix": "security()",
+		"body": ["security(symbol=${1}, resolution=${2}, expression=${3}${4:, gaps=barmerge.gaps_on}${5:, lookahead=barmerge.lookahead_on})$0"],
+		"description": "Request another symbol/resolution"
+	},
+	"sign()" : {
+		"scope": "pinescript",
+		"prefix": "sign()",
+		"body": ["sign(${1})$0"],
+		"description": "Sign (signum) of x is zero if the x is zero, 1.0 if the x is greater than zero, -1.0 if the x is less than zero."
+	},
+	"sin()" : {
+		"scope": "pinescript",
+		"prefix": "sin()",
+		"body": ["sin(${1})$0"],
+		"description": "Trigonometric sine of an angle."
+	},
+	"sma()" : {
+		"scope": "pinescript",
+		"prefix": "sma()",
+		"body": ["sma(source=${1}, length=${2})$0"],
+		"description": "The sma function returns the moving average, that is the sum of last y values of x, divided by y."
+	},
+	"sqrt()" : {
+		"scope": "pinescript",
+		"prefix": "sqrt()",
+		"body": ["sqrt(${1})$0"],
+		"description": "Square root of any x >= 0 is the unique y >= 0 such that y^2 = x."
+	},
+	"stdev()" : {
+		"scope": "pinescript",
+		"prefix": "stdev()",
+		"body": ["stdev(source=${1}, length=${2})$0"],
+		"description": "Standard deviation."
+	},
+	"stoch()" : {
+		"scope": "pinescript",
+		"prefix": "stoch()",
+		"body": ["stoch(source=${1}, high=${2}, low=${3}, length=${4})$0"],
+		"description": "Stochastic. It is calculated by a formula: 100 * (close - lowest(low, length)) / (highest(high, length) - lowest(low, length))."
+	},
+	"str.replace_all()" : {
+		"scope": "pinescript",
+		"prefix": "str.replace_all()",
+		"body": ["str.replace_all(source=${1}, target=${2}, replacement=${3})$0"],
+		"description": "Replaces each occurrence of the target string in the source string with the replacement string."
+	},
+	"strategy()" : {
+		"scope": "pinescript",
+		"prefix": "strategy()",
+		"body": [
+			"strategy(title='${1}', shorttitle='${2}', overlay=${3|true,false|}${4:, format=format.${5|inherit,price,volume|},}",
+			"\t precision=${6}, scale=scale.${7|right,left,none|}, pyramiding=${8},",
+			"\t calc_on_order_fills=${9}, calc_on_every_tick=${10}, max_bars_back=${11},",
+			"\t backtest_fill_limits_assumption=${12}, default_qty_type=${13}, default_qty_value=${14},",
+			"\t initial_capital=${15}, currency=currency.${16:USD}, slippage=${17}, commission_type=${18}, commission_value=${19},",
+			"\t process_orders_on_close=${20}, close_entries_rule=${21}",
+			"\t )$0"],
+		"description": "The function sets a number of strategy properties."
+	},
+	"strategy.cancel()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.cancel()",
+		"body": ["strategy.cancel(id=${1}${2:, when=${3}})$0"],
+		"description": "It is a command to cancel/deactivate pending orders by referencing their names, which were generated by the functions: strategy.order, strategy.entry and strategy.exit."
+	},
+	"strategy.cancel_all()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.cancel_all()",
+		"body": ["strategy.cancel_all(${1:when=${2}})$0"],
+		"description": "It is a command to cancel/deactivate all pending orders, which were generated by the functions: strategy.order, strategy.entry and strategy.exit."
+	},
+	"strategy.close()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.close()",
+		"body": ["strategy.close(id=${1}${2:, when=${3}}${4:, comment=}${5:, qty=}${6:, qty_percent=})$0"],
+		"description": "It is a command to exit from the entry with the specified ID. If there were multiple entry orders with the same ID, all of them are exited at once. If there are no open entries with the specified ID by the moment the command is triggered, the command will not come into effect. The command uses market order. Every entry is closed by a separate market order."
+	},
+	"strategy.close_all()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.close_all()",
+		"body": ["strategy.close_all(${1:when=${2}}${3:, comment=})$0"],
+		"description": "It is a command to exit from current market position making it flat. If there is no open market position by the moment the command is triggered, the command will not come into effect."
+	},
+	"strategy.entry()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.entry()",
+		"body": ["strategy.entry(id=${1}, long=strategy.${2|long,short|}${3:, qty=${4}}${5:, limit=${6}}${7:, stop=${8}}${9:, oca_name=${10}}${11:, oca_type=${12}}${13:, comment=${14}}${15:, when=${16}})","$0"],
+		"description": "It is a command to enter market position."
+	},
+	"strategy.exit()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.exit()",
+		"body": ["strategy.exit(id=${1}, from_entry=${2}${3:, qty=}${4:, qty_percent=}${5:, profit=}${6:, limit=}${7:, loss=}${8:, stop=}${9:, trail_price=}${10:, trail_points=}${11:, trail_offset=}${12:, oca_name=}${13:, comment=}${14:, when=})", "$0"],
+		"description": "It is a command to exit either a specific entry, or whole market position. "
+	},
+	"strategy.order()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.order()",
+		"body": ["strategy.order(id=${1}, long=strategy.${2|long,short|}${3:, qty=${4}}${5:, limit=${6}}${7:, stop=${8}}${9:, oca_name=${10}}${11:, oca_type=${12}}${13:, comment=${14}}${15:, when=${16}})","$0"],
+		"description": "It is a command to place order. If an order with the same ID is already pending, it is possible to modify the order. If there is no order with the specified ID, a new order is placed."
+	},
+	"strategy.risk.allow_entry_in()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.risk.allow_entry_in()",
+		"body": ["strategy.risk.allow_entry_in(${1:value=strategy.direction.${2|all,long,short|}})","$0"],
+		"description": "The purpose of this rule is to forbid short entries, only long etries will be placed. The rule affects the following function: 'entry'."
+	},
+	"strategy.risk.max_cons_loss_days()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.risk.max_cons_loss_days()",
+		"body": ["strategy.risk.max_cons_loss_days(count=${1})","$0"],
+		"description": "The purpose of this rule is to cancel all pending orders, close all open positions and stop placing orders after a specified number of consecutive days with losses. The rule affects the whole strategy."
+	},
+	"strategy.risk.max_drawdown()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.risk.max_drawdown()",
+		"body": ["strategy.risk.max_drawdown(value=${1}, type=strategy.${2|cash,percent_of_equity|})","$0"],
+		"description": "The purpose of this rule is to determine maximum drawdown. The rule affects the whole strategy. Once the maximum drawdown value is reached, all pending orders are cancelled, all open positions are closed and no new orders can be placed."
+	},
+	"strategy.risk.max_intraday_filled_orders()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.risk.max_intraday_filled_orders()",
+		"body": ["strategy.risk.max_intraday_filled_orders(count=${1})","$0"],
+		"description": "The purpose of this rule is to determine maximum number of filled orders per 1 day (per 1 bar, if chart resolution is higher than 1 day). The rule affects the whole strategy. Once the maximum number of filled orders is reached, all pending orders are cancelled, all open positions are closed and no new orders can be placed till the end of the current trading session."
+	},
+	"strategy.risk.max_intraday_loss()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.risk.max_intraday_loss()",
+		"body": ["strategy.risk.max_intraday_loss(value=${1}, type=strategy.${2|cash,percent_of_equity|})","$0"],
+		"description": "The purpose of this rule is to determine maximum loss per 1 day (per 1 bar, if chart resolution is higher than 1 day). The rule affects the whole strategy. Once the maximum loss value is reached, all pending orders are cancelled, all open positions are closed and no new orders can be placed till the end of the current trading session."
+	},
+	"strategy.risk.max_position_size()" : {
+		"scope": "pinescript",
+		"prefix": "strategy.risk.max_position_size()",
+		"body": ["strategy.risk.max_position_size(contracts=${1})","$0"],
+		"description": "The purpose of this rule is to determine maximum size of a market position. The rule affects the following function: strategy.entry. The 'entry' quantity can be reduced (if needed) to such number of contracts/shares/lots/units, so the total position size doesn't exceed the value specified in 'strategy.risk.max_position_size'. If minimum possible quantity still violates the rule, the order will not be placed."
+	},
+	"string()" : {
+		"scope": "pinescript",
+		"prefix": "string()",
+		"body": ["string(${1})$0"],
+		"description": "Casts na to string."
+	},
+	"study()" : {
+		"scope": "pinescript",
+		"prefix": "study()",
+		"body": [
+			"study(title='${1}', shorttitle='${2}', overlay=${3|true,false|}${4:, format=format.${5|inherit,price,volume|},}",
+			"\t precision=${6}, scale=scale.${7|right,left,none|}, max_bars_back=${8}",
+			"\t )$0"],
+		"description": "The function sets a number of study properties."
+	},
+	"sum()" : {
+		"scope": "pinescript",
+		"prefix": "sum()",
+		"body": ["sum(source=${1}, length=${2})$0"],
+		"description": "The Sum function returns the sliding sum of last y values of x."
+	},
+	"supertrend()" : {
+		"scope": "pinescript",
+		"prefix": "supertrend()",
+		"body": ["[${1:supertrend}, ${2:st_direction}] = supertrend(fact=${3}, atrPeriod=${4})","$0"],
+		"description": "The Supertrend indicator."
+	},
+	"swma()" : {
+		"scope": "pinescript",
+		"prefix": "swma()",
+		"body": ["swma(${1:x=${2:close}})$0"],
+		"description": "Symmetrically weighted moving average with fixed length: 4. Weights: [1/6, 2/6, 2/6, 1/6]."
+	},
+	"tan()" : {
+		"scope": "pinescript",
+		"prefix": "tan()",
+		"body": ["tan(${1})$0"],
+		"description": "Returns the trigonometric tangent of an angle."
+	},
+	"tickerid()" : {
+		"scope": "pinescript",
+		"prefix": "tickerid()",
+		"body": ["tickerid(prefix=${1}, ticker=${2}, session=${3}, adjustment=${4})$0"],
+		"description": "Creates a ticker identifier for requesting additional data for script."
+	},
+	"time()" : {
+		"scope": "pinescript",
+		"prefix": "time()",
+		"body": ["time(resolution=${1}${2:, session=${3}})$0"],
+		"description": "Function time returns UNIX time of current bar for the specified resolution and session or NaN if time point is out-of-session."
+	},
+	"timestamp()" : {
+		"scope": "pinescript",
+		"prefix": "timestamp()",
+		"body": ["timestamp(${1:timezone=syminfo.timezone, }year=${2}, month=${3}, day=${4}, hour=${5}, minute=${6}, second=${7})$0"],
+		"description": "Function timestamp returns UNIX time of specified date and time."
+	},
+	"tostring()" : {
+		"scope": "pinescript",
+		"prefix": "tostring()",
+		"body": ["tostring(x=${1}${2:, y=})$0"],
+		"description": "String representation of x argument."
+	},
+	"tr()" : {
+		"scope": "pinescript",
+		"prefix": "tr()",
+		"body": ["tr(${1:handle_na=${2|true,false|}})$0"],
+		"description": "True range. It is max(high - low, abs(high - close[1]), abs(low - close[1]))"
+	},
+	"tsi()" : {
+		"scope": "pinescript",
+		"prefix": "tsi()",
+		"body": ["tsi(source=${1}, short_length=${2}, long_length=${3})$0"],
+		"description": "True strength index. It uses moving averages of the underlying momentum of a financial instrument."
+	},
+	"valuewhen()" : {
+		"scope": "pinescript",
+		"prefix": "valuewhen()",
+		"body": ["valuewhen(condition=${1}, source=${2}, occurrence=${3})$0"],
+		"description": "Source series value when the condition was true on the n-th most recent occurence."
+	},
+	"variance()" : {
+		"scope": "pinescript",
+		"prefix": "variance()",
+		"body": ["variance(source=${1}, length=${2})$0"],
+		"description": "Variance is the expectation of the squared deviation of a series from its mean (sma), and it informally measures how far a set of numbers are spread out from their mean."
+	},
+	"vwap()" : {
+		"scope": "pinescript",
+		"prefix": "vwap()",
+		"body": ["vwap(${1:x=${2}})$0"],
+		"description": "Volume weighted average price."
+	},
+	"vwma()" : {
+		"scope": "pinescript",
+		"prefix": "vwma()",
+		"body": ["vwma(source=${1}, length=${2})$0"],
+		"description": "The vwma function returns volume-weighted moving average of x for y bars back. It is the same as: sma(x * volume, y) / sma(volume, y)"
+	},
+	"weekofyear()" : {
+		"scope": "pinescript",
+		"prefix": "weekofyear()",
+		"body": ["weekofyear(${1:time=${2}})$0"],
+		"description": "Week of year (in exchange timezone) for provided UNIX time."
+	},
+	"wma()" : {
+		"scope": "pinescript",
+		"prefix": "wma()",
+		"body": ["wma(source=${1}, length=${2})$0"],
+		"description": "The wma function returns weighted moving average of x for y bars back. In wma weighting factors decrease in arithmetical progression."
+	},
+	"wpr()" : {
+		"scope": "pinescript",
+		"prefix": "wpr()",
+		"body": ["wpr(${1:length=${2}})$0"],
+		"description": "Williams %R. The oscillator shows the current closing price in relation to the high and low of the past 'length' bars."
+	},
+	"year()" : {
+		"scope": "pinescript",
+		"prefix": "year()",
+		"body": ["year(${1:time=${2}})$0"],
+		"description": "year (in exchange timezone) for provided UNIX time."
+	},
 	//-------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------
