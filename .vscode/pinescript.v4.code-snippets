@@ -27,23 +27,11 @@
 		"body": ["accdist"],
 		"description": "Accumulation/distribution index.\nType: float"
 	},
-	"adjustment.dividends" : {
+	"adjustment.x" : {
 		"scope": "pinescript",
-		"prefix": "adjustment.dividends",
-		"body": ["adjustment.dividends"],
-		"description": "Constant for dividends adjustment type (dividends adjustment is applied).\nType: string"
-	},
-	"adjustment.none" : {
-		"scope": "pinescript",
-		"prefix": "adjustment.none",
-		"body": ["adjustment.none"],
-		"description": "Constant for none adjustment type (no adjustment is applied).\nType: string"
-	},
-	"adjustment.splits" : {
-		"scope": "pinescript",
-		"prefix": "adjustment.splits",
-		"body": ["adjustment.splits"],
-		"description": "Constant for splits adjustment type (splits adjustment is applied).\nType: string"
+		"prefix": "adjustment.x",
+		"body": ["adjustment.${1|dividends,none,splits|}"],
+		"description": "Constant for dividends adjustment type.\nType: string"
 	},
 	"bar_index" : {
 		"scope": "pinescript",
@@ -51,65 +39,17 @@
 		"body": ["bar_index"],
 		"description": "Current bar index. Numbering is zero-based, index of the first bar is 0.\nType: integer"
 	},
-	"barmerge.gaps_off" : {
+	"barmerge.x" : {
 		"scope": "pinescript",
-		"prefix": "barmerge.gaps_off",
-		"body": ["barmerge.gaps_off"],
-		"description": "Merge strategy for requested data. Data is merged continuously without gaps, all the gaps are filled with the previous nearest existing value.\nType: bool"
+		"prefix": "barmerge.x",
+		"body": ["barmerge.${1|gaps_off,gaps_on,lookahead_off,lookahead_on|}"],
+		"description": "Merge strategy for requested data."
 	},
-	"barmerge.gaps_on" : {
+	"barstate.x" : {
 		"scope": "pinescript",
-		"prefix": "barmerge.gaps_on",
-		"body": ["barmerge.gaps_on"],
-		"description": "Merge strategy for requested data. Data is merged with possible gaps (na values).\nType: bool"
-	},
-	"barmerge.lookahead_off" : {
-		"scope": "pinescript",
-		"prefix": "barmerge.lookahead_off",
-		"body": ["barmerge.lookahead_off"],
-		"description": "Merge strategy for the requested data position. Requested barset is merged with current barset in the order of sorting bars by their close time. This merge strategy disables effect of getting data from 'future' on calculation on history.\nType: bool"
-	},
-	"barmerge.lookahead_on" : {
-		"scope": "pinescript",
-		"prefix": "barmerge.lookahead_on",
-		"body": ["barmerge.lookahead_on"],
-		"description": "Merge strategy for the requested data position. Requested barset is merged with current barset in the order of sorting bars by their opening time. This merge strategy can lead to undesirable effect of getting data from 'future' on calculation on history. This is unacceptable in backtesting strategies, but can be useful in indicators.\nType: bool"
-	},
-	"barstate.isconfirmed" : {
-		"scope": "pinescript",
-		"prefix": "barstate.isconfirmed",
-		"body": ["barstate.isconfirmed"],
-		"description": "Returns true if the script is calculating the last (closing) update of the current bar. The next script calculation will be on the new bar data.\nType: bool"
-	},
-	"barstate.isfirst" : {
-		"scope": "pinescript",
-		"prefix": "barstate.isfirst",
-		"body": ["barstate.isfirst"],
-		"description": "Returns true if current bar is first bar in barset, false otherwise.\nType: bool"
-	},
-	"barstate.ishistory" : {
-		"scope": "pinescript",
-		"prefix": "barstate.ishistory",
-		"body": ["barstate.ishistory"],
-		"description": "Returns true if current bar is a historical bar, false otherwise.\nType: bool"
-	},
-	"barstate.islast" : {
-		"scope": "pinescript",
-		"prefix": "barstate.islast",
-		"body": ["barstate.islast"],
-		"description": "Returns true if current bar is the last bar in barset, false otherwise. This condition is true for all real-time bars in barset.\nType: bool"
-	},
-	"barstate.isnew" : {
-		"scope": "pinescript",
-		"prefix": "barstate.isnew",
-		"body": ["barstate.isnew"],
-		"description": "Returns true if script is currently calculating on new bar, false otherwise. This variable is true when calculating on historical bars or on first update of a newly generated real-time bar.\nType: bool"
-	},
-	"barstate.isrealtime" : {
-		"scope": "pinescript",
-		"prefix": "barstate.isrealtime",
-		"body": ["barstate.isrealtime"],
-		"description": "Returns true if current bar is a real-time bar, false otherwise.\nType: bool"
+		"prefix": "barstate.x",
+		"body": ["barstate.${1|isconfirmed,isfirst,ishisstory,islast,isnew,isrealtime|}"],
+		"description": "Returns event outcome.\nType: bool"
 	},
 	"close" : {
 		"scope": "pinescript",

@@ -1,0 +1,57 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='[RS]Bar Pattern Statistics Tool', shorttitle='bst', overlay=true)
+
+int n_bars_in_pattern = input(defval=2, title='How many bars pattern:', type=input.integer, minval=2, maxval=10)
+
+string op_type_01 = 'inside bar'
+string op_type_02 = 'outside bar'
+string op_type_03 = 'up bar'
+string op_type_04 = 'down bar'
+
+string bar01_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar02_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar03_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar04_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar05_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar06_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar07_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar08_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar09_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar10_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+
+f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:na))))
+f_get_nbar_type(_i)=>(_i==1?bar01_type:(_i==2?bar02_type:(_i==3?bar03_type:(_i==4?bar04_type:(_i==5?bar05_type:(_i==6?bar06_type:(_i==7?bar07_type:(_i==8?bar08_type:(_i==9?bar09_type:(_i==10?bar10_type:na))))))))))
+
+f_isHighUp(_pos)    => high[_pos + 1] > high[_pos]
+f_isHighDown(_pos)  => high[_pos + 1] < high[_pos]
+f_isLowUp(_pos)     => low[_pos + 1] > low[_pos]
+f_isLowDown(_pos)   => low[_pos + 1] < low[_pos]
+
+f_isInsideBar(_pos)     => f_isHighDown(_pos) and f_isLowUp(_pos)
+f_isOutsideBar(_pos)    => f_isHighUp and f_isLowDown(_pos)
+f_isUpBar(_pos)         => f_isHighUp(_pos) and f_isLowUp(_pos)
+f_isDownBar(_pos)       => f_isHighDown(_pos) and f_isLowDown(_pos)
+
+f_check_nbar(_i, _pos)=>
+    bool _isvalid = false
+    int _bar_type = f_enum_type(f_get_nbar_type(_i))
+    if bar_type == 1
+        _isvalid := f_isInsideBar(_pos)
+    if bar_type == 2
+        _isvalid := f_isOutsideBar(_pos)
+    if bar_type == 3
+        _isvalid := f_isUpBar(_pos)
+    if bar_type == 4
+        _isvalid := f_isDownBar(_pos)
+    _is_valid
+
+f_check_if_pattern(_length)=>
+    int _count = 0
+    bool _is_valid = false
+    if _length > 1
+        f_check_nbar(_length)
+
+plot(close)
