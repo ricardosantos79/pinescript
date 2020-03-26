@@ -2,56 +2,109 @@
 // © RicardoSantos
 
 //@version=4
-study(title='[RS]Bar Pattern Statistics Tool', shorttitle='bst', overlay=true)
+study(title='[RS]Bar Pattern Statistics Tool', shorttitle='bst', overlay=false)
 
-int n_bars_in_pattern = input(defval=2, title='How many bars pattern:', type=input.integer, minval=2, maxval=10)
+int n_bars_in_pattern = input(defval=3, title='How many bars pattern:', type=input.integer, minval=1, maxval=10)
 
 string op_type_01 = 'inside bar'
 string op_type_02 = 'outside bar'
 string op_type_03 = 'up bar'
 string op_type_04 = 'down bar'
 
-string bar01_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar02_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar03_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar04_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar05_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar06_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar07_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar08_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar09_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
-string bar10_type = input(defval=op_type_01, title='Bar type to previous:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar01_type = input(defval=op_type_01, title='#1 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar02_type = input(defval=op_type_01, title='#2 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar03_type = input(defval=op_type_01, title='#3 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar04_type = input(defval=op_type_01, title='#4 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar05_type = input(defval=op_type_01, title='#5 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar06_type = input(defval=op_type_01, title='#6 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar07_type = input(defval=op_type_01, title='#7 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar08_type = input(defval=op_type_01, title='#8 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar09_type = input(defval=op_type_01, title='#9 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
+string bar10_type = input(defval=op_type_01, title='#10 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04])
 
 f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:na))))
 f_get_nbar_type(_i)=>(_i==1?bar01_type:(_i==2?bar02_type:(_i==3?bar03_type:(_i==4?bar04_type:(_i==5?bar05_type:(_i==6?bar06_type:(_i==7?bar07_type:(_i==8?bar08_type:(_i==9?bar09_type:(_i==10?bar10_type:na))))))))))
 
-f_isHighUp(_pos)    => high[_pos + 1] > high[_pos]
-f_isHighDown(_pos)  => high[_pos + 1] < high[_pos]
-f_isLowUp(_pos)     => low[_pos + 1] > low[_pos]
-f_isLowDown(_pos)   => low[_pos + 1] < low[_pos]
+f_get_pattern_as_text()=>
+    string _t = ''
+    for _i = 1 to n_bars_in_pattern
+        _t := _t + '(' + tostring(x=_i, y='#') + ': ' + f_get_nbar_type(_i) + ')'
+        if _i != n_bars_in_pattern
+            _t := _t + ' > '
+    _t
+
+f_isHighUp(_pos)    => high[_pos + 1] < high[_pos]
+f_isHighDown(_pos)  => high[_pos + 1] > high[_pos]
+f_isLowUp(_pos)     => low[_pos + 1] < low[_pos]
+f_isLowDown(_pos)   => low[_pos + 1] > low[_pos]
 
 f_isInsideBar(_pos)     => f_isHighDown(_pos) and f_isLowUp(_pos)
-f_isOutsideBar(_pos)    => f_isHighUp and f_isLowDown(_pos)
+f_isOutsideBar(_pos)    => f_isHighUp(_pos) and f_isLowDown(_pos)
 f_isUpBar(_pos)         => f_isHighUp(_pos) and f_isLowUp(_pos)
 f_isDownBar(_pos)       => f_isHighDown(_pos) and f_isLowDown(_pos)
 
-f_check_nbar(_i, _pos)=>
-    bool _isvalid = false
-    int _bar_type = f_enum_type(f_get_nbar_type(_i))
-    if bar_type == 1
-        _isvalid := f_isInsideBar(_pos)
-    if bar_type == 2
-        _isvalid := f_isOutsideBar(_pos)
-    if bar_type == 3
-        _isvalid := f_isUpBar(_pos)
-    if bar_type == 4
-        _isvalid := f_isDownBar(_pos)
-    _is_valid
+f_enum_BarPattern(_i, _pos)=>(_i==1?f_isInsideBar(_pos):(_i==2?f_isOutsideBar(_pos):(_i==3?f_isUpBar(_pos):(_i==4?f_isDownBar(_pos):na))))
+
+f_check_nbar(_i, _pos)=>f_enum_BarPattern(f_enum_type(f_get_nbar_type(_i)), _pos)
 
 f_check_if_pattern(_length)=>
     int _count = 0
     bool _is_valid = false
-    if _length > 1
-        f_check_nbar(_length)
+    for _i = 1 to _length
+        int _pos = _length - _i
+        _count := _count + (f_check_nbar(_i, _pos) ? 1 : 0)
+    if _count >= _length
+        _is_valid := true
+    _is_valid
 
-plot(close)
+t = f_check_if_pattern(n_bars_in_pattern) ? 1 : 0
+
+//stats:
+var int n_detected = 0
+var int n_bars_inside = 0
+var int n_bars_outside = 0
+var int n_bars_up = 0
+var int n_bars_down = 0
+var int n_bars_over_atr14x1 = 0
+var int n_bars_over_atr14x2 = 0
+var int n_bars_over_atr14x3 = 0
+
+float atr = atr(14)
+if t[1] > 0
+    n_detected := n_detected + 1
+    if f_isInsideBar(0)
+        n_bars_inside := n_bars_inside + 1
+    if f_isOutsideBar(0)
+        n_bars_outside := n_bars_outside + 1
+    if f_isUpBar(0)
+        n_bars_up := n_bars_up + 1
+    if f_isDownBar(0)
+        n_bars_down := n_bars_down + 1
+    if high-low > atr * 1
+        n_bars_over_atr14x1 := n_bars_over_atr14x1 + 1
+    if high-low > atr * 2
+        n_bars_over_atr14x2 := n_bars_over_atr14x2 + 1
+    if high-low > atr * 3
+        n_bars_over_atr14x3 := n_bars_over_atr14x3 + 1
+
+string tex = 'Statistics:\n' + 
+     'Pattern: ' + f_get_pattern_as_text() + '\n' +
+     'Nº of patterns:' + tostring(x=n_detected, y='#') + '\n' + 
+     'Nº of next bars, that are Inside Bars:' + tostring(x=n_bars_inside, y='#') + '\n' +
+     'Nº of next bars, that are Outside Bars:' + tostring(x=n_bars_outside, y='#') + '\n' +
+     'Nº of next bars, that are Up Bars:' + tostring(x=n_bars_up, y='#') + '\n' +
+     'Nº of next bars, that are Down Bars:' + tostring(x=n_bars_down, y='#') + '\n' +
+     'Nº of next bars, that are over ATR(14):' + tostring(x=n_bars_over_atr14x1, y='#') + '\n' +
+     'Nº of next bars, that are over ATR(14) x 2:' + tostring(x=n_bars_over_atr14x2, y='#') + '\n' +
+     'Nº of next bars, that are over ATR(14) x 3:' + tostring(x=n_bars_over_atr14x3, y='#') + '\n'
+
+var label la = label.new(
+         x=bar_index, y=0.0, text='', 
+         xloc=xloc.bar_index, yloc=yloc.price, 
+         color=color.white, style=label.style_label_left, textcolor=color.black, 
+         size=size.small, textalign=text.align_left
+         )
+
+label.set_xy(id=la, x=bar_index, y=0.0)
+label.set_text(id=la, text=tex)
+plot(t)
