@@ -1426,6 +1426,34 @@
 		],
 		"description": "Custom Function:\nCalculates percentage value."
 	},
+	"f_fib_slicer()" : {
+		"scope": "pinescript",
+		"prefix": "f_fib_slicer()",
+		"body": [
+			"//-----------------------------------------------------------------",
+			"// Fibonacci slicer function",
+			"//\tby https://www.tradingview.com/u/e2e4mfck/ {",
+			"f_fib_slicer(_val1, _val2)=>",
+			"\t_v1 = _val2 > _val1 ? _val1 : _val2",
+			"\t_v2 = _val2 > _val1 ? _val2 : _val1",
+			"\t_m = (_v2 - _v1)",
+			"\t_a = abs((1 - sqrt(5)) / 2.)",
+			"\t_b = sqrt(_a),   _c = sqrt(_b),   _d = 0.5",
+			"\t_e = pow(_a, 2), _f = pow(_a, 3), _g = pow(_a, 4) ",
+			"\t_886 = _m * _c  + _v1",
+			"\t_786 = _m * _b  + _v1",
+			"\t_618 = _m * _a  + _v1",
+			"\t_5   = _m * _d  + _v1",
+			"\t_381 = _m * _e  + _v1",
+			"\t_236 = _m * _f  + _v1",
+			"\t_145 = _m * _g  + _v1",
+			"\t[_886, _786, _618, _5, _381, _236, _145]    ",
+			"",
+			"[$1_886, $1_786, $1_618, $1_5, $1_381, $1_236, $1_145] = f_fib(${2:val1}, ${3:val2}) ",
+			"// } $0"
+		],
+		"description": "Custom Function:\nSlices a range into Fibonacci Segments."
+	},
 	"for loop" : {
 		"scope": "pinescript",
 		"prefix": "for loop statement",
