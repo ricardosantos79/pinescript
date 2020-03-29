@@ -106,22 +106,26 @@ if t[1] > 0
     if high-low > atr * 3
         n_bars_over_atr14x3 := n_bars_over_atr14x3 + 1
 
+string tex_size = input(defval=size.normal, title='Text size:', type=input.string, options=[size.auto, size.tiny, size.small, size.normal, size.large, size.huge])
+
 string tex = 'Statistics:\n' + 
      'Pattern: ' + f_get_pattern_as_text() + '\n' +
-     'Nº of patterns:' + tostring(x=n_detected, y='#') + '/' + tostring(x=total_bars, y='#') + ' (' + tostring(x=f_perc_of(n_detected, total_bars), y='#.000') + '%)' + '\n' + 
-     'Nº of next bars, that are Inside Bars:' + tostring(x=n_bars_inside, y='#') + ' (' + tostring(x=f_perc_of(n_bars_inside, n_detected), y='#.000') + '%)' + '\n' +
-     'Nº of next bars, that are Outside Bars:' + tostring(x=n_bars_outside, y='#') + ' (' + tostring(x=f_perc_of(n_bars_outside, n_detected), y='#.000') + '%)' + '\n' +
-     'Nº of next bars, that are Up Bars:' + tostring(x=n_bars_up, y='#') + ' (' + tostring(x=f_perc_of(n_bars_up, n_detected), y='#.000') + '%)' + '\n' +
-     'Nº of next bars, that are Down Bars:' + tostring(x=n_bars_down, y='#') + ' (' + tostring(x=f_perc_of(n_bars_down, n_detected), y='#.000') + '%)' + '\n' +
-     'Nº of next bars, that are over ATR(14):' + tostring(x=n_bars_over_atr14x1, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x1, n_detected), y='#.000') + '%)' + '\n' +
-     'Nº of next bars, that are over ATR(14) x 2:' + tostring(x=n_bars_over_atr14x2, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x2, n_detected), y='#.000') + '%)' + '\n' +
-     'Nº of next bars, that are over ATR(14) x 3:' + tostring(x=n_bars_over_atr14x3, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x3, n_detected), y='#.000') + '%)' + '\n'
+     'Nº of patterns:' + tostring(x=n_detected, y='#') + ' in ' + tostring(x=total_bars, y='#') + ' bars (' + tostring(x=f_perc_of(n_detected, total_bars), y='#.000') + '%)' + '\n' + 
+     'Nº of next bars, that are:\n' +
+     ' --- > Inside Bars: ' + tostring(x=n_bars_inside, y='#') + ' (' + tostring(x=f_perc_of(n_bars_inside, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Outside Bars: ' + tostring(x=n_bars_outside, y='#') + ' (' + tostring(x=f_perc_of(n_bars_outside, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Up Bars: ' + tostring(x=n_bars_up, y='#') + ' (' + tostring(x=f_perc_of(n_bars_up, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Down Bars: ' + tostring(x=n_bars_down, y='#') + ' (' + tostring(x=f_perc_of(n_bars_down, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Over ATR(14): ' + tostring(x=n_bars_over_atr14x1, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x1, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Over ATR(14) x 2: ' + tostring(x=n_bars_over_atr14x2, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x2, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Over ATR(14) x 3: ' + tostring(x=n_bars_over_atr14x3, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x3, n_detected), y='#.000') + '%)' + '\n'
+
 
 var label la = label.new(
          x=bar_index, y=0.5, text='', 
          xloc=xloc.bar_index, yloc=yloc.price, 
          color=color.white, style=label.style_label_left, textcolor=color.black, 
-         size=size.small, textalign=text.align_left
+         size=tex_size, textalign=text.align_left
          )
 
 label.set_xy(id=la, x=bar_index, y=0.5)
