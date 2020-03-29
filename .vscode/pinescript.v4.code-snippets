@@ -1418,6 +1418,14 @@
 		],
 		"description": "conditional if () else () statement"
 	},
+	"f_perc_of()" : {
+		"scope": "pinescript",
+		"prefix": "f_perc_of()",
+		"body": [
+			"f_perc_of(_frac, _total)=>(_frac / _total) * 100"
+		],
+		"description": "Custom Function:\nCalculates percentage value."
+	},
 	"for loop" : {
 		"scope": "pinescript",
 		"prefix": "for loop statement",
