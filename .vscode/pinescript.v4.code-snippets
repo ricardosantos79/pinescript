@@ -1454,6 +1454,34 @@
 		],
 		"description": "Custom Function:\nSlices a range into Fibonacci Segments."
 	},
+	"f_highest_since()" : {
+		"scope": "pinescript",
+		"prefix": "f_highest_since()",
+		"body": [
+			"//-----------------------------------------------------------------",
+			"// Highest since function",
+			"//\tby https://www.tradingview.com/u/Peter_O/ {",
+			"f_highest_since(_highseries,_sinceevent)=>",
+			"\tvar float _peak = na",
+			"\t_peak := _highseries > _peak or _sinceevent ? _highseries : _peak",
+			"// } $0"
+		],
+		"description": "Custom Function:\nReturns value of a series at the last event occurence."
+	},
+	"f_lowest_since()" : {
+		"scope": "pinescript",
+		"prefix": "f_lowest_since()",
+		"body": [
+			"//-----------------------------------------------------------------",
+			"// Highest since function",
+			"//\tby https://www.tradingview.com/u/Peter_O/ {",
+			"f_lowest_since(_lowseries,_sinceevent)=>",
+			"\tvar float _bottom = na",
+			"\t_bottom := _lowseries < _bottom or _sinceevent ? _lowseries : _bottom",
+			"// } $0"
+		],
+		"description": "Custom Function:\nReturns value of a series at the last event occurence."
+	},
 	"for loop" : {
 		"scope": "pinescript",
 		"prefix": "for loop statement",
