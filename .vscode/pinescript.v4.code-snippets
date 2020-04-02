@@ -1473,7 +1473,7 @@
 		"prefix": "f_lowest_since()",
 		"body": [
 			"//-----------------------------------------------------------------",
-			"// Highest since function",
+			"// Lowest since function",
 			"//\tby https://www.tradingview.com/u/Peter_O/ {",
 			"f_lowest_since(_lowseries,_sinceevent)=>",
 			"\tvar float _bottom = na",
