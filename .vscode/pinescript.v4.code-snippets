@@ -22,337 +22,337 @@
 	// Pinescript builtin variables:
 	//-------------------------------------------------------------------------------
 	"accdist" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "accdist",
 		"body": ["accdist"],
 		"description": "Accumulation/distribution index.\nType: float"
 	},
 	"adjustment.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "adjustment.x",
 		"body": ["adjustment.${1|dividends,none,splits|}"],
 		"description": "Constant for dividends adjustment type.\nType: string"
 	},
 	"bar_index" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "bar_index",
 		"body": ["bar_index"],
 		"description": "Current bar index. Numbering is zero-based, index of the first bar is 0.\nType: integer"
 	},
 	"barmerge.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "barmerge.x",
 		"body": ["barmerge.${1|gaps_off,gaps_on,lookahead_off,lookahead_on|}"],
 		"description": "Merge strategy for requested data."
 	},
 	"barstate.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "barstate.x",
 		"body": ["barstate.${1|isconfirmed,isfirst,ishisstory,islast,isnew,isrealtime|}"],
 		"description": "Returns event outcome.\nType: bool"
 	},
 	"close" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "close",
 		"body": ["close"],
 		"description": "Returns true if current bar is a real-time bar, false otherwise.\nType: bool"
 	},
 	"color.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "color.x",
 		"body": ["color.${1|aqua,black,silver,gray,white,maroon,red,purple,fuchsia,green,lime,olive,yellow,navy,blue,teal,orange|}"],
 		"description": "Is a named constant for a color.\nType: color"
 	},
 	"currency.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "currency.x",
 		"body": ["currency.${1|AUD,CAD,CHF,EUR,GBP,HKD,JPY,NOK,NONE,NZD,RUB,SEK,SGD,TRY,USD,ZAR|}"],
 		"description": "String representing a currency.\nType: string"
 	},
 	"dayofmonth" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dayofmonth",
 		"body": ["dayofmonth"],
 		"description": "Date of current bar time in exchange timezone.\nType: integer"
 	},
 	"dayofweek" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dayofweek",
 		"body": ["dayofweek"],
 		"description": "Day of week for current bar time in exchange timezone.\nType: integer"
 	},
 	"dayofweek.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dayofweek.x",
 		"body": ["dayofweek.${1|friday,monday,saturday,sunday,thursday,tuesday,wednesday|}"],
 		"description": "Is a named constant for return value of dayofweek function and value of dayofweek variable.\nType: integer"
 	},
 	"display.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "display.x",
 		"body": ["display.${1|all,none|}"],
 		"description": "A named constant that specifies where the plot is displayed.\nType: integer"
 	},
 	"extend.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "extend.x",
 		"body": ["extend.${1|both,left,none,right|}"],
 		"description": "Named constant for line.new and line.set_extend functions.\nType: string"
 	},
 	"format.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "format.x",
 		"body": ["format.${1|inherit,price,volume|}"],
 		"description": "Named constant for selecting the formatting of the script output values.\nType: string"
 	},
 	"high" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "high",
 		"body": ["high"],
 		"description": "Current high price.\nType: float"
 	},
 	"hl2" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hl2",
 		"body": ["hl2"],
 		"description": "Is a shortcut for (high + low)/2.\nType: float"
 	},
 	"hlc3" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hlc3",
 		"body": ["hlc3"],
 		"description": "Is a shortcut for (high + low + close)/3.\nType: float"
 	},
 	"hline.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hline.x",
 		"body": ["hline.${1|style_dashed,style_dotted,style_solid|}"],
 		"description": "Named constant for solid linestyle of hline function.\nType: integer"
 	},
 	"hour" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hour",
 		"body": ["hour"],
 		"description": "Current bar hour in exchange timezone.\nType: integer"
 	},
 	"iii" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "iii",
 		"body": ["iii"],
 		"description": "Intraday Intensity Index.\nType: float"
 	},
 	"input.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "input.x",
 		"body": ["input.${1|bool,float,integer,resolution,session,source,string,symbol|}"],
 		"description": "Named constant for input type of input function.\nType: string"
 	},
 	"label.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.x",
 		"body": ["label.${1|style_arrowdown,style_arrowup,style_circle,style_cross,style_diamond,style_flag,style_label_center,style_label_down,style_label_left,style_label_right,style_label_up,style_none,style_square,style_triangledown,style_triangleup,style_xcross|}"],
 		"description": "Label style for label.new and label.set_style functions.\nType: string"
 	},
 	"line.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.x",
 		"body": ["line.${1|style_arrow_both,style_arrow_left,style_arrow_right,style_dashed,style_dotted,style_solid|}"],
 		"description": "Line style for line.new and line.set_style functions.\nType: string"
 	},
 	"location.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "location.x",
 		"body": ["location.${1|abovebar,absolute,belowbar,bottom,top|}"],
 		"description": "Location value for plotshape, plotchar functions.\nType: string"
 	},
 	"low" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "low",
 		"body": ["low"],
 		"description": "Current low price.\nType: float"
 	},
 	"minute" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "minute",
 		"body": ["minute"],
 		"description": "Current bar minute in exchange timezone.\nType: integer"
 	},
 	"month" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "month",
 		"body": ["month"],
 		"description": "Current bar month in exchange timezone.\nType: integer"
 	},
 	"na" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "na",
 		"body": ["na"],
 		"description": "Double. NaN value(Not a number).\nType: na"
 	},
 	"nvi" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "nvi",
 		"body": ["nvi"],
 		"description": "Negative Volume Index.\nType: float"
 	},
 	"obv" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "obv",
 		"body": ["obv"],
 		"description": "On Balance Volume.\nType: float"
 	},
 	"ohlc4" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "ohlc4",
 		"body": ["ohlc4"],
 		"description": "Is a shortcut for (open + high + low + close)/4.\nType: float"
 	},
 	"open" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "open",
 		"body": ["open"],
 		"description": "Current open price.\nType: float"
 	},
 	"plot.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plot.x",
 		"body": ["plot.${1|style_area,style_areabr,style_circles,style_columns,style_cross,style_histogram,style_line,style_linebr,style_stepline|}"],
 		"description": "Named costant for plot() function property.\nType: string"
 	},
 	"pvi" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "pvi",
 		"body": ["pvi"],
 		"description": "Positive Volume Index.\nType: float"
 	},
 	"pvt" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "pvt",
 		"body": ["pvt"],
 		"description": "Price Volume Trend.\nType: float"
 	},
 	"scale.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "scale.x",
 		"body": ["scale.${1|left,none,right|}"],
 		"description": "Scale value for study() function.\nType: integer"
 	},
 	"second" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "second",
 		"body": ["second"],
 		"description": "Current bar second in exchange timezone.\nType: integer"
 	},
 	"session.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "session.x",
 		"body": ["session.${1|extended,regular|}"],
 		"description": "Constant for session type.\nType: string"
 	},
 	"shape.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "shape.x",
 		"body": ["shape.${1|arrowdown,arrowup,circle,cross,diamond,flag,labeldown,labelup,square,triangledown,triangleup,xcross|}"],
 		"description": "Shape style for plotshape() function.\nType: string"
 	},
 	"size.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "size.x",
 		"body": ["size.${1|auto,huge,large,normal,small,tiny|}"],
 		"description": "Size value for plotshape() function.\nType: string"
 	},
 	"strategy.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.x",
 		"body": ["strategy.${1|cash,closedtrades,comission.cash_per_contract,comission.cash_per_order,comission.percent,direction.all,direction.long,direction.short,equity,eventrades,fixed,grossloss,grossprofit,initial_capital,long,losstrades,max_contracts_held_all,max_contracts_held_long,max_contracts_held_short,max_drawdown,netprofit,oca.cancel,oca.none,oca.reduce,openprofit,opentrades,percent_of_equity,position_avg_price,position_entry_name,position_size,short,wintrades|}"],
 		"description": "Size value for plotshape() function.\nType: string"
 	},
 	"syminfo.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "syminfo.x",
 		"body": ["syminfo.${1|currency,description,mintick,pointvalue,prefix,root,session,ticker,tickerid,timezone,type|}"],
 		"description": "Properties of the underlying asset.\nType: ---"
 	},
 	"text.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "text.x",
 		"body": ["text.${1|align_center,align_left,align_right|}"],
 		"description": "Label text alignment for label.new() function.\nType: string"
 	},
 	"time" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "time",
 		"body": ["time"],
 		"description": "Current bar time in UNIX format.\nType: integer"
 	},
 	"time_close" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "time_close",
 		"body": ["time_close"],
 		"description": "Current bar close time in UNIX format.\nType: integer"
 	},
 	"timeframe.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "timeframe.x",
 		"body": ["timeframe.${1|isdaily,isdwm,isintraday,isminutes,ismonthly,isseconds,isweekly,multiplier,period|}"],
 		"description": "Properties of timeframe.\nType: ---"
 	},
 	"timenow" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "timenow",
 		"body": ["timenow"],
 		"description": "Current time in UNIX format.\nType: integer"
 	},
 	"tr" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "tr",
 		"body": ["tr"],
 		"description": "True range. Same as tr(false). It is max(high - low, abs(high - close[1]), abs(low - close[1])).\nType: float"
 	},
 	"volume" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "volume",
 		"body": ["volume"],
 		"description": "Current bar volume.\nType: float"
 	},
 	"vwap" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "vwap",
 		"body": ["vwap"],
 		"description": "Volume-weighted average price. It uses hlc3 as source.\nType: float"
 	},
 	"wad" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "wad",
 		"body": ["wad"],
 		"description": "Williams Accumulation/Distribution.\nType: float"
 	},
 	"weekofyear" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "weekofyear",
 		"body": ["weekofyear"],
 		"description": "Week number of current bar time in exchange timezone.\nType: integer"
 	},
 	"wvad" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "wvad",
 		"body": ["wvad"],
 		"description": "Williams Variable Accumulation/Distribution.\nType: float"
 	},
 	"xloc.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "xloc.x",
 		"body": ["xloc.${1|bar_index,bar_time|}"],
 		"description": "A named constant that specifies the algorithm of interpretation of x-value in functions line.new and label.new.\nType: string"
 	},
 	"year" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "year",
 		"body": ["year"],
 		"description": "Current bar year in exchange timezone.\nType: integer"
 	},
 	"yloc.x" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "yloc.x",
 		"body": ["yloc.${1|abovebar,belowbar,price|}"],
 		"description": "A named constant that specifies the algorithm of interpretation of y-value in function label.new.\nType: string"
@@ -363,649 +363,649 @@
 	// builtin functions:
 	//-------------------------------------------------------------------------------
 	"abs()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "abs()",
 		"body": ["abs($0)"],
 		"description": "Absolute value of input value."
 	},
 	"acos()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "acos()",
 		"body": ["acos($0)"],
 		"description": "The acos function returns the arccosine (in radians) of number such that cos(acos(y)) = y for y in range [-1, 1]."
 	},
 	"alertcondition()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "alertcondition()",
 		"body": ["alertcondition(condition=${1}, title='${2}', message='${3}')", "${0}"],
 		"description": "Creates alert condition, that is available in Create Alert dialog. Please note, that alertcondition does NOT create an alert, it just gives you more options in Create Alert dialog. Also, alertcondition effect is invisible on chart."
 	},
 	"alma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "alma()",
 		"body": ["alma(series=${1}, length=${2}, offset=${3}, sigma=${4})${0}"],
 		"description": "Arnaud Legoux Moving Average. It uses Gaussian distribution as weights for moving average."
 	},
 	"asin()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "asin()",
 		"body": ["asin($0)"],
 		"description": "The asin function returns the arcsine (in radians) of number such that sin(asin(y)) = y for y in range [-1, 1]."
 	},
 	"atan()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "atan()",
 		"body": ["atan($0)"],
 		"description": "The atan function returns the arctangent (in radians) of number such that tan(atan(y)) = y for any y."
 	},
 	"atr()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "atr()",
 		"body": ["atr(length=$0)"],
 		"description": "Function atr (average true range) returns the RMA of true range. True range is max(high - low, abs(high - close[1]), abs(low - close[1]))"
 	},
 	"avg()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "avg()",
 		"body": ["avg($0)"],
 		"description": "Calculates average of all given series (elementwise)."
 	},
 	"barcolor()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "barcolor()",
 		"body": ["barcolor(color=${1}, offset=${2}, editable=${3}, show_last=${4}, title=${5})", "${0}"],
 		"description": "Set color of bars."
 	},
 	"barssince()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "barssince()",
 		"body": ["barssince(condition=$0)"],
 		"description": "Counts the number of bars since condition was true."
 	},
 	"bb()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "bb()",
 		"body": ["[${1|_,bb_middle|}, ${2|_,bb_upper|}, ${3|_,bb_lower|}] = bb(series=${4}, length=${5}, mult=${6})", "${0}"],
 		"description": "Bollinger Bands. A Bollinger Band is a technical analysis tool defined by a set of lines plotted two standard deviations (positively and negatively) away from a simple moving average (SMA) of the security's price, but can be adjusted to user preferences."
 	},
 	"bbw()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "bbw()",
 		"body": ["bbw(series=${1}, length=${2}, mult=${3})$0"],
 		"description": "Bollinger Bands Width. The Bollinger Band Width is the difference between the upper and the lower Bollinger Bands divided by the middle band."
 	},
 	"bgcolor()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "bgcolor()",
 		"body": ["bgcolor(color=${1}, transp=${2}, offset=${3}, editable=${4}, show_last=${5}, title=${6})", "${0}"],
 		"description": "Fill background color of bars with specified color."
 	},
 	"bool()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "bool()",
 		"body": ["bool($0)"],
 		"description": "Casts na to bool."
 	},
 	"cci()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "cci()",
 		"body": ["cci(source=${1}, length=${2})$0"],
 		"description": "The CCI (commodity channel index) is calculated as the difference between the typical price of a commodity and its simple moving average, divided by the mean absolute deviation of the typical price. The index is scaled by an inverse factor of 0.015 to provide more readable numbers."
 	},
 	"ceil()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "ceil()",
 		"body": ["ceil($0)"],
 		"description": "The ceil function returns the smallest (closest to negative infinity) integer that is greater than or equal to the argument."
 	},
 	"change()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "change()",
 		"body": ["change(source=${1}${2:, length=})$0"],
 		"description": "Difference between current value and previous, x - x[y]."
 	},
 	"cmo()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "cmo()",
 		"body": ["cmo(series=${1}, length=${2})$0"],
 		"description": "Chande Momentum Oscillator. Calculates the difference between the sum of recent gains and the sum of recent losses and then divides the result by the sum of all price movement over the same period."
 	},
 	"cog()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "cog()",
 		"body": ["cog(source=${1}, length=${2})$0"],
 		"description": "The cog (center of gravity) is an indicator based on statistics and the Fibonacci golden ratio."
 	},
 	"color()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "color()",
 		"body": ["color($0)"],
 		"description": "Casts na to color."
 	},
 	"color.new()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "color.new()",
 		"body": ["color.new(color=${1}, transp=${2})$0"],
 		"description": "Function color applies the specified transparency to the given color."
 	},
 	"correlation()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "correlation()",
 		"body": ["correlation(source_a=${1}, source_b=${2}, length=${3})$0"],
 		"description": "Correlation coefficient. Describes the degree to which two series tend to deviate from their sma values."
 	},
 	"cos()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "cos()",
 		"body": ["cos($0)"],
 		"description": "The cos function returns the trigonometric cosine of an angle."
 	},
 	"cross()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "cross()",
 		"body": ["cross(x=${1}, y=${2})$0"],
 		"description": "returns 1 if two series have crossed each other, otherwise 0."
 	},
 	"crossover()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "crossover()",
 		"body": ["crossover(x=${1}, y=${2})$0"],
 		"description": "returns 1 if series x have crossed over y, otherwise 0."
 	},
 	"crossunder()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "crossunder()",
 		"body": ["crossunder(x=${1}, y=${2})$0"],
 		"description": "returns 1 if series x have crossed under y, otherwise 0."
 	},
 	"cum()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "cum()",
 		"body": ["cum($0)"],
 		"description": "Cumulative (total) sum of x. In other words it's the sum of all elements of x."
 	},
 	"dayofmonth()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dayofmonth()",
 		"body": ["dayofmonth(time=${1:time})$0"],
 		"description": "Day  of month in exchange timezone for provided UNIX time."
 	},
 	"dayofweek()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dayofweek()",
 		"body": ["dayofweek(time=${1:time})$0"],
 		"description": "Day  of week in exchange timezone for provided UNIX time."
 	},
 	"dev()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dev()",
 		"body": ["dev(source=${1}, length=${2})$0"],
 		"description": "Measure of difference between the series and it's sma."
 	},
 	"dmi()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "dmi()",
 		"body": ["[${1|_,diplus|}, ${2|_,diminus|}, ${3|_,adx|}] = dmi(diLength=${4}, adxSmoothing=${5})$0"],
 		"description": "Directional Movement Index function."
 	},
 	"ema()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "ema()",
 		"body": ["ema(source=${1}, length=${2})$0"],
 		"description": "The ema function returns the exponentially weighted moving average. In ema weighting factors decrease exponentially. It calculates by sing a formula: EMA = alpha * x + (1 - alpha) * EMA[1], where alpha = 2 / (y + 1)"
 	},
 	"exp()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "exp()",
 		"body": ["exp($0)"],
 		"description": "The exp function of x is e^x, where x is the argument and e is Euler's number."
 	},
 	"falling()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "falling()",
 		"body": ["falling(source=${1}, length=${2})$0"],
 		"description": "Test if the source series is now falling for the number of length in bars long."
 	},
 	"fill()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "fill()",
 		"body": ["fill(${1|hline1=,plot1=|}, ${2|hline2=, plot2=|}, color=${3}, transp=${4}, title='${5}', editable=${2})$0"],
 		"description": "Fills background between two plots or hlines with given color."
 	},
 	"fixnan()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "fixnan()",
 		"body": ["fixnan($0)"],
 		"description": "For a given series replaces NaN values with previous nearest non-NaN value."
 	},
 	"float()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "float()",
 		"body": ["float($0)"],
 		"description": "Casts na to float."
 	},
 	"floor()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "floor()",
 		"body": ["floor($0)"],
 		"description": "Returns the largest integer less than or equal to the given number."
 	},
 	"heikinashi()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "heikinashi()",
 		"body": ["heikinashi($0)"],
 		"description": "Create a ticker identifier for requesting Heikin Ashi bar values."
 	},
 	"highest()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "highest()",
 		"body": ["highest${1|(,(source=\\, |}length=${2})$0"],
 		"description": "Highest value for a given number of bars back."
 	},
 	"highestbars()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "highestbars()",
 		"body": ["highestbars${1|(,(source=\\, |}length=${2})$0"],
 		"description": "Highest value offset for a given number of bars back."
 	},
 	"hline()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hline()",
 		"body": ["hline(price=${1}, title='${2}', color=${3}, linestyle=${4}, linewidth=${5}, editable=${6})$0"],
 		"description": "Renders a horizontal line at a given fixed price level."
 	},
 	"hma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hma()",
 		"body": ["hma(source=${1}, length=${2})$0"],
 		"description": "Returns the Hull Moving Average."
 	},
 	"hour()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "hour()",
 		"body": ["hour(time=${1:time})$0"],
 		"description": "Hour in exchange timezone for provided UNIX time."
 	},
 	"iff()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "iff()",
 		"body": ["iff(${1:condition}, ${2:then}, ${3:_else})$0"],
 		"description": "if true then/else function."
 	},
 	"input()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "input()",
 		"body": ["input(defval=${1}, title='${2}', type=${3}, minval=${4}, maxval=${5}, confirm=${6}, step=${7}, options=${8})$0"],
 		"description": "Adds an input to your script indicator. User can see and edit inputs on the Format Object dialog of the script study. Script inputs look and behave exactly the same as inputs of built-in Technical Analysis indicators."
 	},
 	"int()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "int()",
 		"body": ["int($0)"],
 		"description": "Casts na to int."
 	},
 	"kagi()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "kagi()",
 		"body": ["kagi(symbol=${1}, reversal=${2})$0"],
 		"description": "Creates a ticker identifier for requesting kagi values."
 	},
 	"kc()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "kc()",
 		"body": ["[${1:kcmiddle}, ${2:kcupper}, ${3:kclower}] = kc(series=${4}, length=${5}, mult=${6})$0"],
 		"description": "Keltner Channels. Keltner channel is a technical analysis indicator showing a central moving average line plus channel lines at a distance above and below."
 	},
 	"kcw()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "kcw()",
 		"body": ["kcw(series=${1}, length=${2}, mult=${3}${4:, useTrueRange=true})$0"],
 		"description": "Adds an input to your script indicator. User can see and edit inputs on the Format Object dialog of the script study. Script inputs look and behave exactly the same as inputs of built-in Technical Analysis indicators."
 	},
 	"label()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label()",
 		"body": ["label($0)"],
 		"description": "Casts na to label."
 	},
 	"label.delete()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.delete()",
 		"body": ["label.delete(id=${1})$0"],
 		"description": "Deletes the specified label object. If it has already been deleted, does nothing."
 	},
 	"label.get_text()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.get_text()",
 		"body": ["label.get_text(id=${1})$0"],
 		"description": "Returns the text of this label object."
 	},
 	"label.get_x()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.get_x()",
 		"body": ["label.get_x(id=${1})$0"],
 		"description": "Returns UNIX time or bar_index(depending on the last xloc value set) of this label's position'."
 	},
 	"label.get_y()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.get_y()",
 		"body": ["label.get_y(id=${1})$0"],
 		"description": "Returns price of this label's position."
 	},
 	"label.new()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.new()",
 		"body": ["label.new(x=${1}, y=${2}, text=${3}${4:, xloc=xloc.bar_time}${5:, yloc=yloc.price}${6:, color=}${7:, style=}${8:, textcolor=}${9:, size=size.small}${10:, textalign=text.align_center})$0"],
 		"description": "Creates a new label object."
 	},
 	"label.set_color()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_color()",
 		"body": ["label.set_color(id=${1}, color=${2})$0"],
 		"description": "Sets label border and arrow color."
 	},
 	"label.set_size()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_size()",
 		"body": ["label.set_size(id=${1}, color=${2|size.auto,size.tiny,size.small,size.normal,size.large,size.huge|})$0"],
 		"description": "Sets label border and arrow color."
 	},
 	"label.set_style()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_style()",
 		"body": ["label.set_style(id=${1}, style=${2|label.style_none,label.style_xcross,label.style_cross,label.style_triangleup,label.style_triangledown,label.style_flag,label.style_circle,label.style_arrowup,label.style_arrowdown,label.style_label_up,label.style_label_down,label.style_label_left,label.style_label_right,label.style_label_center,label.style_square,label.style_diamond|})$0"],
 		"description": "Sets label style."
 	},
 	"label.set_text()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_text()",
 		"body": ["label.set_text(id=${1}, text=${2})$0"],
 		"description": "Sets label text."
 	},
 	"label.set_textalign()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_textalign()",
 		"body": ["label.set_textalign(id=${1}, textalign=${2|text.align_left,text.align_center,text.align_right|})$0"],
 		"description": "Sets the alignment for the label text."
 	},
 	"label.set_textcolor()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_textcolor()",
 		"body": ["label.set_textcolor(id=${1}, textcolor=${2})$0"],
 		"description": "Sets color of the label text."
 	},
 	"label.set_x()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_x()",
 		"body": ["label.set_x(id=${1}, x=${2})$0"],
 		"description": "Sets bar index or bar time(depending on the xloc) of the label position."
 	},
 	"label.set_xloc()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_xloc()",
 		"body": ["label.set_xloc(id=${1}, x=${2}, xloc=xloc.${3|bar_index,bar_time|})$0"],
 		"description": "Sets x-location and new bar index/time value."
 	},
 	"label.set_xy()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_xy()",
 		"body": ["label.set_xy(id=${1}, x=${2}, y=${3})$0"],
 		"description": "Sets bar index/time of the label position."
 	},
 	"label.set_y()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_y()",
 		"body": ["label.set_y(id=${1}, y=${2})$0"],
 		"description": "Sets price of the label position."
 	},
 	"label.set_yloc()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "label.set_yloc()",
 		"body": ["label.set_yloc(id=${1}, yloc=yloc.${2|price,abovebar,belowbar|})$0"],
 		"description": "Sets new y-location calculation algorithm."
 	},
 	"line()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line()",
 		"body": ["line($0)"],
 		"description": "Casts na to line."
 	},
 	"line.delete()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.delete()",
 		"body": ["line.delete(id=${1})$0"],
 		"description": "Deletes the specified line object. If it has already been deleted, does nothing."
 	},
 	"line.get_x1()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.get_x1()",
 		"body": ["line.get_x1(id=${1})$0"],
 		"description": "Returns UNIX time or bar index (depending on the last xloc value set) of the first point of the line."
 	},
 	"line.get_x2()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.get_x2()",
 		"body": ["line.get_x2(id=${1})$0"],
 		"description": "Returns UNIX time or bar index (depending on the last xloc value set) of the second point of the line."
 	},
 	"line.get_y1()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.get_y1()",
 		"body": ["line.get_y1(id=${1})$0"],
 		"description": "Returns price of the first point of the line."
 	},
 	"line.get_y2()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.get_y2()",
 		"body": ["line.get_y2(id=${1})$0"],
 		"description": "Returns price of the second point of the line."
 	},
 	"line.new()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.new()",
 		"body": ["line.new(x1=${1}, y1=${2}, x2=${3}, y2=${4}${5:, xloc=xloc.bar_time}${6:, extend=extend.none}${7:, color=color.blue}${8:, style=line.style_solid}${9:, width=1})$0"],
 		"description": "Creates new line object."
 	},
 	"line.set_color()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_color()",
 		"body": ["line.set_color(id=${1}, color=${2})$0"],
 		"description": "Sets the line color."
 	},
 	"line.set_extend()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_extend()",
 		"body": ["line.set_extend(id=${1}, extend=extend.${2|none,right,left,both|})$0"],
 		"description": "Sets the extending type of this line object."
 	},
 	"line.set_style()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_style()",
 		"body": ["line.set_style(id=${1}, style=line.style_${2|solid,dotted,dashed,arrow_left,arrow_right,arrow_both|})$0"],
 		"description": "Sets the style type of this line object."
 	},
 	"line.set_width()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_width()",
 		"body": ["line.set_width(id=${1}, width=${2})$0"],
 		"description": "Sets the line width."
 	},
 	"line.set_x1()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_x1()",
 		"body": ["line.set_x1(id=${1}, x=${2})$0"],
 		"description": "Sets bar index or bar time(depending on the xloc) of the first point."
 	},
 	"line.set_x2()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_x2()",
 		"body": ["line.set_x2(id=${1}, x=${2})$0"],
 		"description": "Sets bar index or bar time(depending on the xloc) of the second point."
 	},
 	"line.set_xloc()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_xloc()",
 		"body": ["line.set_xloc(id=${1}, x1=${2}, x2=${3}, xloc=xloc.bar_${4|index,time|})$0"],
 		"description": "Sets the x-location typand new bar index/time values."
 	},
 	"line.set_xy1()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_xy1()",
 		"body": ["line.set_xy1(id=${1}, x=${2}, y=${3})$0"],
 		"description": "Sets bar index/time and price of the first point."
 	},
 	"line.set_xy2()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_xy2()",
 		"body": ["line.set_xy2(id=${1}, x=${2}, y=${3})$0"],
 		"description": "Sets bar index/time and price of the second point."
 	},
 	"line.set_y1()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_y1()",
 		"body": ["line.set_y1(id=${1}, y=${2})$0"],
 		"description": "Sets price of the first point."
 	},
 	"line.set_y2()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "line.set_y2()",
 		"body": ["line.set_y2(id=${1}, y=${2})$0"],
 		"description": "Sets price of the second point."
 	},
 	"linebreak()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "linebreak()",
 		"body": ["linebreak(symbol=${1}, number_of_lines=${2})$0"],
 		"description": "Creates a ticker identifier for requesting line break values."
 	},
 	"linreg()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "linreg()",
 		"body": ["linreg(source=${1}, length=${2}, offset=${3})$0"],
 		"description": "Linear regression curve. A line that best fits the prices specified over a user-defined time period. It is calculated using the least squares method. The result of this function is calculated using the formula: linreg = intercept + slope * (length - 1 - offset), where length is the y argument, offset is the z argument, intercept and slope are the values calculated with the least squares method on source series (x argument)."
 	},
 	"log()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "log()",
 		"body": ["log($0)"],
 		"description": "Natural logarithm of any x > 0 is the unique 'y' such that e^y=x."
 	},
 	"log10()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "log10()",
 		"body": ["log10($0)"],
 		"description": "Base 10 logarithm of any x > 0 is the unique 'y' such that 10^y=x."
 	},
 	"lowest()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "lowest()",
 		"body": ["lowest${1|(,(source=\\, |}length=${2})$0"],
 		"description": "Lowest value for a given number of bars back."
 	},
 	"lowestbars()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "lowestbars()",
 		"body": ["lowestbars${1|(,(source=\\, |}length=${2})$0"],
 		"description": "Lowest value offset for a given number of bars back."
 	},
 	"macd()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "macd()",
 		"body": ["[${1:macd_line}, ${2:macd_signal}, ${3:macd_hist}] = macd(source=${4}, fastlen=${5}, slowlen=${6}, siglen=${7})$0"],
 		"description": "MACD (moving average convergence/divergence). It is supposed to reveal changes in the strength, direction, momentum, and duration of a trend in a stock's price."
 	},
 	"max()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "max()",
 		"body": ["max($0)"],
 		"description": "Returns the greatest of multiple values."
 	},
 	"max_bars_back()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "max_bars_back()",
 		"body": ["max_bars_back(var=${1}, num=${2})$0"],
 		"description": "Cap the stored series length."
 	},
 	"mfi()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "mfi()",
 		"body": ["mfi(series=${1}, length=${2})$0"],
 		"description": "Money Flow Index."
 	},
 	"min()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "min()",
 		"body": ["min($0)"],
 		"description": "Returns the smallest of multiple values."
 	},
 	"minute()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "minute()",
 		"body": ["minute(time=${1})$0"],
 		"description": "Minute (in exchange timezone) for provided UNIX time."
 	},
 	"mom()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "mom()",
 		"body": ["mom(source=${1}, length=${2})$0"],
 		"description": "Difference of x-x[y]."
 	},
 	"month()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "month()",
 		"body": ["month(time=${1})$0"],
 		"description": "Month (in exchange timezone) for provided UNIX time."
 	},
 	"na()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "na()",
 		"body": ["na($0)"],
 		"description": "Test value if its NaN."
 	},
 	"nz()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "nz()",
 		"body": ["nz(x=${1}${2:, y=})$0"],
 		"description": "Replaces NaN values with zeros or given value."
 	},
 	"offset()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "offset()",
 		"body": ["offset(source=${1}, offset=${2})$0"],
 		"description": "Shifts series x on the y bars to the right."
 	},
 	"percentile_linear_interpolation()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "percentile_linear_interpolation()",
 		"body": ["percentile_linear_interpolation(source=${1}, length=${2}, percentage=${3})$0"],
 		"description": "Calculates percentile using method of linear interpolation between the two nearest ranks."
 	},
 	"percentile_nearest_rank()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "percentile_nearest_rank()",
 		"body": ["percentile_nearest_rank(source=${1}, length=${2}, percentage=${3})$0"],
 		"description": "Calculates percentile using method of nearest rank."
 	},
 	"percentrank()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "percentrank()",
 		"body": ["percentrank(source=${1}, length=${2})$0"],
 		"description": "Percent rank is the percents of how many previous values was less than or equal to the current value of given series."
 	},
 	"pivothigh()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "pivothigh()",
 		"body": ["pivothigh${1|(,(source=\\, |}leftbars=${2}, rightbars=${3})$0"],
 		"description": "Returns price of the pivot high point. It returns 'NaN', if there was no pivot high point."
 	},
 	"pivotlow()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "pivotlow()",
 		"body": ["pivotlow${1|(,(source=\\, |}leftbars=${2}, rightbars=${3})$0"],
 		"description": "Returns price of the pivot low point. It returns 'NaN', if there was no pivot low point."
 	},
 	"plot()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plot()",
 		"body": [
 			"plot(series=${1}${2:, title=''}${3:, color=color.blue}${4:, linewidth=1}${5:, style=plot.style_line}${6:, trackprice=true}${7:, transp=0}${8:, histbase=0}${9:, offset=0}${10:, join=true}${11:, editable=true}${12:, show_last=1}${13:, display=display.none})", 
@@ -1014,7 +1014,7 @@
 		"description": "Plots a series of data on the chart."
 	},
 	"plotarrow()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plotarrow()",
 		"body": [
 			"plotarrow(series=${1}${2:, title=''}${3:, colorup=color.blue}${4:, colordown=color.navy}${5:, transp=0}${6:, offset=0}${7:, minheight=0}${8:, maxheight=0}${9:, editable=0}${10:, show_last=1}${11:, display=display.none})", 
@@ -1023,7 +1023,7 @@
 		"description": "Plots a series of conditional up/down arrows on the chart."
 	},
 	"plotbar()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plotbar()",
 		"body": [
 			"plotbar(open=${1}, high=${2}, low=${3}, close=${4}${5:, title=''}${6:, color=color.blue}${7:, editable=true}${8:, show_last=1}${8:, display=display.none})", 
@@ -1032,7 +1032,7 @@
 		"description": "Plots ohlc bars on the chart."
 	},
 	"plotcandle()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plotcandle()",
 		"body": [
 			"plotcandle(open=${1}, high=${2}, low=${3}, close=${4}${5:, title=''}${6:, color=color.blue}${7:, wickcolor=color.navy}${8:, editable=true}${9:, show_last=1}${10:, bordercolor=color.teal}${11:, display=display.none})", 
@@ -1041,7 +1041,7 @@
 		"description": "Plots candles on the chart."
 	},
 	"plotchar()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plotchar()",
 		"body": [
 			"plotchar(series=${1}${2:, title=''}${3:, char=''}${4:, location=location.absolute}${5:, color=color.blue}${6:, transp=0}${7:, offset=0}${8:, text=''}${9:, textcolor=color.navy}${10:, editable=true}${11:, size=size.small}${12:, show_last=1}${11:, display=display.none})", 
@@ -1050,7 +1050,7 @@
 		"description": "Plots a series of conditional shapes using Unicode characters on the chart."
 	},
 	"plotshape()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plotshape()",
 		"body": [
 			"plotshape(series=${1}${2:, title=''}${3:, style=shape.xcross}${4:, location=location.absolute}${5:, color=color.blue}${6:, transp=0}${7:, offset=0}${8:, text=''}${9:, textcolor=color.navy}${10:, editable=true}${11:, size=size.small}${12:, show_last=1}${11:, display=display.none})", 
@@ -1059,115 +1059,115 @@
 		"description": "Plots visual shapes on the chart."
 	},
 	"pointfigure()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "pointfigure()",
 		"body": ["pointfigure(symbol=${1}, source=${2}, style=${3}, param=${4}, reversal=${5})$0"],
 		"description": "Creates a ticker for requesting Point & Figure values."
 	},
 	"pow()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "pow()",
 		"body": ["pow(base=${1}, exponent=${2})$0"],
 		"description": "Mathematical power function."
 	},
 	"renko()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "renko()",
 		"body": ["renko(symbol=${1}, style=${2}, param=${3})$0"],
 		"description": "Creates a ticker for requesting Renko values."
 	},
 	"rising()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "rising()",
 		"body": ["rising(source=${1}, length=${2})$0"],
 		"description": "Test if the x series is now rising for y bars long."
 	},
 	"rma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "rma()",
 		"body": ["rma(source=${1}, length=${2})$0"],
 		"description": "Moving average used in RSI. It is the exponentially weighted moving average with alpha = 1 / length."
 	},
 	"roc()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "roc()",
 		"body": ["roc(source=${1}, length=${2})$0"],
 		"description": "Function roc (rate of change) showing the difference between current value of x and the value of x that was y days ago."
 	},
 	"round()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "round()",
 		"body": ["round(${1})$0"],
 		"description": "The round function returns the value of the argument rounded to the nearest integer, with ties rounding up."
 	},
 	"rsi()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "rsi()",
 		"body": ["rsi(x=${1}, y=${2})$0"],
 		"description": "Relative strength index. It is calculated based on rma's of upward and downward change of x."
 	},
 	"sar()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "sar()",
 		"body": ["sar(start=${1}, inc=${2}, max=${3})$0"],
 		"description": "Parabolic SAR (parabolic stop and reverse) is a method devised by J. Welles Wilder, Jr., to find potential reversals in the market price direction of traded goods."
 	},
 	"second()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "second()",
 		"body": ["second(time=${1})$0"],
 		"description": "Second (in exchange timezone) for provided UNIX time."
 	},
 	"security()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "security()",
 		"body": ["security(symbol=${1}, resolution=${2}, expression=${3}${4:, gaps=barmerge.gaps_on}${5:, lookahead=barmerge.lookahead_on})$0"],
 		"description": "Request another symbol/resolution"
 	},
 	"sign()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "sign()",
 		"body": ["sign(${1})$0"],
 		"description": "Sign (signum) of x is zero if the x is zero, 1.0 if the x is greater than zero, -1.0 if the x is less than zero."
 	},
 	"sin()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "sin()",
 		"body": ["sin(${1})$0"],
 		"description": "Trigonometric sine of an angle."
 	},
 	"sma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "sma()",
 		"body": ["sma(source=${1}, length=${2})$0"],
 		"description": "The sma function returns the moving average, that is the sum of last y values of x, divided by y."
 	},
 	"sqrt()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "sqrt()",
 		"body": ["sqrt(${1})$0"],
 		"description": "Square root of any x >= 0 is the unique y >= 0 such that y^2 = x."
 	},
 	"stdev()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "stdev()",
 		"body": ["stdev(source=${1}, length=${2})$0"],
 		"description": "Standard deviation."
 	},
 	"stoch()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "stoch()",
 		"body": ["stoch(source=${1}, high=${2}, low=${3}, length=${4})$0"],
 		"description": "Stochastic. It is calculated by a formula: 100 * (close - lowest(low, length)) / (highest(high, length) - lowest(low, length))."
 	},
 	"str.replace_all()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "str.replace_all()",
 		"body": ["str.replace_all(source=${1}, target=${2}, replacement=${3})$0"],
 		"description": "Replaces each occurrence of the target string in the source string with the replacement string."
 	},
 	"strategy()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy()",
 		"body": [
 			"strategy(title='${1}', shorttitle='${2}', overlay=${3|true,false|}${4:, format=format.${5|inherit,price,volume|},}",
@@ -1180,91 +1180,91 @@
 		"description": "The function sets a number of strategy properties."
 	},
 	"strategy.cancel()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.cancel()",
 		"body": ["strategy.cancel(id=${1}${2:, when=${3}})$0"],
 		"description": "It is a command to cancel/deactivate pending orders by referencing their names, which were generated by the functions: strategy.order, strategy.entry and strategy.exit."
 	},
 	"strategy.cancel_all()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.cancel_all()",
 		"body": ["strategy.cancel_all(${1:when=${2}})$0"],
 		"description": "It is a command to cancel/deactivate all pending orders, which were generated by the functions: strategy.order, strategy.entry and strategy.exit."
 	},
 	"strategy.close()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.close()",
 		"body": ["strategy.close(id=${1}${2:, when=${3}}${4:, comment=}${5:, qty=}${6:, qty_percent=})$0"],
 		"description": "It is a command to exit from the entry with the specified ID. If there were multiple entry orders with the same ID, all of them are exited at once. If there are no open entries with the specified ID by the moment the command is triggered, the command will not come into effect. The command uses market order. Every entry is closed by a separate market order."
 	},
 	"strategy.close_all()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.close_all()",
 		"body": ["strategy.close_all(${1:when=${2}}${3:, comment=})$0"],
 		"description": "It is a command to exit from current market position making it flat. If there is no open market position by the moment the command is triggered, the command will not come into effect."
 	},
 	"strategy.entry()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.entry()",
 		"body": ["strategy.entry(id=${1}, long=strategy.${2|long,short|}${3:, qty=${4}}${5:, limit=${6}}${7:, stop=${8}}${9:, oca_name=${10}}${11:, oca_type=${12}}${13:, comment=${14}}${15:, when=${16}})","$0"],
 		"description": "It is a command to enter market position."
 	},
 	"strategy.exit()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.exit()",
 		"body": ["strategy.exit(id=${1}, from_entry=${2}${3:, qty=}${4:, qty_percent=}${5:, profit=}${6:, limit=}${7:, loss=}${8:, stop=}${9:, trail_price=}${10:, trail_points=}${11:, trail_offset=}${12:, oca_name=}${13:, comment=}${14:, when=})", "$0"],
 		"description": "It is a command to exit either a specific entry, or whole market position. "
 	},
 	"strategy.order()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.order()",
 		"body": ["strategy.order(id=${1}, long=strategy.${2|long,short|}${3:, qty=${4}}${5:, limit=${6}}${7:, stop=${8}}${9:, oca_name=${10}}${11:, oca_type=${12}}${13:, comment=${14}}${15:, when=${16}})","$0"],
 		"description": "It is a command to place order. If an order with the same ID is already pending, it is possible to modify the order. If there is no order with the specified ID, a new order is placed."
 	},
 	"strategy.risk.allow_entry_in()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.risk.allow_entry_in()",
 		"body": ["strategy.risk.allow_entry_in(${1:value=strategy.direction.${2|all,long,short|}})","$0"],
 		"description": "The purpose of this rule is to forbid short entries, only long etries will be placed. The rule affects the following function: 'entry'."
 	},
 	"strategy.risk.max_cons_loss_days()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.risk.max_cons_loss_days()",
 		"body": ["strategy.risk.max_cons_loss_days(count=${1})","$0"],
 		"description": "The purpose of this rule is to cancel all pending orders, close all open positions and stop placing orders after a specified number of consecutive days with losses. The rule affects the whole strategy."
 	},
 	"strategy.risk.max_drawdown()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.risk.max_drawdown()",
 		"body": ["strategy.risk.max_drawdown(value=${1}, type=strategy.${2|cash,percent_of_equity|})","$0"],
 		"description": "The purpose of this rule is to determine maximum drawdown. The rule affects the whole strategy. Once the maximum drawdown value is reached, all pending orders are cancelled, all open positions are closed and no new orders can be placed."
 	},
 	"strategy.risk.max_intraday_filled_orders()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.risk.max_intraday_filled_orders()",
 		"body": ["strategy.risk.max_intraday_filled_orders(count=${1})","$0"],
 		"description": "The purpose of this rule is to determine maximum number of filled orders per 1 day (per 1 bar, if chart resolution is higher than 1 day). The rule affects the whole strategy. Once the maximum number of filled orders is reached, all pending orders are cancelled, all open positions are closed and no new orders can be placed till the end of the current trading session."
 	},
 	"strategy.risk.max_intraday_loss()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.risk.max_intraday_loss()",
 		"body": ["strategy.risk.max_intraday_loss(value=${1}, type=strategy.${2|cash,percent_of_equity|})","$0"],
 		"description": "The purpose of this rule is to determine maximum loss per 1 day (per 1 bar, if chart resolution is higher than 1 day). The rule affects the whole strategy. Once the maximum loss value is reached, all pending orders are cancelled, all open positions are closed and no new orders can be placed till the end of the current trading session."
 	},
 	"strategy.risk.max_position_size()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "strategy.risk.max_position_size()",
 		"body": ["strategy.risk.max_position_size(contracts=${1})","$0"],
 		"description": "The purpose of this rule is to determine maximum size of a market position. The rule affects the following function: strategy.entry. The 'entry' quantity can be reduced (if needed) to such number of contracts/shares/lots/units, so the total position size doesn't exceed the value specified in 'strategy.risk.max_position_size'. If minimum possible quantity still violates the rule, the order will not be placed."
 	},
 	"string()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "string()",
 		"body": ["string(${1})$0"],
 		"description": "Casts na to string."
 	},
 	"study()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "study()",
 		"body": [
 			"study(title='${1}', shorttitle='${2}', overlay=${3|true,false|}${4:, format=format.${5|inherit,price,volume|},}",
@@ -1273,109 +1273,109 @@
 		"description": "The function sets a number of study properties."
 	},
 	"sum()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "sum()",
 		"body": ["sum(source=${1}, length=${2})$0"],
 		"description": "The Sum function returns the sliding sum of last y values of x."
 	},
 	"supertrend()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "supertrend()",
 		"body": ["[${1:supertrend}, ${2:st_direction}] = supertrend(fact=${3}, atrPeriod=${4})","$0"],
 		"description": "The Supertrend indicator."
 	},
 	"swma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "swma()",
 		"body": ["swma(${1:x=${2:close}})$0"],
 		"description": "Symmetrically weighted moving average with fixed length: 4. Weights: [1/6, 2/6, 2/6, 1/6]."
 	},
 	"tan()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "tan()",
 		"body": ["tan(${1})$0"],
 		"description": "Returns the trigonometric tangent of an angle."
 	},
 	"tickerid()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "tickerid()",
 		"body": ["tickerid(prefix=${1}, ticker=${2}, session=${3}, adjustment=${4})$0"],
 		"description": "Creates a ticker identifier for requesting additional data for script."
 	},
 	"time()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "time()",
 		"body": ["time(resolution=${1}${2:, session=${3}})$0"],
 		"description": "Function time returns UNIX time of current bar for the specified resolution and session or NaN if time point is out-of-session."
 	},
 	"timestamp()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "timestamp()",
 		"body": ["timestamp(${1:timezone=syminfo.timezone, }year=${2}, month=${3}, day=${4}, hour=${5}, minute=${6}, second=${7})$0"],
 		"description": "Function timestamp returns UNIX time of specified date and time."
 	},
 	"tostring()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "tostring()",
 		"body": ["tostring(x=${1}${2:, y=})$0"],
 		"description": "String representation of x argument."
 	},
 	"tr()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "tr()",
 		"body": ["tr(${1:handle_na=${2|true,false|}})$0"],
 		"description": "True range. It is max(high - low, abs(high - close[1]), abs(low - close[1]))"
 	},
 	"tsi()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "tsi()",
 		"body": ["tsi(source=${1}, short_length=${2}, long_length=${3})$0"],
 		"description": "True strength index. It uses moving averages of the underlying momentum of a financial instrument."
 	},
 	"valuewhen()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "valuewhen()",
 		"body": ["valuewhen(condition=${1}, source=${2}, occurrence=${3})$0"],
 		"description": "Source series value when the condition was true on the n-th most recent occurence."
 	},
 	"variance()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "variance()",
 		"body": ["variance(source=${1}, length=${2})$0"],
 		"description": "Variance is the expectation of the squared deviation of a series from its mean (sma), and it informally measures how far a set of numbers are spread out from their mean."
 	},
 	"vwap()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "vwap()",
 		"body": ["vwap(${1:x=${2}})$0"],
 		"description": "Volume weighted average price."
 	},
 	"vwma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "vwma()",
 		"body": ["vwma(source=${1}, length=${2})$0"],
 		"description": "The vwma function returns volume-weighted moving average of x for y bars back. It is the same as: sma(x * volume, y) / sma(volume, y)"
 	},
 	"weekofyear()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "weekofyear()",
 		"body": ["weekofyear(${1:time=${2}})$0"],
 		"description": "Week of year (in exchange timezone) for provided UNIX time."
 	},
 	"wma()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "wma()",
 		"body": ["wma(source=${1}, length=${2})$0"],
 		"description": "The wma function returns weighted moving average of x for y bars back. In wma weighting factors decrease in arithmetical progression."
 	},
 	"wpr()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "wpr()",
 		"body": ["wpr(${1:length=${2}})$0"],
 		"description": "Williams %R. The oscillator shows the current closing price in relation to the high and low of the past 'length' bars."
 	},
 	"year()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "year()",
 		"body": ["year(${1:time=${2}})$0"],
 		"description": "year (in exchange timezone) for provided UNIX time."
@@ -1396,7 +1396,7 @@
 		"description": "Custom Function Initializer"
 	},
 	"f_color_palette_black_to_white" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_color_palette_black_to_white",
 		"body": [
 			"// Black to White color palette.",
@@ -1407,7 +1407,7 @@
 		"description": "Black to White color palette with 41 colors."
 	},
 	"if else" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "if else statement",
 		"body": [
 			"if ${1:true}",
@@ -1419,7 +1419,7 @@
 		"description": "conditional if () else () statement"
 	},
 	"f_perc_of()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_perc_of()",
 		"body": [
 			"f_perc_of(_frac, _total)=>(_frac / _total) * 100"
@@ -1427,7 +1427,7 @@
 		"description": "Custom Function:\nCalculates percentage value."
 	},
 	"f_cus_sum()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_sum()",
 		"body": [
 		  "Sum(src,p) => a = cum(src), a - a[p]"
@@ -1435,7 +1435,7 @@
 		"description": "Custom Function:\nSum with variable length"
 	},
 	"f_cus_sma()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_cus_sum()",
 		"body": [
 		  "Sma(src,p) => a = cum(src), (a - a[p])/p"
@@ -1443,7 +1443,7 @@
 		"description": "Custom Function:\nSMA with variable length"
 	  },
 	"f_cus_variance()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_cus_variance()",
 		"body": [
 		  "Variance(src,p) => p == 1 ? 0 : Sma(src*src,p) - pow(Sma(src,p),2)"
@@ -1451,7 +1451,7 @@
 		"description": "Custom Function:\nVariance with variable length"
 	},
 	"f_cus_stdev()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_cus_stdev()",
 		"body": [
 		  "Stdev(src,p) => p == 1 ? 0 : sqrt(Sma(src*src,p) - pow(Sma(src,p),2))"
@@ -1459,7 +1459,7 @@
 		"description": "Custom Function:\nVariance with variable length"
 	},
 	"f_cus_covariance()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_cus_covariance()",
 		"body": [
 		  "Covariance(x,y,p) => Sma(x*y,p) - Sma(x,p)*Sma(y,p)"
@@ -1467,7 +1467,7 @@
 		"description": "Custom Function:\nVariance with variable length"
 	},
 	"f_cus_correlation()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_cus_variance()",
 		"body": [
 		  "Correlation(x,y,p) => Covariance(x,y,p)/(Stdev(x,p)*Stdev(y,p))"
@@ -1475,7 +1475,7 @@
 		"description": "Custom Function:\nVariance with variable length"
 	},
 	"f_round()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_round()",
 		"body": [
 		  "f_round( _val, _decimals) =>",
@@ -1485,7 +1485,7 @@
 		"description": "Custom Function:\nRound"
 	},
 	"f_random()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_random()",
 		"body": [
 		  "f_random(_range) =>",
@@ -1495,7 +1495,7 @@
 		"description": "Custom Function:\nRandom Seed Number"
 	},
 	"f_format_to_tick()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_format_to_tick()",
 		"body": [
 		  "f_print(_txt) => var _lbl = label.new(bar_index, highest(10)[1], _txt, xloc.bar_index, yloc.price, #00000000, label.style_none, color.gray, size.large, text.align_center), label.set_xy(_lbl, bar_index, highest(10)[1]), label.set_text(_lbl, _txt)",
@@ -1510,7 +1510,7 @@
 		"description": "Custom Function:\nFormat string value to tick"
 	},
 	"f_roundToTick()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_roundToTick()",
 		"body": [
 		  "f_roundToTick( _price) => round(_price / syminfo.mintick) * syminfo.mintick"
@@ -1518,7 +1518,7 @@
 		"description": "Custom Function:\nRound To Tick"
 	},
 	"f_fib_slicer()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_fib_slicer()",
 		"body": [
 			"//-----------------------------------------------------------------",
@@ -1546,7 +1546,7 @@
 		"description": "Custom Function:\nSlices a range into Fibonacci Segments."
 	},
 	"f_highest_since()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_highest_since()",
 		"body": [
 			"//-----------------------------------------------------------------",
@@ -1560,7 +1560,7 @@
 		"description": "Custom Function:\nReturns value of a series at the last event occurence."
 	},
 	"f_lowest_since()" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_lowest_since()",
 		"body": [
 			"//-----------------------------------------------------------------",
@@ -1574,7 +1574,7 @@
 		"description": "Custom Function:\nReturns value of a series at the last event occurence."
 	},
 	"for loop" : {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "for loop statement",
 		"body": [
 			"for _i = 0 to 999 by 1",
@@ -1595,7 +1595,7 @@
 	// added by Daveatt, Best-Trading-Indicator
 	// https://github.com/Best-Trading-Indicator/pinescript/blob/master/pine.v4.code-snippets
 	"date_range": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "date_range",
 		"body": [
 		"DateFilter = input(false, '═════════════ Date Range Filtering')",
@@ -1612,7 +1612,7 @@
 		"description": "Custom Function:\nTest if a date is in a range"
 	},
 	"f_bar_within_today()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_bar_within_today()",
 		"body": [
 		"f_bar_within_today() =>",
@@ -1625,7 +1625,7 @@
 		"description": "Custom Function:\nTest if a bar's date is today"
 	},
 	"track_high_low_time": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "track_high_low_time",
 		"body": [
 		"timeAllowed = input('1200-1500', 'Allowed hours', input.session)",
@@ -1646,7 +1646,7 @@
 		"description": "Track highs/lows for a specific period of time"
 	},
 	"f_resInMinutes()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_resInMinutes()",
 		"body": [
 		"f_resInMinutes() =>",
@@ -1660,7 +1660,7 @@
 		"description": "Custom Function: \nConverts current 'timeframe.multiplier' plus the TF into minutes of type float"
 	},
 	"f_resFromMinutes()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_resFromMinutes()",
 		"body": [
 		"res = input(1440., 'Minutes in target resolution (<= 0.0167 [1 sec.])', minval = 0.0167)",
@@ -1683,7 +1683,7 @@
 		"description": "Custom Function: \nConverts current 'timeframe.multiplier' plus the TF into minutes of type float"
 	},
 	"f_multipleOfRes(_res, _mult)": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_multipleOfRes(_res, _mult)",
 		"body": [
 		"resMult = input(4, minval = 1)",
@@ -1703,7 +1703,7 @@
 		"description": "Custom Function: \nReturns a multiple of current TF as a string usable with 'security()'"
 	},
 	"f_ideal_TimesInLast(_cond, _len)()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_ideal_TimesInLast(_cond, _len)",
 		"body": [
 		"// ————— Method 1. This function uses Pine's built-in function but only accepts a simple int for the length.",
@@ -1712,7 +1712,7 @@
 		"description": "Custom Function: \nCount the occurrences of a condition in the last x bars?"
 	},
 	"last_day": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "last_day",
 		"body": [
 		"lastDay = security(syminfo.tickerid,'D', barstate.islast, lookahead = barmerge.lookahead_on)"
@@ -1720,7 +1720,7 @@
 		"description": "Return the Last day"
 	},
 	"f_normalize()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_normalize()",
 		"body": [
 		"// ————— When scale of signal to rescale is unknown.",
@@ -1740,7 +1740,7 @@
 		"description": "Custom Function: \nScale of signal to rescale is unknown"
 	},
 	"f_rescale()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_rescale()",
 		"body": [
 		"// ————— When scale of signal to rescale is known.",
@@ -1757,7 +1757,7 @@
 		"description": "Custom Function: \nScale of signal to rescale is known"
 	},
 	"f_print()": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "f_print()",
 		"body": [
 		"f_print(_txt) => var _lbl = label.new(bar_index, highest(10)[1], _txt, xloc.bar_index, yloc.price, #00000000, label.style_none, color.gray, size.large, text.align_left), label.set_xy(_lbl, bar_index, highest(10)[1]), label.set_text(_lbl, _txt)",
@@ -1769,7 +1769,7 @@
 	//-------------------------------------------------------------------------------
 	//--- debug tool:
 	"debugBool": {
-		"scope": "pinescript",
+		"scope": "pine, pinescript",
 		"prefix": "plotBool",
 		"body": [
 		"plot(X ? 1 : 0, title='X', transp=100, color=color.orange)"
