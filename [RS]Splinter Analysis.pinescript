@@ -1,0 +1,62 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="[RS]Splinter Analysis", shorttitle="SA", overlay=false)
+//  Initiate bar counter.
+var int b = -1
+b := b + 1
+
+f_highest(_source, _bars, _length)=>
+    float _h_value = _source
+    int _h_bar = _bars
+    for _i = 0 to max(_length-1, 0)
+        bool _isSourceOver = _source[_i] > _h_value
+        if _isSourceOver
+            _h_value := _source[_i]
+            _h_bar := _bars[_i]
+    [_h_value, _h_bar]
+
+f_lowest(_source, _bars, _length)=>
+    float _l_value = _source
+    int _l_bar = _bars
+    for _i = 0 to max(_length-1, 0)
+        bool _isSourceUnder = _source[_i] < _l_value
+        if _isSourceUnder
+            _l_value := _source[_i]
+            _l_bar := _bars[_i]
+    [_l_value, _l_bar]
+
+length = input(10)
+offset = input(0)
+[hv, hb] = f_highest(high[offset], b[offset], length)
+[lv, lb] = f_highest(low[offset], b[offset], length)
+
+plot(hv)
+plot(lv)
+
+f_build_ohlc(_source, _source_high, _source_low, _totalbars)=>
+    float _o = _source[_totalbars]
+    float _h = _source_high
+    float _l = _source_low
+    float _c = _source
+    for _i = 0 to _totalbars
+        if _source_high[_i] >= _h
+            _h := _source_high[_i]
+        if _source_low[_i] >= _l
+            _l := _source_low[_i]
+    [_o, _h, _l, _c]
+
+
+
+f_candle(_o, _h, _l, _c, _i, _length)=>
+    int _bar_position = bar_index - _length + _i
+    color _body_col = _c > _o ? color.green : color.maroon
+    var line _body = line.new(x1=_bar_position, y1=_o, x2=_bar_position, y2=_c, xloc=xloc.bar_index, extend=extend.none, color=_body_col, style=line.style_solid, width=5)
+    var line _wick = line.new(x1=_bar_position, y1=_l, x2=_bar_position, y2=_h, xloc=xloc.bar_index, extend=extend.none, color=_body_col, style=line.style_solid, width=1)
+    line.set_color(id=_body, color=_body_col)
+    line.set_xy1(id=_body, x=_bar_position, y=_o)
+    line.set_xy2(id=_body, x=_bar_position, y=_c)
+    line.set_color(id=_wick, color=_body_col)
+    line.set_xy1(id=_wick, x=_bar_position, y=_l)
+    line.set_xy2(id=_wick, x=_bar_position, y=_h)

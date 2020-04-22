@@ -1426,6 +1426,97 @@
 		],
 		"description": "Custom Function:\nCalculates percentage value."
 	},
+	"f_cus_sum()": {
+		"scope": "pinescript",
+		"prefix": "f_sum()",
+		"body": [
+		  "Sum(src,p) => a = cum(src), a - a[p]"
+		],
+		"description": "Custom Function:\nSum with variable length"
+	},
+	"f_cus_sma()": {
+		"scope": "pinescript",
+		"prefix": "f_cus_sum()",
+		"body": [
+		  "Sma(src,p) => a = cum(src), (a - a[p])/p"
+		],
+		"description": "Custom Function:\nSMA with variable length"
+	  },
+	"f_cus_variance()": {
+		"scope": "pinescript",
+		"prefix": "f_cus_variance()",
+		"body": [
+		  "Variance(src,p) => p == 1 ? 0 : Sma(src*src,p) - pow(Sma(src,p),2)"
+		],
+		"description": "Custom Function:\nVariance with variable length"
+	},
+	"f_cus_stdev()": {
+		"scope": "pinescript",
+		"prefix": "f_cus_stdev()",
+		"body": [
+		  "Stdev(src,p) => p == 1 ? 0 : sqrt(Sma(src*src,p) - pow(Sma(src,p),2))"
+		],
+		"description": "Custom Function:\nVariance with variable length"
+	},
+	"f_cus_covariance()": {
+		"scope": "pinescript",
+		"prefix": "f_cus_covariance()",
+		"body": [
+		  "Covariance(x,y,p) => Sma(x*y,p) - Sma(x,p)*Sma(y,p)"
+		],
+		"description": "Custom Function:\nVariance with variable length"
+	},
+	"f_cus_correlation()": {
+		"scope": "pinescript",
+		"prefix": "f_cus_variance()",
+		"body": [
+		  "Correlation(x,y,p) => Covariance(x,y,p)/(Stdev(x,p)*Stdev(y,p))"
+		],
+		"description": "Custom Function:\nVariance with variable length"
+	},
+	"f_round()": {
+		"scope": "pinescript",
+		"prefix": "f_round()",
+		"body": [
+		  "f_round( _val, _decimals) =>",
+		  "\t_p = pow(10, _decimals)",
+		  "\tround(abs(_val) * _p) / _p * sign(_val)"
+		],
+		"description": "Custom Function:\nRound"
+	},
+	"f_random()": {
+		"scope": "pinescript",
+		"prefix": "f_random()",
+		"body": [
+		  "f_random(_range) =>",
+		  "\tvar _return = 1.0 + timenow",
+		  "\treturn := (3.14159 * _return % (bar_index + 1)) % _range"
+		],
+		"description": "Custom Function:\nRandom Seed Number"
+	},
+	"f_format_to_tick()": {
+		"scope": "pinescript",
+		"prefix": "f_format_to_tick()",
+		"body": [
+		  "f_print(_txt) => var _lbl = label.new(bar_index, highest(10)[1], _txt, xloc.bar_index, yloc.price, #00000000, label.style_none, color.gray, size.large, text.align_center), label.set_xy(_lbl, bar_index, highest(10)[1]), label.set_text(_lbl, _txt)",
+		  "// Produces a string format usable with `tostring()` to restrict precision to ticks.",
+		  "//  • Note that `tostring()` will also round the value.",
+		  "f_tickFormat() =>",
+		  "\ts = tostring(syminfo.mintick)",
+		  "\ts := str.replace_all(_s, '25','00')",
+		  "\ts := str.replace_all(_s, '5', '0')",
+		  "\ts := str.replace_all(_s, '1', '0')",
+		],
+		"description": "Custom Function:\nFormat string value to tick"
+	},
+	"f_roundToTick()": {
+		"scope": "pinescript",
+		"prefix": "f_roundToTick()",
+		"body": [
+		  "f_roundToTick( _price) => round(_price / syminfo.mintick) * syminfo.mintick"
+		],
+		"description": "Custom Function:\nRound To Tick"
+	},
 	"f_fib_slicer()" : {
 		"scope": "pinescript",
 		"prefix": "f_fib_slicer()",
@@ -1495,6 +1586,196 @@
 			"        continue"
 		],
 		"description": "for ()() loop statement"
+	},
+//-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+	/////////////////////////////////
+	//*** PINECODERS SNIPPETS  ***//
+	////////////////////////////////
+	// added by Daveatt, Best-Trading-Indicator
+	// https://github.com/Best-Trading-Indicator/pinescript/blob/master/pine.v4.code-snippets
+	"date_range": {
+		"scope": "pinescript",
+		"prefix": "date_range",
+		"body": [
+		"DateFilter = input(false, '═════════════ Date Range Filtering')",
+		"FromYear = input(defval=${1}, 'From Year', minval = 1900)",
+		"FromMonth = input(defval=${2}, 'From Month', minval = 1, maxval = 12)",
+		"FromDay = input(defval=${3}, 'From Day', minval = 1, maxval = 31)",
+		"ToMonth = input(defval=${4}, 'To Month', minval = 1, maxval = 12)",
+		"ToYear = input(defval=${5}, 'To Year', minval = 1900)",
+		"ToDay = input(defval=${6}, 'To Day', minval = 1, maxval = 31)",
+		"FromDate = timestamp(FromYear, FromMonth, FromDay, 00, 00)",
+		"ToDate = timestamp(ToYear, ToMonth, ToDay, 23, 59)",
+		"TradeDateIsAllowed() => DateFilter ? (time >= FromDate and time <= ToDate) : true",
+		],
+		"description": "Custom Function:\nTest if a date is in a range"
+	},
+	"f_bar_within_today()": {
+		"scope": "pinescript",
+		"prefix": "f_bar_within_today()",
+		"body": [
+		"f_bar_within_today() =>",
+		"\tcurrentYear = year(timenow)",
+		"\tcurrentMonth = month(timenow)",
+		"\tcurrentDay = dayofmonth(timenow)",
+		"\ttoday = year == currentYear and month == currentMonth and dayofmonth == currentDay",
+		"\nbgcolor(today ? color.gray : na)"
+		],
+		"description": "Custom Function:\nTest if a bar's date is today"
+	},
+	"track_high_low_time": {
+		"scope": "pinescript",
+		"prefix": "track_high_low_time",
+		"body": [
+		"timeAllowed = input('1200-1500', 'Allowed hours', input.session)",
+		"// Check to see if we are in allowed hours.",
+		"timeIsAllowed = time(timeframe.period, timeAllowed)",
+		"var hi = 10e-10",
+		"var lo = 10e10",
+		"if timeIsAllowed",
+		"\t// We are entering allowed hours; reset hi/lo.",
+		"\tif not timeIsAllowed[1]",
+		"\t\thi := high",
+		"\t\tlo := low",
+		"\telse",
+		"\t\t// We are in allowed hours; track hi/lo.",
+		"\t\thi := max(high, hi)",
+		"\t\tlo := min(low, lo)"
+		],
+		"description": "Track highs/lows for a specific period of time"
+	},
+	"f_resInMinutes()": {
+		"scope": "pinescript",
+		"prefix": "f_resInMinutes()",
+		"body": [
+		"f_resInMinutes() =>",
+		"\t_resInMinutes = timeframe.multiplier * (",
+		"\t timeframe.isseconds   ? 1. / 60.  :",
+		"\t timeframe.isminutes   ? 1.        :",
+		"\t timeframe.isdaily     ? 1440.     :",
+		"\t timeframe.isweekly    ? 10080.    :",
+		"\t timeframe.ismonthly   ? 43800.    : na)",
+		],
+		"description": "Custom Function: \nConverts current 'timeframe.multiplier' plus the TF into minutes of type float"
+	},
+	"f_resFromMinutes()": {
+		"scope": "pinescript",
+		"prefix": "f_resFromMinutes()",
+		"body": [
+		"res = input(1440., 'Minutes in target resolution (<= 0.0167 [1 sec.])', minval = 0.0167)",
+		"\n\nf_resFromMinutes() =>",
+		"\t_resInMinutes = timeframe.multiplier * (",
+		"\t timeframe.isseconds   ? 1. / 60.  :",
+		"\t timeframe.isminutes   ? 1.        :",
+		"\t timeframe.isdaily     ? 1440.     :",
+		"\t timeframe.isweekly    ? 10080.    :",
+		"\t timeframe.ismonthly   ? 43800.    : na)",
+		"\n\n// Converts a resolution expressed in minutes into a string usable by 'security()'",
+		"f_resFromMinutes(_minutes) =>",
+		"\t_minutes   <= 0.0167 ? '1S' :",
+		"\t _minutes   <= 0.0834 ? '5S' :",
+		"\t _minutes   <= 0.2500 ? '15S' :",
+		"\t _minutes   <= 0.5000 ? '30S' :",
+		"\t _minutes   <= 1440 ? tostring(round(_minutes)) :",
+		"\t _minutes   <= 43800 ? tostring(round(min(_minutes / 1440, 365))) + 'D' : tostring(round(min(_minutes / 43800,12))) + 'M'"
+		],
+		"description": "Custom Function: \nConverts current 'timeframe.multiplier' plus the TF into minutes of type float"
+	},
+	"f_multipleOfRes(_res, _mult)": {
+		"scope": "pinescript",
+		"prefix": "f_multipleOfRes(_res, _mult)",
+		"body": [
+		"resMult = input(4, minval = 1)",
+		"\nf_multipleOfRes(_res, _mult) =>",
+		"\t// _res:  current resolution in minutes, in the fractional format supplied by f_resInMinutes() companion function.",
+		"\t// _mult: Multiple of current TF to be calculated.",
+		"\t// Convert current float TF in minutes to target string TF in 'timeframe.period' format.",
+		"\t_targetResInMin = _res * max(_mult, 1)",
+		"\t// Find best string to express the resolution.",
+		"\t_targetResInMin   <= 0.083 ? '5S'  :",
+		"\t _targetResInMin <= 0.251 ? '15S' :",
+		"\t _targetResInMin <= 0.501 ? '30S' :",
+		"\t _targetResInMin <= 1440  ? tostring(round(_targetResInMin)) :",
+		"\t _targetResInMin <= 43800 ? tostring(round(min(_targetResInMin / 1440, 365))) + 'D' :",
+		"\t tostring(round(min(_targetResInMin / 43800, 12))) + 'M'"
+		],
+		"description": "Custom Function: \nReturns a multiple of current TF as a string usable with 'security()'"
+	},
+	"f_ideal_TimesInLast(_cond, _len)()": {
+		"scope": "pinescript",
+		"prefix": "f_ideal_TimesInLast(_cond, _len)",
+		"body": [
+		"// ————— Method 1. This function uses Pine's built-in function but only accepts a simple int for the length.",
+		"f_ideal_TimesInLast(_cond, _len) =>  sum(_cond ? 1 : 0, _len)"
+		],
+		"description": "Custom Function: \nCount the occurrences of a condition in the last x bars?"
+	},
+	"last_day": {
+		"scope": "pinescript",
+		"prefix": "last_day",
+		"body": [
+		"lastDay = security(syminfo.tickerid,'D', barstate.islast, lookahead = barmerge.lookahead_on)"
+		],
+		"description": "Return the Last day"
+	},
+	"f_normalize()": {
+		"scope": "pinescript",
+		"prefix": "f_normalize()",
+		"body": [
+		"// ————— When scale of signal to rescale is unknown.",
+		"// Min/Max of signal to rescale is determined by its historical low/high.",
+		"normalize(_src, _min, _max) =>",
+		"\t// Normalizes series with unknown min/max using historical min/max.,",
+		"\t// _src: series to rescale.",
+		"\t// _min: minimum value of rescaled series.",
+		"\t// _max: maximum value of rescaled series.",
+		"\tvar _historicMin = 10e10",
+		"\tvar _historicMax = -10e10",
+		"\t_historicMin := min(nz(_src, _historicMin), _historicMin)",
+		"\t_historicMax := max(nz(_src, _historicMax), _historicMax)",
+		"\t_min + (_max - _min) * (_src - _historicMin) / max(_historicMax - _historicMin, 10e-10)",
+		"\nplot(normalize(volume, -100, 100))"
+		],
+		"description": "Custom Function: \nScale of signal to rescale is unknown"
+	},
+	"f_rescale()": {
+		"scope": "pinescript",
+		"prefix": "f_rescale()",
+		"body": [
+		"// ————— When scale of signal to rescale is known.",
+		"rescale(_src, _oldMin, _oldMax, _newMin, _newMax) =>",
+		"\t// Rescales series with known min/max.",
+		"\t// _src: series to rescale.",
+		"\t// _oldMin: minimum value of series to rescale.",
+		"\t// _oldMax: maximum value of series to rescale.",
+		"\t// _newMin: minimum value of rescaled series.",
+		"\t// _newMax: maximum value of rescaled series.",
+		"\t_newMin + (_newMax - _newMin) * (_src - _oldMin) / max(_oldMax - _oldMin, 10e-10)",
+		"\nplot(rescale(rsi(close, 14), 0, 100, -100, 100), color = color.fuchsia)",
+		],
+		"description": "Custom Function: \nScale of signal to rescale is known"
+	},
+	"f_print()": {
+		"scope": "pinescript",
+		"prefix": "f_print()",
+		"body": [
+		"f_print(_txt) => var _lbl = label.new(bar_index, highest(10)[1], _txt, xloc.bar_index, yloc.price, #00000000, label.style_none, color.gray, size.large, text.align_left), label.set_xy(_lbl, bar_index, highest(10)[1]), label.set_text(_lbl, _txt)",
+		"f_print('Multiplier = ' + tostring(timeframe.multiplier) + '\\nPeriod = ' + timeframe.period + '\\nHigh = ' + tostring(high))"
+		],
+		"description": "Custom Function: \nExamine the value of a string"
+	},
+	//-------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------
+	//--- debug tool:
+	"debugBool": {
+		"scope": "pinescript",
+		"prefix": "plotBool",
+		"body": [
+		"plot(X ? 1 : 0, title='X', transp=100, color=color.orange)"
+		],
+		"description": "inserting a 'debug bool plot' function"
 	}
-	
+//-------------------------------------------------------------------------------
+//--- End of file.
 }
