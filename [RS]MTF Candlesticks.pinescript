@@ -1,0 +1,128 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="[RS]MTF Candle Sticks", overlay=true)
+
+//  Required functions:
+// —————————— PineCoders MTF Selection Framework functions
+// ————— Converts current "timeframe.multiplier" plus the TF into minutes of type float.
+f_resInMinutes() => 
+    _resInMinutes = timeframe.multiplier * (
+         timeframe.isseconds ? 1. / 60. :
+         timeframe.isminutes ? 1.       :
+         timeframe.isdaily   ? 1440.    :
+         timeframe.isweekly  ? 10080.   :
+         timeframe.ismonthly ? 43800.   : na)
+
+// ————— Returns resolution of _resolution period in minutes.
+f_tfResInMinutes(_resolution) =>
+    // _resolution: resolution of any TF (in "timeframe.period" string format).
+    security(syminfo.tickerid, _resolution, f_resInMinutes())
+
+f_countdown_to_close_text(_tf)=>
+    int _open_date = valuewhen(change(time(_tf)) != 0, time, 0)
+    int _close_date = _open_date + round(f_tfResInMinutes(_tf)) * 60000
+    int _time_difference = _close_date - timenow
+    int _tina_minute = 60000, int _tina_hour = (60*_tina_minute), int _tina_day = (1440*_tina_minute), int _tina_week = (10080*_tina_minute), int _tina_month = (43800*_tina_minute)
+    int _month = _time_difference / _tina_month
+    int _weeks = (_time_difference % _tina_month) / _tina_week
+    int _days = ((_time_difference % _tina_month) % _tina_week) / _tina_day
+    int _hours = (((_time_difference % _tina_month) % _tina_week) % _tina_day) / _tina_hour
+    int _minutes = ((((_time_difference % _tina_month) % _tina_week) % _tina_day) % _tina_hour) / _tina_minute
+    string _countdown = (_month >= 1 ? tostring(_month, " #M ") : "") + (_weeks >= 1 ? tostring(_weeks, " #W ") : "") + (_days >= 1 ? tostring(_days, " #D ") : "") + (_hours >= 0 ? tostring(_hours, " #") : "00") + (_minutes >= 0 ? tostring(_minutes, ":# ") : ":00")
+    _countdown
+
+int n_of_candlesticks = input(defval=5, minval=0, maxval=5)
+string tf1 = input(defval="60")
+string tf2 = input(defval="240")
+string tf3 = input(defval="D")
+string tf4 = input(defval="W")
+string tf5 = input(defval="M")
+
+bool show_labels = input(false)
+bool show_sr = input(false)
+
+int spacing = input(5)
+int tdispl = round((time[0] - time[10]) / 10) * spacing
+
+bool bm = barmerge.lookahead_on
+bool gp = barmerge.gaps_off
+
+f_security(_tf, _display)=>
+    bool _bm = barmerge.lookahead_on
+    bool _gp = barmerge.gaps_off
+    float _open = not _display ? 0.0 : security(syminfo.tickerid, _tf, open, _gp, _bm)
+    float _high = not _display ? 0.0 : security(syminfo.tickerid, _tf, high, _gp, _bm)
+    float _low = not _display ? 0.0 : security(syminfo.tickerid, _tf, low, _gp, _bm)
+    [_open, _high, _low]
+
+[tf1_open, tf1_high, tf1_low] = f_security(tf1, n_of_candlesticks >= 1)
+[tf2_open, tf2_high, tf2_low] = f_security(tf2, n_of_candlesticks >= 2)
+[tf3_open, tf3_high, tf3_low] = f_security(tf3, n_of_candlesticks >= 3)
+[tf4_open, tf4_high, tf4_low] = f_security(tf4, n_of_candlesticks >= 4)
+[tf5_open, tf5_high, tf5_low] = f_security(tf5, n_of_candlesticks >= 5)
+
+labelpos = max(tf1_high, max(tf2_high, max(tf3_high, max(tf4_high, tf5_high))))
+
+f_draw_candle(_o, _h, _l, _c, _x, _label, _label_pos)=>
+    color _col_body_buy = color.new(color.green, 0)
+    color _col_body_sel = color.new(color.maroon, 0)
+    color _col_shadow_buy = color.new(color.green, 20)
+    color _col_shadow_sel = color.new(color.maroon, 20)
+    //-
+    color _shadowcol = _c > _o ? _col_shadow_buy : _col_shadow_sel
+    color _bodycol = _c > _o ? _col_body_buy : _col_body_sel
+    var line _shadow = na
+    var line _body = na
+    line.delete(_shadow)
+    line.delete(_body)
+    _shadow := line.new(
+             x1=_x, y1=_l,
+             x2=_x, y2=_h,
+             xloc= xloc.bar_time, extend=extend.none, color=_shadowcol, style=line.style_solid, width=2 
+             )
+    _body := line.new(
+             x1=_x, y1=_o,
+             x2=_x, y2=_c,
+             xloc= xloc.bar_time, extend=extend.none, color=_bodycol, style=line.style_solid, width=8 
+             )
+    //
+    string _countdown = f_countdown_to_close_text(_label)
+    if show_labels
+        var label _la = na
+        label.delete(_la)
+        _la := label.new(
+                 x=_x, y=labelpos,
+                 text=_label + "\n" + _countdown,
+                 xloc=xloc.bar_time, yloc=yloc.price,
+                 color=color.white, style=label.style_labeldown, textcolor=color.black, size=size.small
+                 )
+    //
+    if show_sr
+        var line _lh = na
+        var line _ll = na
+        line.delete(_lh)
+        line.delete(_ll)
+        _lh := line.new(
+                 x1=time, y1=_h,
+                 x2=_x, y2=_h,
+                 xloc= xloc.bar_time, extend=extend.left, color=color.new(color.blue, 50), style=line.style_solid, width=1 
+                 )
+        _ll := line.new(
+                 x1=time, y1=_l,
+                 x2=_x, y2=_l,
+                 xloc= xloc.bar_time, extend=extend.left, color=color.new(color.blue, 50), style=line.style_solid, width=1 
+                 )
+
+if n_of_candlesticks >= 1
+    f_draw_candle(tf1_open, tf1_high, tf1_low, close, time + tdispl * 1, tf1, labelpos)
+if n_of_candlesticks >= 2
+    f_draw_candle(tf2_open, tf2_high, tf2_low, close, time + tdispl * 2, tf2, labelpos)
+if n_of_candlesticks >= 3
+    f_draw_candle(tf3_open, tf3_high, tf3_low, close, time + tdispl * 3, tf3, labelpos)
+if n_of_candlesticks >= 4
+    f_draw_candle(tf4_open, tf4_high, tf4_low, close, time + tdispl * 4, tf4, labelpos)
+if n_of_candlesticks >= 5
+    f_draw_candle(tf5_open, tf5_high, tf5_low, close, time + tdispl * 5, tf5, labelpos)
+
