@@ -1,0 +1,54 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="[RS]Donchian Fans", shorttitle="DF", overlay=true)
+//  Initiate bars:
+var int b = -1, b := b + 1
+//----------------------------------------------------------------------------------
+//  Required functions:
+f_highest_bar(_source, _bars, _length)=>
+    float _h_value = _source
+    int _h_bar = _bars
+    for _i = 0 to max(_length-1, 0)
+        bool _isSourceOver = _source[_i] > _h_value
+        if _isSourceOver
+            _h_value := _source[_i]
+            _h_bar := _bars[_i]
+    [_h_value, _h_bar]
+
+f_lowest_bar(_source, _bars, _length)=>
+    float _l_value = _source
+    int _l_bar = _bars
+    for _i = 0 to max(_length-1, 0)
+        bool _isSourceUnder = _source[_i] < _l_value
+        if _isSourceUnder
+            _l_value := _source[_i]
+            _l_bar := _bars[_i]
+    [_l_value, _l_bar]
+
+f_line(_x1, _y1, _r, _color)=>
+    var line _li = na
+    line.delete(id=_li)
+    _li := line.new(x1=_x1[1], y1=_y1 - _r, x2=_x1, y2=_y1, xloc=xloc.bar_index, extend=extend.none, color=_color, style=line.style_dashed, width=1)
+//----------------------------------------------------------------------------------
+
+int length = input(defval=100, title='Channel length:', minval=1)
+
+[h_price, h_bar] = f_highest_bar(high, b, length)
+[l_price, l_bar] = f_lowest_bar(low, b, length)
+
+float mid = (h_price + l_price) / 2
+
+plot(series=h_price, title='H', color=color.black, linewidth=1, style=plot.style_line, transp=20)
+plot(series=mid, title='M', color=color.black, linewidth=1, style=plot.style_line, transp=20)
+plot(series=l_price, title='L', color=color.black, linewidth=1, style=plot.style_line, transp=20)
+
+var float r = atr(length)
+if change(mid) != 0
+    r := atr(length)
+
+var line h1000 = na
+
+if change(h_bar) != 0
+    h1000 := f_line(h_bar, h_price, -r, color.black)
