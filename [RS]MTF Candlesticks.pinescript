@@ -30,7 +30,7 @@ f_countdown_to_close_text(_tf)=>
     int _days = ((_time_difference % _tina_month) % _tina_week) / _tina_day
     int _hours = (((_time_difference % _tina_month) % _tina_week) % _tina_day) / _tina_hour
     int _minutes = ((((_time_difference % _tina_month) % _tina_week) % _tina_day) % _tina_hour) / _tina_minute
-    string _countdown = (_month >= 1 ? tostring(_month, " #M ") : "") + (_weeks >= 1 ? tostring(_weeks, " #W ") : "") + (_days >= 1 ? tostring(_days, " #D ") : "") + (_hours >= 0 ? tostring(_hours, " #") : "00") + (_minutes >= 0 ? tostring(_minutes, ":# ") : ":00")
+    string _countdown = (_month >= 1 ? tostring(_month, " #M ") : "") + (_weeks >= 1 ? tostring(_weeks, " #W ") : "") + (_days >= 1 ? tostring(_days, " #D ") : "") + (_hours >= 0 ? (_hours < 10 ? "0" : "") + tostring(_hours, "#") : "00") + (_minutes >= 0 ? (_minutes < 10 ? "0" : "") + tostring(_minutes, ":# ") : ":00")
     _countdown
 
 int n_of_candlesticks = input(defval=5, minval=0, maxval=5)
