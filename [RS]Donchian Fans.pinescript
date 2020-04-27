@@ -30,7 +30,7 @@ f_lowest_bar(_source, _bars, _length)=>
 f_line(_x1, _y1, _r, _color)=>
     var line _li = na
     line.delete(id=_li)
-    _li := line.new(x1=_x1[1], y1=_y1 - _r, x2=_x1, y2=_y1, xloc=xloc.bar_index, extend=extend.none, color=_color, style=line.style_dashed, width=1)
+    _li := line.new(x1=_x1-1, y1=_y1 - _r, x2=_x1, y2=_y1, xloc=xloc.bar_index, extend=extend.right, color=_color, style=line.style_dashed, width=1)
 //----------------------------------------------------------------------------------
 
 int length = input(defval=100, title='Channel length:', minval=1)
@@ -48,7 +48,35 @@ var float r = atr(length)
 if change(mid) != 0
     r := atr(length)
 
-var line h1000 = na
+var line h_1_04 = na
+var line h_1_08 = na
+var line h_1_16 = na
+var line h_1_32 = na
+var line h_1_64 = na
 
-if change(h_bar) != 0
-    h1000 := f_line(h_bar, h_price, -r, color.black)
+var line l_1_04 = na
+var line l_1_08 = na
+var line l_1_16 = na
+var line l_1_32 = na
+var line l_1_64 = na
+
+bool is_new_h = h_price > h_price[1]
+bool is_new_l = l_price < l_price[1]
+
+vhb = valuewhen(high >= h_price, h_bar, 0)
+vhp = valuewhen(high >= h_price, h_price, 0)
+vlb = valuewhen(low <= l_price, l_bar, 0)
+vlp = valuewhen(low <= l_price, l_price, 0)
+
+if is_new_l
+    h_1_04 := f_line(vhb, vhp, -r * (1. / 04.), color.black)
+    h_1_08 := f_line(vhb, vhp, -r * (1. / 08.), color.black)
+    h_1_16 := f_line(vhb, vhp, -r * (1. / 16.), color.black)
+    h_1_32 := f_line(vhb, vhp, -r * (1. / 32.), color.black)
+    h_1_64 := f_line(vhb, vhp, -r * (1. / 64.), color.black)
+if is_new_h
+    l_1_04 := f_line(vlb, vlp, r * (1. / 04.), color.black)
+    l_1_08 := f_line(vlb, vlp, r * (1. / 08.), color.black)
+    l_1_16 := f_line(vlb, vlp, r * (1. / 16.), color.black)
+    l_1_32 := f_line(vlb, vlp, r * (1. / 32.), color.black)
+    l_1_64 := f_line(vlb, vlp, r * (1. / 64.), color.black)
