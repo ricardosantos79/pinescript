@@ -20,6 +20,8 @@ f_tfResInMinutes(_resolution) =>
     // _resolution: resolution of any TF (in "timeframe.period" string format).
     security(syminfo.tickerid, _resolution, f_resInMinutes())
 
+//  Returns a time formated text string of the elapsed time remaining until 
+//      specified timeframe closes:
 f_countdown_to_close_text(_tf)=>
     int _open_date = valuewhen(change(time(_tf)) != 0, time, 0)
     int _close_date = _open_date + round(f_tfResInMinutes(_tf)) * 60000
@@ -33,7 +35,10 @@ f_countdown_to_close_text(_tf)=>
     string _countdown = (_month >= 1 ? tostring(_month, " #M ") : "") + (_weeks >= 1 ? tostring(_weeks, " #W ") : "") + (_days >= 1 ? tostring(_days, " #D ") : "") + (_hours >= 0 ? (_hours < 10 ? "0" : "") + tostring(_hours, "#") : "00") + (_minutes >= 0 ? (_minutes < 10 ? "0" : "") + tostring(_minutes, ":# ") : ":00")
     _countdown
 
+//------------------------------------------------------------------------------
+//  inputs:
 int n_of_candlesticks = input(defval=5, minval=0, maxval=5)
+int n_of_candlesticks_per_tf = input(defval=5, minval=0, maxval=5)
 string tf1 = input(defval="60")
 string tf2 = input(defval="240")
 string tf3 = input(defval="D")
@@ -43,25 +48,26 @@ string tf5 = input(defval="M")
 bool show_labels = input(false)
 bool show_sr = input(false)
 
-int spacing = input(5)
-int tdispl = round((time[0] - time[10]) / 10) * spacing
+int spacing = input(4)
+int tdispl = round(f_resInMinutes()) * 60000 * spacing
 
 bool bm = barmerge.lookahead_on
 bool gp = barmerge.gaps_off
 
-f_security(_tf, _display)=>
+f_security(_tf, _pos, _display)=>
     bool _bm = barmerge.lookahead_on
     bool _gp = barmerge.gaps_off
-    float _open = not _display ? 0.0 : security(syminfo.tickerid, _tf, open, _gp, _bm)
-    float _high = not _display ? 0.0 : security(syminfo.tickerid, _tf, high, _gp, _bm)
-    float _low = not _display ? 0.0 : security(syminfo.tickerid, _tf, low, _gp, _bm)
-    [_open, _high, _low]
+    float _open = not _display ? 0.0 : security(syminfo.tickerid, _tf, open[_pos], _gp, _bm)
+    float _high = not _display ? 0.0 : security(syminfo.tickerid, _tf, high[_pos], _gp, _bm)
+    float _low = not _display ? 0.0 : security(syminfo.tickerid, _tf, low[_pos], _gp, _bm)
+    float _close = not _display ? 0.0 : security(syminfo.tickerid, _tf, close[_pos], _gp, _bm)
+    [_open, _high, _low, _close]
 
-[tf1_open, tf1_high, tf1_low] = f_security(tf1, n_of_candlesticks >= 1)
-[tf2_open, tf2_high, tf2_low] = f_security(tf2, n_of_candlesticks >= 2)
-[tf3_open, tf3_high, tf3_low] = f_security(tf3, n_of_candlesticks >= 3)
-[tf4_open, tf4_high, tf4_low] = f_security(tf4, n_of_candlesticks >= 4)
-[tf5_open, tf5_high, tf5_low] = f_security(tf5, n_of_candlesticks >= 5)
+[tf1_open, tf1_high, tf1_low, tf1_close] = f_security(tf1, 0, n_of_candlesticks >= 1)
+[tf2_open, tf2_high, tf2_low, tf2_close] = f_security(tf2, 0, n_of_candlesticks >= 2)
+[tf3_open, tf3_high, tf3_low, tf3_close] = f_security(tf3, 0, n_of_candlesticks >= 3)
+[tf4_open, tf4_high, tf4_low, tf4_close] = f_security(tf4, 0, n_of_candlesticks >= 4)
+[tf5_open, tf5_high, tf5_low, tf5_close] = f_security(tf5, 0, n_of_candlesticks >= 5)
 
 labelpos = max(tf1_high, max(tf2_high, max(tf3_high, max(tf4_high, tf5_high))))
 
@@ -116,13 +122,13 @@ f_draw_candle(_o, _h, _l, _c, _x, _label, _label_pos)=>
                  )
 
 if n_of_candlesticks >= 1
-    f_draw_candle(tf1_open, tf1_high, tf1_low, close, time + tdispl * 1, tf1, labelpos)
+    f_draw_candle(tf1_open, tf1_high, tf1_low, tf1_close, time + tdispl * 1, tf1, labelpos)
 if n_of_candlesticks >= 2
-    f_draw_candle(tf2_open, tf2_high, tf2_low, close, time + tdispl * 2, tf2, labelpos)
+    f_draw_candle(tf2_open, tf2_high, tf2_low, tf2_close, time + tdispl * 2, tf2, labelpos)
 if n_of_candlesticks >= 3
-    f_draw_candle(tf3_open, tf3_high, tf3_low, close, time + tdispl * 3, tf3, labelpos)
+    f_draw_candle(tf3_open, tf3_high, tf3_low, tf3_close, time + tdispl * 3, tf3, labelpos)
 if n_of_candlesticks >= 4
-    f_draw_candle(tf4_open, tf4_high, tf4_low, close, time + tdispl * 4, tf4, labelpos)
+    f_draw_candle(tf4_open, tf4_high, tf4_low, tf4_close, time + tdispl * 4, tf4, labelpos)
 if n_of_candlesticks >= 5
-    f_draw_candle(tf5_open, tf5_high, tf5_low, close, time + tdispl * 5, tf5, labelpos)
+    f_draw_candle(tf5_open, tf5_high, tf5_low, tf5_close, time + tdispl * 5, tf5, labelpos)
 

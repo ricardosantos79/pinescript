@@ -12,19 +12,20 @@ string op_type_03 = 'up bar'
 string op_type_04 = 'down bar'
 string op_type_05 = 'up pin bar'
 string op_type_06 = 'down pin bar'
+string op_type_07 = 'any type of bar'
 
-string bar01_type = input(defval=op_type_01, title='#1 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar02_type = input(defval=op_type_01, title='#2 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar03_type = input(defval=op_type_01, title='#3 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar04_type = input(defval=op_type_01, title='#4 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar05_type = input(defval=op_type_01, title='#5 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar06_type = input(defval=op_type_01, title='#6 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar07_type = input(defval=op_type_01, title='#7 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar08_type = input(defval=op_type_01, title='#8 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar09_type = input(defval=op_type_01, title='#9 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
-string bar10_type = input(defval=op_type_01, title='#10 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06])
+string bar01_type = input(defval=op_type_01, title='#1 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar02_type = input(defval=op_type_01, title='#2 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar03_type = input(defval=op_type_01, title='#3 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar04_type = input(defval=op_type_01, title='#4 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar05_type = input(defval=op_type_01, title='#5 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar06_type = input(defval=op_type_01, title='#6 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar07_type = input(defval=op_type_01, title='#7 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar08_type = input(defval=op_type_01, title='#8 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar09_type = input(defval=op_type_01, title='#9 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar10_type = input(defval=op_type_01, title='#10 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
 
-f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:(_str==op_type_05?5:(_str==op_type_06?6:na))))))
+f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:(_str==op_type_05?5:(_str==op_type_06?6:(_str==op_type_07?7:na)))))))
 f_get_nbar_type(_i)=>(_i==1?bar01_type:(_i==2?bar02_type:(_i==3?bar03_type:(_i==4?bar04_type:(_i==5?bar05_type:(_i==6?bar06_type:(_i==7?bar07_type:(_i==8?bar08_type:(_i==9?bar09_type:(_i==10?bar10_type:na))))))))))
 
 f_get_pattern_as_text()=>
@@ -55,8 +56,9 @@ f_isUpBar(_pos)         => f_isHighUp(_pos) and f_isLowUp(_pos)
 f_isDownBar(_pos)       => f_isHighDown(_pos) and f_isLowDown(_pos)
 f_isPinUp(_pos)         => risinghigh[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (upperwick[_pos] * 0.66) > lowerwick[_pos]
 f_isPinDown(_pos)       => fallinglow[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (lowerwick[_pos] * 0.66) > upperwick[_pos]
+f_isAny(_pos)           => true
 
-f_enum_BarPattern(_i, _pos)=>(_i==1?f_isInsideBar(_pos):(_i==2?f_isOutsideBar(_pos):(_i==3?f_isUpBar(_pos):(_i==4?f_isDownBar(_pos):(_i==5?f_isPinUp(_pos):(_i==6?f_isPinDown(_pos):na))))))
+f_enum_BarPattern(_i, _pos)=>(_i==1?f_isInsideBar(_pos):(_i==2?f_isOutsideBar(_pos):(_i==3?f_isUpBar(_pos):(_i==4?f_isDownBar(_pos):(_i==5?f_isPinUp(_pos):(_i==6?f_isPinDown(_pos):(_i==7?f_isAny(_pos):na)))))))
 
 f_check_nbar(_i, _pos)=>f_enum_BarPattern(f_enum_type(f_get_nbar_type(_i)), _pos)
 
