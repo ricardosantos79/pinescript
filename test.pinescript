@@ -13,6 +13,7 @@ string op_type_06 = 'down pin bar'
 string op_type_07 = 'any type of bar'
 f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:(_str==op_type_05?5:(_str==op_type_06?6:(_str==op_type_07?7:na)))))))
 f_enum_type_by_idx(_i)=>(_i==1?op_type_01:(_i==2?op_type_02:(_i==3?op_type_03:(_i==4?op_type_04:(_i==5?op_type_05:(_i==6?op_type_06:(_i==7?op_type_07:op_type_07)))))))
+
 float body_range = abs(close - open)
 float hl_range = high - low
 float upperwick = high - max(close, open)
@@ -35,8 +36,25 @@ f_isPinUp(_pos)         => risinghigh[_pos] and body_range[_pos] < (hl_range[_po
 f_isPinDown(_pos)       => fallinglow[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (lowerwick[_pos] * 0.66) > upperwick[_pos]
 f_isAny(_pos)           => true
 
-f_enum_BarPattern(_i, _pos)=>(_i==1?f_isInsideBar(_pos):(_i==2?f_isOutsideBar(_pos):(_i==3?f_isUpBar(_pos):(_i==4?f_isDownBar(_pos):(_i==5?f_isPinUp(_pos):(_i==6?f_isPinDown(_pos):(_i==7?f_isAny(_pos):na)))))))
-f_ident_bar(_pos)=>f_isInsideBar(_pos)?1:(f_isOutsideBar(_pos)?2:(f_isUpBar(_pos)?3:(f_isDownBar(_pos)?4:(f_isPinUp(_pos)?5:(f_isPinDown(_pos)?6:(f_isAny(_pos)?7:7))))))
+f_enum_BarPattern(_i, _pos)=>
+    _isInsideBar = f_isInsideBar(_pos)
+    _isOutsideBar = f_isOutsideBar(_pos)
+    _isUpBar = f_isUpBar(_pos)
+    _isDownBar = f_isDownBar(_pos)
+    _isPinUp = f_isPinUp(_pos)
+    _isPinDown = f_isPinDown(_pos)
+    _isAny = f_isAny(_pos)
+    (_i==1?_isInsideBar:(_i==2?_isOutsideBar:(_i==3?_isUpBar:(_i==4?_isDownBar:(_i==5?_isPinUp:(_i==6?_isPinDown:(_i==7?_isAny:na)))))))
+
+f_ident_bar(_pos)=>
+    _isInsideBar = f_isInsideBar(_pos)
+    _isOutsideBar = f_isOutsideBar(_pos)
+    _isUpBar = f_isUpBar(_pos)
+    _isDownBar = f_isDownBar(_pos)
+    _isPinUp = f_isPinUp(_pos)
+    _isPinDown = f_isPinDown(_pos)
+    _isAny = f_isAny(_pos)
+    _isInsideBar?1:(_isOutsideBar?2:(_isUpBar?3:(_isDownBar?4:(_isPinUp?5:(_isPinDown?6:(_isAny?7:7))))))
 
 bool automatic_last_n_bars = input(false)
 int n_bars_in_pattern = input(defval=3, title='How many bars pattern:', type=input.integer, minval=1, maxval=10)
@@ -51,18 +69,28 @@ string bar07_type = input(defval=op_type_01, title='#7 in pattern:', type=input.
 string bar08_type = input(defval=op_type_01, title='#8 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
 string bar09_type = input(defval=op_type_01, title='#9 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
 string bar10_type = input(defval=op_type_01, title='#10 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
-
+ 
+automatic_last_n_bars_pre_eval_01 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-1)))
+automatic_last_n_bars_pre_eval_02 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-2)))
+automatic_last_n_bars_pre_eval_03 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-3)))
+automatic_last_n_bars_pre_eval_04 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-4)))
+automatic_last_n_bars_pre_eval_05 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-5)))
+automatic_last_n_bars_pre_eval_06 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-6)))
+automatic_last_n_bars_pre_eval_07 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-7)))
+automatic_last_n_bars_pre_eval_08 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-8)))
+automatic_last_n_bars_pre_eval_09 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-9)))
+automatic_last_n_bars_pre_eval_10 = f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-10)))
 if automatic_last_n_bars
-    bar01_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-1)))
-    bar02_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-2)))
-    bar03_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-3)))
-    bar04_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-4)))
-    bar05_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-5)))
-    bar06_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-6)))
-    bar07_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-7)))
-    bar08_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-8)))
-    bar09_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-9)))
-    bar10_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-10)))
+    bar01_type := automatic_last_n_bars_pre_eval_01//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-1)))
+    bar02_type := automatic_last_n_bars_pre_eval_02//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-2)))
+    bar03_type := automatic_last_n_bars_pre_eval_03//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-3)))
+    bar04_type := automatic_last_n_bars_pre_eval_04//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-4)))
+    bar05_type := automatic_last_n_bars_pre_eval_05//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-5)))
+    bar06_type := automatic_last_n_bars_pre_eval_06//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-6)))
+    bar07_type := automatic_last_n_bars_pre_eval_07//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-7)))
+    bar08_type := automatic_last_n_bars_pre_eval_08//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-8)))
+    bar09_type := automatic_last_n_bars_pre_eval_09//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-9)))
+    bar10_type := automatic_last_n_bars_pre_eval_10//f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-10)))
 
 f_get_nbar_type(_i)=>(_i==1?bar01_type:(_i==2?bar02_type:(_i==3?bar03_type:(_i==4?bar04_type:(_i==5?bar05_type:(_i==6?bar06_type:(_i==7?bar07_type:(_i==8?bar08_type:(_i==9?bar09_type:(_i==10?bar10_type:na))))))))))
 f_check_nbar(_i, _pos)=>f_enum_BarPattern(f_enum_type(f_get_nbar_type(_i)), _pos)
