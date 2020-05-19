@@ -4,7 +4,6 @@
 //@version=4
 study(title='[RS]Bar Pattern Statistics Tool', shorttitle='bst', overlay=false)
 
-// bar type placeholder names:
 string op_type_01 = 'inside bar'
 string op_type_02 = 'outside bar'
 string op_type_03 = 'up bar'
@@ -12,11 +11,8 @@ string op_type_04 = 'down bar'
 string op_type_05 = 'up pin bar'
 string op_type_06 = 'down pin bar'
 string op_type_07 = 'any type of bar'
-//  bar type enumeration functions:
 f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:(_str==op_type_05?5:(_str==op_type_06?6:(_str==op_type_07?7:na)))))))
 f_enum_type_by_idx(_i)=>(_i==1?op_type_01:(_i==2?op_type_02:(_i==3?op_type_03:(_i==4?op_type_04:(_i==5?op_type_05:(_i==6?op_type_06:(_i==7?op_type_07:op_type_07)))))))
-//
-//  current bar information:
 float body_range = abs(close - open)
 float hl_range = high - low
 float upperwick = high - max(close, open)
@@ -25,8 +21,7 @@ bool risinghigh = high > high[1]
 bool fallinghigh = high < high[1]
 bool risinglow = low > low[1]
 bool fallinglow = low < low[1]
-//
-// bar type information at position:
+
 f_isHighUp(_pos)    => risinghigh[_pos]
 f_isHighDown(_pos)  => fallinghigh[_pos]
 f_isLowUp(_pos)     => risinglow[_pos]
@@ -58,16 +53,16 @@ string bar09_type = input(defval=op_type_01, title='#9 in pattern:', type=input.
 string bar10_type = input(defval=op_type_01, title='#10 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
 
 if automatic_last_n_bars
-    bar01_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-0)))
-    bar02_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-1)))
-    bar03_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-2)))
-    bar04_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-3)))
-    bar05_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-4)))
-    bar06_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-5)))
-    bar07_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-6)))
-    bar08_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-7)))
-    bar09_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-8)))
-    bar10_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-9)))
+    bar01_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-1)))
+    bar02_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-2)))
+    bar03_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-3)))
+    bar04_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-4)))
+    bar05_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-5)))
+    bar06_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-6)))
+    bar07_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-7)))
+    bar08_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-8)))
+    bar09_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-9)))
+    bar10_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-10)))
 
 f_get_nbar_type(_i)=>(_i==1?bar01_type:(_i==2?bar02_type:(_i==3?bar03_type:(_i==4?bar04_type:(_i==5?bar05_type:(_i==6?bar06_type:(_i==7?bar07_type:(_i==8?bar08_type:(_i==9?bar09_type:(_i==10?bar10_type:na))))))))))
 f_check_nbar(_i, _pos)=>f_enum_BarPattern(f_enum_type(f_get_nbar_type(_i)), _pos)
