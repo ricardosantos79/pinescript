@@ -2,5 +2,155 @@
 // © RicardoSantos
 
 //@version=4
-study("this is a test file")
-plot(close)
+study(title='[RS]Bar Pattern Statistics Tool', shorttitle='bst', overlay=false)
+
+// bar type placeholder names:
+string op_type_01 = 'inside bar'
+string op_type_02 = 'outside bar'
+string op_type_03 = 'up bar'
+string op_type_04 = 'down bar'
+string op_type_05 = 'up pin bar'
+string op_type_06 = 'down pin bar'
+string op_type_07 = 'any type of bar'
+//  bar type enumeration functions:
+f_enum_type(_str)=>(_str==op_type_01?1:(_str==op_type_02?2:(_str==op_type_03?3:(_str==op_type_04?4:(_str==op_type_05?5:(_str==op_type_06?6:(_str==op_type_07?7:na)))))))
+f_enum_type_by_idx(_i)=>(_i==1?op_type_01:(_i==2?op_type_02:(_i==3?op_type_03:(_i==4?op_type_04:(_i==5?op_type_05:(_i==6?op_type_06:(_i==7?op_type_07:op_type_07)))))))
+//
+//  current bar information:
+float body_range = abs(close - open)
+float hl_range = high - low
+float upperwick = high - max(close, open)
+float lowerwick = min(close, open) - low
+bool risinghigh = high > high[1]
+bool fallinghigh = high < high[1]
+bool risinglow = low > low[1]
+bool fallinglow = low < low[1]
+//
+// bar type information at position:
+f_isHighUp(_pos)    => risinghigh[_pos]
+f_isHighDown(_pos)  => fallinghigh[_pos]
+f_isLowUp(_pos)     => risinglow[_pos]
+f_isLowDown(_pos)   => fallinglow[_pos]
+
+f_isInsideBar(_pos)     => f_isHighDown(_pos) and f_isLowUp(_pos)
+f_isOutsideBar(_pos)    => f_isHighUp(_pos) and f_isLowDown(_pos)
+f_isUpBar(_pos)         => f_isHighUp(_pos) and f_isLowUp(_pos)
+f_isDownBar(_pos)       => f_isHighDown(_pos) and f_isLowDown(_pos)
+f_isPinUp(_pos)         => risinghigh[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (upperwick[_pos] * 0.66) > lowerwick[_pos]
+f_isPinDown(_pos)       => fallinglow[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (lowerwick[_pos] * 0.66) > upperwick[_pos]
+f_isAny(_pos)           => true
+
+f_enum_BarPattern(_i, _pos)=>(_i==1?f_isInsideBar(_pos):(_i==2?f_isOutsideBar(_pos):(_i==3?f_isUpBar(_pos):(_i==4?f_isDownBar(_pos):(_i==5?f_isPinUp(_pos):(_i==6?f_isPinDown(_pos):(_i==7?f_isAny(_pos):na)))))))
+f_ident_bar(_pos)=>f_isInsideBar(_pos)?1:(f_isOutsideBar(_pos)?2:(f_isUpBar(_pos)?3:(f_isDownBar(_pos)?4:(f_isPinUp(_pos)?5:(f_isPinDown(_pos)?6:(f_isAny(_pos)?7:7))))))
+
+bool automatic_last_n_bars = input(false)
+int n_bars_in_pattern = input(defval=3, title='How many bars pattern:', type=input.integer, minval=1, maxval=10)
+
+string bar01_type = input(defval=op_type_01, title='#1 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar02_type = input(defval=op_type_01, title='#2 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar03_type = input(defval=op_type_01, title='#3 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar04_type = input(defval=op_type_01, title='#4 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar05_type = input(defval=op_type_01, title='#5 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar06_type = input(defval=op_type_01, title='#6 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar07_type = input(defval=op_type_01, title='#7 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar08_type = input(defval=op_type_01, title='#8 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar09_type = input(defval=op_type_01, title='#9 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+string bar10_type = input(defval=op_type_01, title='#10 in pattern:', type=input.string, options=[op_type_01, op_type_02, op_type_03, op_type_04, op_type_05, op_type_06, op_type_07])
+
+if automatic_last_n_bars
+    bar01_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-0)))
+    bar02_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-1)))
+    bar03_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-2)))
+    bar04_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-3)))
+    bar05_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-4)))
+    bar06_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-5)))
+    bar07_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-6)))
+    bar08_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-7)))
+    bar09_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-8)))
+    bar10_type := f_enum_type_by_idx(f_ident_bar(max(0, n_bars_in_pattern-9)))
+
+f_get_nbar_type(_i)=>(_i==1?bar01_type:(_i==2?bar02_type:(_i==3?bar03_type:(_i==4?bar04_type:(_i==5?bar05_type:(_i==6?bar06_type:(_i==7?bar07_type:(_i==8?bar08_type:(_i==9?bar09_type:(_i==10?bar10_type:na))))))))))
+f_check_nbar(_i, _pos)=>f_enum_BarPattern(f_enum_type(f_get_nbar_type(_i)), _pos)
+
+f_get_pattern_as_text()=>
+    string _t = ''
+    for _i = 1 to n_bars_in_pattern
+        _t := _t + '(' + tostring(x=_i, y='#') + ': ' + f_get_nbar_type(_i) + ')'
+        if _i != n_bars_in_pattern
+            _t := _t + ' > '
+    _t
+
+
+f_check_if_pattern(_length)=>
+    int _count = 0
+    bool _is_valid = false
+    for _i = 1 to _length
+        int _pos = _length - _i
+        _count := _count + (f_check_nbar(_i, _pos) ? 1 : 0)
+    if _count >= _length
+        _is_valid := true
+    _is_valid
+
+t = f_check_if_pattern(n_bars_in_pattern) ? 1 : 0
+
+var int total_bars = 0
+total_bars := total_bars + 1
+
+f_perc_of(_fraction, _total)=>(_fraction / _total) * 100
+
+//stats:
+
+var int n_detected = 0
+var int n_bars_inside = 0
+var int n_bars_outside = 0
+var int n_bars_up = 0
+var int n_bars_down = 0
+var int n_bars_over_atr14x1 = 0
+var int n_bars_over_atr14x2 = 0
+var int n_bars_over_atr14x3 = 0
+
+float atr = atr(14)
+if t[1] > 0
+    n_detected := n_detected + 1
+    if f_isInsideBar(0)
+        n_bars_inside := n_bars_inside + 1
+    if f_isOutsideBar(0)
+        n_bars_outside := n_bars_outside + 1
+    if f_isUpBar(0)
+        n_bars_up := n_bars_up + 1
+    if f_isDownBar(0)
+        n_bars_down := n_bars_down + 1
+    if high-low > atr * 1
+        n_bars_over_atr14x1 := n_bars_over_atr14x1 + 1
+    if high-low > atr * 2
+        n_bars_over_atr14x2 := n_bars_over_atr14x2 + 1
+    if high-low > atr * 3
+        n_bars_over_atr14x3 := n_bars_over_atr14x3 + 1
+
+string tex_size = input(defval=size.normal, title='Text size:', type=input.string, options=[size.auto, size.tiny, size.small, size.normal, size.large, size.huge])
+
+string tex = 'Statistics:\n' + 
+     'Pattern: ' + f_get_pattern_as_text() + '\n' +
+     'Nº of patterns:' + tostring(x=n_detected, y='#') + ' in ' + tostring(x=total_bars, y='#') + ' bars (' + tostring(x=f_perc_of(n_detected, total_bars), y='#.000') + '%)' + '\n' + 
+     'Nº of next bars, that are:\n' +
+     ' --- > Inside Bars: ' + tostring(x=n_bars_inside, y='#') + ' (' + tostring(x=f_perc_of(n_bars_inside, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Outside Bars: ' + tostring(x=n_bars_outside, y='#') + ' (' + tostring(x=f_perc_of(n_bars_outside, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Up Bars: ' + tostring(x=n_bars_up, y='#') + ' (' + tostring(x=f_perc_of(n_bars_up, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Down Bars: ' + tostring(x=n_bars_down, y='#') + ' (' + tostring(x=f_perc_of(n_bars_down, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Over ATR(14): ' + tostring(x=n_bars_over_atr14x1, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x1, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Over ATR(14) x 2: ' + tostring(x=n_bars_over_atr14x2, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x2, n_detected), y='#.000') + '%)' + '\n' +
+     ' --- > Over ATR(14) x 3: ' + tostring(x=n_bars_over_atr14x3, y='#') + ' (' + tostring(x=f_perc_of(n_bars_over_atr14x3, n_detected), y='#.000') + '%)' + '\n'
+
+
+var label la = label.new(
+         x=bar_index, y=0.5, text='', 
+         xloc=xloc.bar_index, yloc=yloc.price, 
+         color=color.white, style=label.style_label_left, textcolor=color.black, 
+         size=tex_size, textalign=text.align_left
+         )
+
+label.set_xy(id=la, x=bar_index, y=0.5)
+label.set_text(id=la, text=tex)
+plot(series=t, title='Event', color=color.black, style=plot.style_histogram, transp=0)
+hline(0)
+hline(1)
