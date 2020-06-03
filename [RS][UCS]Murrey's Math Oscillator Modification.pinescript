@@ -1,0 +1,79 @@
+// Created & Developed by Ucsgears, based on Murrey Math Line Principle
+// Version 2 - March, 12 - 2015
+// Modification - sometime around 2016~ RicardoSantos
+// V4 update - 03-06-2020 RicardoSantos
+
+//@version=4
+study(title="[RS][UCS]Murrey's Math Oscillator Modification", shorttitle="[RS][UCS]MMLO", overlay=false, precision = 2)
+
+// Inputs
+int length = input(defval=4, minval = 1, title = "Look back Length")
+float mult = input(0.125)
+bool lines = input(defval=true, title="Show Murrey Math Fractals")
+bool bc = input(defval=true, title="Show Bar Colors Based On Oscillator")
+
+
+//-----------------------------------------------------
+f_mo(_length, _multiplier)=>
+    float _cumdev = cum(stdev(close, 4)) / (bar_index + 1)
+    float _mdev = _cumdev * _length
+    //--
+    var float _oscdev = hlc3
+    float _previous = nz(_oscdev[1], hlc3)
+    if open - _mdev > _previous
+        _oscdev := _previous + _cumdev
+    else if open + _cumdev * _length < _previous
+        _oscdev := _previous - _cumdev
+    else
+        _oscdev := _previous
+    float _oscillator = (close - _oscdev) / (_cumdev * (_length * 10))
+    //--
+    color _col = na
+    if _oscillator > 0
+        if _oscillator < _multiplier * 2
+            _col := #ADFF2F
+        else if _oscillator < _multiplier * 4
+            _col := #ADFF2F
+        else if _oscillator < _multiplier * 6
+            _col := #ADFF2F
+        else if _oscillator < _multiplier * 8
+            _col := #008000
+        else
+            _col := color.blue
+    else if _oscillator < 0
+        if _oscillator > -_multiplier * 2
+            _col := #CD5C5C
+        else if _oscillator > -_multiplier * 4
+            _col := #FA8072
+        else if _oscillator > -_multiplier * 6
+            _col := #FFA07A
+        else if _oscillator > -_multiplier * 8
+            _col := #FF0000
+        else
+            _col := color.navy
+    else
+        _col := color.yellow
+    //--
+    [_oscillator, _col]
+    
+//-----------------------------------------------------
+[oscillator, colordef] = f_mo(length, mult)
+
+plot(series=oscillator, color=colordef, title="Murrey Math Oscillator", style=plot.style_columns, transp = 60)
+plot(0, title="Zero Line", color=color.gray, linewidth=4)
+
+plot(lines == 1 ? mult*2 : na, title = "First Positive Quadrant", color=color.gray, linewidth = 1)
+plot(lines == 1 ? mult*4 : na, title = "Second Positive Quadrant", color=color.gray, linewidth = 1)
+p3 = plot(lines == 1 ? mult*6 : na, title = "Third Positive Quadrant", color=color.gray, linewidth = 2)
+p4 = plot(lines == 1 ? mult*8 : na, title = "Fourth Positive Quadrant", color=color.gray, linewidth = 1)
+plot(lines == 1 ? -mult*2 : na, title = "First Negative Quadrant", color=color.gray, linewidth = 1)
+plot(lines == 1 ? -mult*4 : na, title = "Second Negative Quadrant", color=color.gray, linewidth = 1)
+p2 = plot(lines == 1 ? -mult*6 : na, title = "Third Negative Quadrant", color=color.gray, linewidth = 2)
+p1 = plot(lines == 1 ? -mult*8 : na, title = "Fourth Negative Quadrant", color=color.gray, linewidth = 1)
+
+fill (p1,p2, color = color.orange)
+fill (p3,p4, color = color.lime)
+
+// Bar Color Oversold and Overbought
+bcolor = bc == 1 ? colordef : na
+barcolor(bcolor)
