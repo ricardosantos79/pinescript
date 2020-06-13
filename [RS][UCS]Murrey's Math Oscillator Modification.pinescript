@@ -1,32 +1,67 @@
+
 // Created & Developed by Ucsgears, based on Murrey Math Line Principle
 // Version 2 - March, 12 - 2015
 // Modification - sometime around 2016~ RicardoSantos
-// V4 update - 03-06-2020 RicardoSantos
-
+// V4 update - 2020-06-03 RicardoSantos
+// multiple methods - 2020-06-13 RicardoSantos
 //@version=4
 study(title="[RS][UCS]Murrey's Math Oscillator Modification", shorttitle="[RS][UCS]MMLO", overlay=false, precision = 2)
 
 // Inputs
+string m_donchian = 'donchian channel'
+string m_cumdev = 'cumulative deviation'
+string m_decenv = 'decay envelope'
+
+string method = input(defval=m_donchian, options=[m_donchian, m_cumdev, m_decenv])
 int length = input(defval=4, minval = 1, title = "Look back Length")
 float mult = input(0.125)
 bool lines = input(defval=true, title="Show Murrey Math Fractals")
 bool bc = input(defval=true, title="Show Bar Colors Based On Oscillator")
 
-
 //-----------------------------------------------------
-f_mo(_length, _multiplier)=>
-    float _cumdev = cum(stdev(close, 4)) / (bar_index + 1)
-    float _mdev = _cumdev * _length
-    //--
-    var float _oscdev = hlc3
-    float _previous = nz(_oscdev[1], hlc3)
-    if open - _mdev > _previous
-        _oscdev := _previous + _cumdev
-    else if open + _cumdev * _length < _previous
-        _oscdev := _previous - _cumdev
+f_mo(_method, _length, _multiplier)=>
+    float _oscillator = 0.0
+    float _lvl_range = _multiplier
+    if _method == m_cumdev
+        float _cumdev = cum(stdev(close, 4)) / (bar_index + 1)
+        float _mdev = _cumdev * _length
+        //--
+        var float _oscdev = hlc3
+        float _previous = nz(_oscdev[1], hlc3)
+        if open - _mdev > _previous
+            _oscdev := _previous + _cumdev
+        else if open + _cumdev * _length < _previous
+            _oscdev := _previous - _cumdev
+        else
+            _oscdev := _previous
+        _oscillator := (close - _oscdev) / (_cumdev * (_length * 10))
+    else if _method == m_donchian
+        float _hi = highest(high, _length)
+        float _lo = lowest(low, _length)
+        float _range = _hi - _lo
+        float _lvl_range = _range * _multiplier
+        float _midline = avg(_hi, _lo)//_lo + _lvl_range * 4
+        
+        _oscillator := (close - _midline) / (_range / 2)
+    else if _method == m_decenv
+        var float _hi = high
+        var float _lo = low
+        if high > _hi
+            _hi := high
+        else
+            _hi := max(avg(nz(_hi) * (1.0 - _multiplier), high * (1.0 + _multiplier)), high)
+        if low < _lo
+            _lo := low
+        else
+            _lo := min(avg(nz(_lo) * (1.0 - _multiplier), low * (1.0 + _multiplier)), low)
+
+        float _range = _hi - _lo
+        float _lvl_range = _range * _multiplier
+        float _midline = avg(_hi, _lo)//_lo + _lvl_range * 4
+        float _c = ema(close, _length)
+        _oscillator := 0 - (_c - _midline) / (_range / 2)
     else
-        _oscdev := _previous
-    float _oscillator = (close - _oscdev) / (_cumdev * (_length * 10))
+        _oscillator := na
     //--
     color _col = na
     if _oscillator > 0
@@ -57,7 +92,7 @@ f_mo(_length, _multiplier)=>
     [_oscillator, _col]
     
 //-----------------------------------------------------
-[oscillator, colordef] = f_mo(length, mult)
+[oscillator, colordef] = f_mo(method, length, mult)
 
 plot(series=oscillator, color=colordef, title="Murrey Math Oscillator", style=plot.style_columns, transp = 60)
 plot(0, title="Zero Line", color=color.gray, linewidth=4)
