@@ -1,0 +1,61 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="[RS]Simple Forecast - Keltner Worms", shorttitle="KC", overlay=true, resolution="")
+
+src = input(close, title="Source")
+
+f_kc(_src, _length)=>
+	_ma = ema(_src, _length)
+    _rangema = rma(tr(true), _length)
+    var _auto_mult = 0
+    for _i = _auto_mult to 9999
+        if abs(_src - _ma) > (_rangema * _auto_mult)
+            _auto_mult := _auto_mult + 1
+            continue
+        else
+            break
+
+    _upper = _ma + _rangema * _auto_mult
+    _lower = _ma - _rangema * _auto_mult
+    [_ma, _upper, _lower]
+
+[p005ma, p005upper, p005lower] = f_kc(src, 5)
+[p010ma, p010upper, p010lower] = f_kc(src, 10)
+[p025ma, p025upper, p025lower] = f_kc(src, 25)
+[p050ma, p050upper, p050lower] = f_kc(src, 50)
+[p100ma, p100upper, p100lower] = f_kc(src, 100)
+[p200ma, p200upper, p200lower] = f_kc(src, 200)
+
+c = color.blue
+
+p005u = plot(p005upper, color=#0094FF, title="Upper", offset=5, show_last=5)
+plot(p005ma, color=#0094FF, title="Basis", offset=5, show_last=5)
+p005l = plot(p005lower, color=#0094FF, title="Lower", offset=5, show_last=5)
+fill(p005u, p005l, color=#0094FF, transp=95, title="Background")
+
+p010u = plot(p010upper, color=#0094FF, title="Upper", offset=10, show_last=5)
+plot(p010ma, color=#0094FF, title="Basis", offset=10, show_last=5)
+p010l = plot(p010lower, color=#0094FF, title="Lower", offset=10, show_last=5)
+fill(p010u, p010l, color=#0094FF, transp=95, title="Background")
+
+p025u = plot(p025upper, color=#0094FF, title="Upper", offset=25, show_last=15)
+plot(p025ma, color=#0094FF, title="Basis", offset=25, show_last=15)
+p025l = plot(p025lower, color=#0094FF, title="Lower", offset=25, show_last=15)
+fill(p025u, p025l, color=#0094FF, transp=95, title="Background")
+
+p050u = plot(p050upper, color=#0094FF, title="Upper", offset=50, show_last=25)
+plot(p050ma, color=#0094FF, title="Basis", offset=50, show_last=25)
+p050l = plot(p050lower, color=#0094FF, title="Lower", offset=50, show_last=25)
+fill(p050u, p050l, color=#0094FF, transp=95, title="Background")
+
+p100u = plot(p100upper, color=#0094FF, title="Upper", offset=100, show_last=50)
+plot(p100ma, color=#0094FF, title="Basis", offset=100, show_last=50)
+p100l = plot(p100lower, color=#0094FF, title="Lower", offset=100, show_last=50)
+fill(p100u, p100l, color=#0094FF, transp=95, title="Background")
+
+p200u = plot(p200upper, color=#0094FF, title="Upper", offset=200, show_last=100)
+plot(p200ma, color=#0094FF, title="Basis", offset=200, show_last=100)
+p200l = plot(p200lower, color=#0094FF, title="Lower", offset=200, show_last=100)
+fill(p200u, p200l, color=#0094FF, transp=95, title="Background")
