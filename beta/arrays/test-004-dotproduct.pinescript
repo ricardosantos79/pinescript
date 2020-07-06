@@ -1,0 +1,21 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("My Script")
+
+f_dot_product(_A, _B)=>
+    int _Alength = array.size(_A)
+    int _Blength = array.size(_B)
+    _dot = 0.0
+    if _Alength == _Blength
+        for _i = 0 to _Alength-1
+            _dot := _dot + array.get(_A, _i) * array.get(_B, _i)
+    _dot
+
+dotlength = input(6)
+float[] A = array.newfloat(dotlength, close)
+float[] B = array.newfloat(dotlength, 1.618)
+
+float dot = f_dot_product(A, B)
+plot(dot)

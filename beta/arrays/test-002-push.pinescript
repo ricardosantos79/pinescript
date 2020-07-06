@@ -1,0 +1,20 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("f_push()")
+
+f_push(_id, _value)=>
+    _e = array.pop(_id)
+    array.insert(_id, 0, _value)
+
+length = input(5)
+
+var float[] a = array.newfloat(length, close)
+
+f_push(a, close)
+
+plot(array.get(a, 0))
+plot(array.get(a, 4), color=color.yellow, offset=-4)
+
+plot(array.sum(a) / length, color=color.red)

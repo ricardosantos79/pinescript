@@ -1,0 +1,35 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("My Script")
+
+f_push(_id, _value)=>
+    _e = array.pop(_id)
+    array.insert(_id, 0, _value)
+
+f_push_array(_A, _B)=>
+    for _i = array.size(_B)-1 to 0
+        f_push(_A, array.get(_B, _i))
+
+h = highest(10)
+l = lowest(10)
+avg = (h+l)/2
+newhigh = high >= h ? 1 : 0
+newlow = low <= l ? 1 : 0
+
+length = input(6)
+var float[] A = array.newfloat(length, close)
+float[] B = array.newfloat(2, 0.0)
+
+if change(newhigh) < 0 or change(newlow) < 0
+    //array.set(B, 0, avg)
+    array.set(B, 0, h)
+    array.set(B, 1, l)
+    f_push_array(A, B)
+
+plot(array.sum(A) / length)
+plot(array.max(A), color=color.white)
+plot(array.min(A), color=color.white)
+plot(close, color=color.yellow)
+//plot(array.sum(A))

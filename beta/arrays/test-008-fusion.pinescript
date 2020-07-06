@@ -1,0 +1,56 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='test-008-fusion', overlay=true)
+
+var label debug_high = label.new(x=bar_index, y=0.0, text='', style=label.style_label_lower_left)
+var label debug_low = label.new(x=bar_index, y=0.0, text='', style=label.style_label_upper_left)
+var label debug_mid = label.new(x=bar_index, y=0.0, text='', style=label.style_label_right)
+f_print(_array, _label)=>
+    int _size = array.size(id=_array) - 1
+    string _t = ''
+    if _size > 0
+        for _i = 0 to _size
+            _t := _t + tostring(_i, '# : ') + tostring(array.get(id=_array, index=_i)) + '\n'
+    label.set_xy(id=_label, x=bar_index, y=0.0)
+    label.set_text(id=_label, text=_t)
+
+int length = input(10)
+int half = (1 + length) / 2
+// (1 + length) prioritizes the first half (lows) of the array so that at odd values it will have 1 more element.
+
+var float[] extremes = array.newfloat(size=length, initial_value=open)
+
+float[] lows = array.slice(id=extremes, index_from=0, index_to=half)
+float[] highs = array.slice(id=extremes, index_from=half, index_to=length)
+// odd slicing behaviour: when slicing the second part(highs) index_from should be half + 1?
+// right now it seems to be doing so automatically, or not being added into the first part value of "half".
+
+float h = highest(length)
+float l = lowest(length)
+
+bool isnewhigh = high >= h
+bool isnewlow = low <= l
+
+if isnewhigh
+    float _e = array.pop(id=highs)
+    array.insert(id=highs, index=0, value=high)
+if isnewlow
+    float _e = array.pop(id=lows)
+    array.insert(id=lows, index=0, value=low)
+
+float avg_extreme = array.sum(id=extremes) /  array.size(id=extremes)
+
+float avg_high = array.sum(id=highs) / array.size(id=highs)
+float avg_low = array.sum(id=lows) / array.size(id=lows)
+
+plot(avg_high)
+plot(avg_low)
+plot(avg_extreme, color=color.silver)
+
+bool show_debug = input(false)
+if show_debug
+    f_print(highs, debug_high)
+    f_print(lows, debug_low)
+    f_print(extremes, debug_mid)

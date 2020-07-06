@@ -1,0 +1,18 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("My Script")
+length = 5
+var float[] a = array.newfloat(length, close)
+_length = array.size(a)
+sum = 0
+for _i = _length-1 to 1
+//     _e = array.get(a, _i-1)
+    array.insert(a, _i, _i)
+// array.insert(a, 0, close)
+
+
+plot(array.get(a, 0))
+//plot(close)
+//plot(array.sum(a) / length)
