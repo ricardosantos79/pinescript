@@ -3,7 +3,7 @@
 
 //@version=4
 study("test-011-game")
-int msize = 7
+int msize = 8
 var int[] A = array.newint(size=msize, initial_value=0)
 var int[] B = array.newint(size=msize, initial_value=0)
 var int[] C = array.newint(size=msize, initial_value=0)
@@ -15,27 +15,39 @@ var int[] H = array.newint(size=msize, initial_value=0)
 
 f_xdim(_i)=>(_i==0?A:(_i==1?B:(_i==2?C:(_i==3?D:(_i==4?E:(_i==5?F:(_i==6?G:(_i==7?H:A))))))))
 
-for _i=0 to msize
-    _ref_current_array = f_xdim(_i)
-    for _j=0 to msize
-        int _north_cell = array.get(id=f_xdim((_i - 1) % (msize + 1)), index=_j)
-        int _south_cell = array.get(id=f_xdim((_i + 1) % (msize + 1)), index=_j)
-        int _west_cell = array.get(id=_ref_current_array, index=(_j - 1) % (msize + 1))
-        int _east_cell = array.get(id=_ref_current_array, index=(_j + 1) % (msize + 1))
+// populate:
+pop_at_every = bar_index%21//input(3)
+if barstate.islast
+    for _i=0 to msize-1
+        for _j=0 to msize-1
+            if (_i*_j)%pop_at_every
+                array.set(id=f_xdim(_i), index=_j, value=1)
+//t = ''
+for _i=0 to msize-1
+    //_ref_current_array = f_xdim(_i)
+    for _j=0 to msize-1
+        //t:= t + tostring((msize + _i - 1) % (msize)) + '\n'
+        int _north_cell = array.get(id=f_xdim((msize + _i - 1) % (msize)), index=_j)
+        int _south_cell = array.get(id=f_xdim((msize + _i + 1) % (msize)), index=_j)
+        int _west_cell = array.get(id=f_xdim(_i), index=(msize + _j - 1) % (msize))
+        int _east_cell = array.get(id=f_xdim(_i), index=(msize + _j + 1) % (msize))
+        //
         int _sum_cells = _north_cell + _south_cell + _west_cell + _east_cell
-        int _current_cell = array.get(id=_ref_current_array, index=_j)
+        int _current_cell = array.get(id=f_xdim(_i), index=_j)
         // rules:
         if _current_cell > 0
             if _sum_cells > 1 and _sum_cells < 4
-                array.set(id=_ref_current_array, index=_j, value=1)
+                array.set(id=f_xdim(_i), index=_j, value=1)
             else
-                array.set(id=_ref_current_array, index=_j, value=0)
+                array.set(id=f_xdim(_i), index=_j, value=0)
         else        
             if _sum_cells == 3
-                array.set(id=_ref_current_array, index=_j, value=1)
+                array.set(id=f_xdim(_i), index=_j, value=1)
             else
-                array.set(id=_ref_current_array, index=_j, value=0)
-
+                array.set(id=f_xdim(_i), index=_j, value=0)
+// var label la = label.new(bar_index, 0.0, '')
+// label.set_xy(la, bar_index, 0.0)
+// label.set_text(la, t)
 //
 plot(series=array.get(id=A, index=0) > 0 ? 1.0 : 0.0, title='', color=color.blue, style=plot.style_columns, transp=20, histbase=0.0, offset=-7, show_last=1)
 plot(series=array.get(id=A, index=1) > 0 ? 1.0 : 0.0, title='', color=color.blue, style=plot.style_columns, transp=20, histbase=0.0, offset=-6, show_last=1)
