@@ -1,0 +1,30 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-010-linearity", overlay=false)
+
+int length = input(10)
+var float[] prices = array.newfloat(size=length, initial_value=open)
+e = array.remove(id=prices, index=0)
+array.push(id=prices, value=close)
+
+// float[] copy = array.copy(id=prices)
+// array.sort(id=copy, order=true)
+
+float start_value = e//array.sum(id=copy) / length
+float lin = 0.0
+for _i = length-1 to 0
+    float _a = 1 / (1 + _i)
+    lin := (lin) + (array.get(id=prices, index=_i) - start_value) * _a
+
+
+// plot(lin)
+// plot(e)
+color col = lin > 0 ? color.green : color.red
+// var line li = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=extend.none, width=2)
+// line.set_xy1(id=li, x=bar_index[length], y=start_value)
+// line.set_xy2(id=li, x=bar_index[0], y=start_value + lin)
+// line.set_color(id=li, color=col)
+barcolor(col)
+plot(lin)//, display=display.none)

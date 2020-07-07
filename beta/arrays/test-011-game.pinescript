@@ -1,0 +1,40 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-011-game")
+int msize = 7
+var int[] A = array.newint(size=msize, initial_value=0)
+var int[] B = array.newint(size=msize, initial_value=0)
+var int[] C = array.newint(size=msize, initial_value=0)
+var int[] D = array.newint(size=msize, initial_value=0)
+var int[] E = array.newint(size=msize, initial_value=0)
+var int[] F = array.newint(size=msize, initial_value=0)
+var int[] G = array.newint(size=msize, initial_value=0)
+var int[] H = array.newint(size=msize, initial_value=0)
+
+f_xdim(_i)=>(_i==0?A:(_i==1?B:(_i==2?C:(_i==3?D:(_i==4?E:(_i==5?F:(_i==6?G:(_i==7?H:A))))))))
+
+for _i=0 to msize
+    _ref_current_array = f_xdim(_i)
+    for _j=0 to msize
+        int _north_cell = array.get(id=f_xdim((_i - 1) % (msize + 1)), index=_j)
+        int _south_cell = array.get(id=f_xdim((_i + 1) % (msize + 1)), index=_j)
+        int _west_cell = array.get(id=_ref_current_array, index=(_j - 1) % (msize + 1))
+        int _east_cell = array.get(id=_ref_current_array, index=(_j + 1) % (msize + 1))
+        int _sum_cells = _north_cell + _south_cell + _west_cell + _east_cell
+        int _current_cell = array.get(id=_ref_current_array, index=_j)
+        // rules:
+        if _current_cell > 0
+            if _sum_cells > 1 and _sum_cells < 4
+                array.set(id=_ref_current_array, index=_j, value=1)
+            else
+                array.set(id=_ref_current_array, index=_j, value=0)
+        else        
+            if _sum_cells == 3
+                array.set(id=_ref_current_array, index=_j, value=1)
+            else
+                array.set(id=_ref_current_array, index=_j, value=0)
+
+
+plot(series=1.0, title='', color=(array.get(id=f_xdim(0), index=0) ? color.blue : na), style=plot.style_columns, transp=20, histbase=0.0, offset=-7, show_last=1)
