@@ -1,0 +1,34 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-009-stat_mining")
+var label debug = label.new(x=bar_index, y=0.0, text='', style=label.style_label_right)
+f_print(_A, _B, _C, _D, _label)=>
+    int _size = array.size(id=_A) - 1
+    string _t = ''
+    if _size > 0
+        for _i = _size to 0
+            _t := _t + tostring(_i, '# : ') + tostring(array.get(id=_A, index=_i), '#') + ', ' + tostring(array.get(id=_B, index=_i), '#') + ', ' + tostring(array.get(id=_C, index=_i), '#') + ', ' + tostring(array.get(id=_D, index=_i), '#') + '. \n'
+    label.set_xy(id=_label, x=bar_index, y=0.0)
+    label.set_text(id=_label, text=_t)
+
+var int[] r1_totals = array.newint(size=101, initial_value=0)
+var int[] r2_totals = array.newint(size=101, initial_value=0)
+var int[] r3_totals = array.newint(size=101, initial_value=0)
+var int[] r4_totals = array.newint(size=101, initial_value=0)
+
+int rsi = round(rsi(close, 14)[1])
+float range = atr(14)
+float width = abs(close-close[1]) / range
+
+if width < 1
+    array.set(id=r1_totals, index=rsi, value=array.get(id=r1_totals, index=rsi) + 1)
+else if width < 2
+    array.set(id=r2_totals, index=rsi, value=array.get(id=r2_totals, index=rsi) + 1)
+else if width < 3
+    array.set(id=r3_totals, index=rsi, value=array.get(id=r3_totals, index=rsi) + 1)
+else
+    array.set(id=r4_totals, index=rsi, value=array.get(id=r4_totals, index=rsi) + 1)
+
+f_print(r1_totals, r2_totals, r3_totals, r4_totals, debug)
