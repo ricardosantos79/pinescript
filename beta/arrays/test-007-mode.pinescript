@@ -23,17 +23,43 @@ float src = close//bar_index % length
 var float[] prices = array.newfloat(size=length, initial_value=close)
 f_push(prices, src)
 
-f_mode(_id)=>
+f_median(_id)=>
     int _size = array.size(id=_id)
-    int _target = _size % 2 == 0 ? _size / 2 : 1 + _size / 2
+    int _target = _size / 2//_size % 2 == 0 ? _size / 2 : 1 + _size / 2
     float[] _sorted = array.copy(id=_id)
     array.sort(id=_sorted, order=true)
     //f_print(_sorted, debug)
     float _return = 0.
     if _size > 0
-        _return := array.get(id=_sorted, index=_target)
+        if _size % 2 == 0
+            _return := array.get(id=_sorted, index=_target)
+        else
+            float[] _center = array.slice(id=_sorted, index_from=_target, index_to=_target + 2)
+            _return := array.sum(id=_center) / 2
     _return
 
-float mode = f_mode(prices)
+f_mode(_id, _multiplier)=>
+    int _size = array.size(id=_id)
+    int _max_value = 0
+    int _max_count = 0
+    
+    for _i = 0 to _size-1
+        int _count = 0
+        int _base = round((array.get(id=_id, index=_i) * _multiplier) / _multiplier)
+        for _j = 0 to _size-1
+            int _value = round((array.get(id=_id, index=_j) * _multiplier) / _multiplier)
+            if _value == _base
+                _count := _count + 1
+            if _count > _max_count
+                _max_count := _count
+                _max_value := _base
+    _max_value
+
 plot(src, color=color.gray)
-plot(mode)
+
+
+float median = f_median(prices)
+plot(median)
+
+int mode = f_mode(prices, 1)
+plot(mode, color=color.orange)
