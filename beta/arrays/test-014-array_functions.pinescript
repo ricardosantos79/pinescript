@@ -1,0 +1,104 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-014-array_functions", overlay=true)
+
+
+var float[] prices = array.new_float(size=10, initial_value=open)
+var int[] indices = array.new_int(size=10, initial_value=0)
+if pivothigh(2, 2)
+    e = array.pop(id=prices)
+    i = array.pop(id=indices)
+    array.insert(id=prices, index=0, value=high[2])
+    array.insert(id=indices, index=0, value=bar_index[2])
+if pivotlow(2, 2)
+    e = array.pop(id=prices)
+    i = array.pop(id=indices)
+    array.insert(id=prices, index=0, value=low[2])
+    array.insert(id=indices, index=0, value=bar_index[2])
+
+f_mean(_id)=>
+    int _size = array.size(id=_id)
+    float _mean = array.sum(id=_id) / _size
+
+f_stdev(_id)=>
+    int _size = array.size(id=_id)
+    float _mean = array.sum(id=_id) / _size
+    float _dev = 0.0
+    for _i = 0 to _size - 1
+        _dev := _dev + abs(array.get(id=_id, index=_i) - _mean)
+    _dev := _dev / _size
+
+f_variance(_id)=>
+    int _size = array.size(id=_id)
+    float _mean = array.sum(id=_id) / _size
+    float _var = 0.0
+    for _i = 0 to _size - 1
+        _var := _var + pow(array.get(id=_id, index=_i) - _mean, 2)
+    _var
+    
+f_covariance(_id1, _id2)=>
+    int _size1 = array.size(id=_id1)
+    int _size2 = array.size(id=_id2)
+    float _mean1 = array.sum(id=_id1) / _size1
+    float _mean2 = array.sum(id=_id2) / _size2
+    float _cov = 0.0
+    if _size1 == _size2
+        for _i = 0 to _size1 - 1
+            _cov := _cov + (array.get(id=_id1, index=_i) - _mean1) * (array.get(id=_id2, index=_i) - _mean2)
+    _cov        
+
+f_coefficients(_id1, _id2)=>
+    int _size1 = array.size(id=_id1)
+    int _size2 = array.size(id=_id2)
+    float _mean1 = array.sum(id=_id1) / _size1
+    float _mean2 = array.sum(id=_id2) / _size2
+    float _var = 0.0
+    float _cov = 0.0
+    if _size1 == _size2
+        for _i = 0 to _size1 - 1
+            _var := _var + pow(array.get(id=_id1, index=_i) - _mean1, 2)
+            _cov := _cov + (array.get(id=_id1, index=_i) - _mean1) * (array.get(id=_id2, index=_i) - _mean2)
+    float _b1 = _cov / _var
+    float _b0 = _mean1 - _b1 * _mean2
+	[_b0, _b1]
+
+// https://machinelearningmastery.com/implement-simple-linear-regression-scratch-python/
+f_simple_linreg(_id1, _id2)=>
+    int _size1 = array.size(id=_id1)
+    int _size2 = array.size(id=_id2)
+    float _mean1 = array.sum(id=_id1) / _size1
+    float _mean2 = array.sum(id=_id2) / _size2
+    float _var = 0.0
+    float _cov = 0.0
+    if _size1 == _size2
+        for _i = 0 to _size1 - 1
+            _var := _var + pow(array.get(id=_id1, index=_i) - _mean1, 2)
+            _cov := _cov + (array.get(id=_id1, index=_i) - _mean1) * (array.get(id=_id2, index=_i) - _mean2)
+    float _b1 = _cov / _var
+    float _b0 = _mean1 - _b1 * _mean2
+	float[] _predictions = array.new_float(size=0, initial_value=0.0)
+	for _i = 0 to _size2 - 1
+	    array.push(id=_predictions, value=_b0 + _b1 * array.get(id=_id2, index=_i))
+	_predictions
+	
+
+float mean = f_mean(prices)
+float stdev = f_stdev(prices)
+float variance = f_variance(prices)
+float covariance = f_covariance(prices, indices)
+[b0, b1] = f_coefficients(prices, indices)
+float[] D = f_simple_linreg(prices, indices)
+
+var label debug = label.new(bar_index, open, '')
+label.set_xy(id=debug, x=bar_index, y=close)
+label.set_text(id=debug, text=tostring(indices) + '\n' + tostring(D))
+
+plot(mean, color=color.yellow, transp=50)
+plot(mean + stdev, color=color.yellow, transp=50)
+
+plot(variance, color=color.yellow, transp=50, display=display.none)
+plot(covariance, color=color.yellow, transp=50, display=display.none)
+plot(b0, color=color.orange, transp=50, display=display.none)
+plot(b1, color=color.orange, transp=50, display=display.none)
