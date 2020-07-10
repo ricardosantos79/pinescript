@@ -20,7 +20,7 @@ f_push(_id, _value)=>
 
 int length = input(10)
 float src = close//bar_index % length
-var float[] prices = array.newfloat(size=length, initial_value=close)
+var float[] prices = array.new_float(size=length, initial_value=close)
 f_push(prices, src)
 
 f_median(_id)=>

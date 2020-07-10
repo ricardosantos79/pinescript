@@ -10,7 +10,7 @@ f_push(_id, _value)=>
 
 length = input(5)
 
-var float[] a = array.newfloat(length, close)
+var float[] a = array.new_float(length, close)
 
 f_push(a, close)
 

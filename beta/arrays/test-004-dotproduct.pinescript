@@ -14,8 +14,8 @@ f_dot_product(_A, _B)=>
     _dot
 
 dotlength = input(6)
-float[] A = array.newfloat(dotlength, close)
-float[] B = array.newfloat(dotlength, 1.618)
+float[] A = array.new_float(dotlength, close)
+float[] B = array.new_float(dotlength, 1.618)
 
 float dot = f_dot_product(A, B)
 plot(dot)

@@ -20,7 +20,7 @@ int length = input(10)
 int half = (1 + length) / 2
 // (1 + length) prioritizes the first half (lows) of the array so that at odd values it will have 1 more element.
 
-var float[] extremes = array.newfloat(size=length, initial_value=open)
+var float[] extremes = array.new_float(size=length, initial_value=open)
 
 float[] lows = array.slice(id=extremes, index_from=0, index_to=half)
 float[] highs = array.slice(id=extremes, index_from=half, index_to=length)

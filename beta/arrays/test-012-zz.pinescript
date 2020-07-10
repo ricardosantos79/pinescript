@@ -3,67 +3,102 @@
 
 //@version=4
 study("test-012-", overlay=true)
+
+bool show_debug = input(false)
+var label debug = label.new(x=bar_index, y=open, text='', style=label.style_label_left)
+f_print(_A, _label)=>
+    if show_debug
+        int _size = array.size(id=_A) - 1
+        string _t = ''
+        if _size > 0
+            for _i = _size to 0
+                _t := _t + tostring(_i, '# : ') + tostring(array.get(id=_A, index=_i), '#') + ' \n'
+        label.set_xy(id=_label, x=bar_index, y=0.0)
+        label.set_text(id=_label, text=_t)
+
+
 float h = pivothigh(high, 2, 2)
-float l = pivotlow(high, 2, 2)
+float l = pivotlow(low, 2, 2)
 
-var int z = 0
+var int z_bar_index = 0
 var bool direction = false
-
+//plot(direction?1:0)
 if direction
     if h
         direction := false
-        z := bar_index
+        z_bar_index := bar_index
     if l
-        z := bar_index
+        z_bar_index := bar_index
 else
     if l
         direction := true
-        z := bar_index
+        z_bar_index := bar_index
     if h
-        z := bar_index
+        z_bar_index := bar_index
 
 plot(h, color=color.red, linewidth=2, style=plot.style_circles)
 plot(l, color=color.lime, linewidth=2, style=plot.style_circles)
-float zigzag = direction ? l[bar_index-z] : h[bar_index-z]
-plot(zigzag)
 
-int array_maximum_storage = 10
-var int[] zz = array.newint(size=1, initial_value=0)
+float zigzag = direction ? l[bar_index-z_bar_index] : h[bar_index-z_bar_index]
+plot(zigzag, color=color.gray)
+
+int array_maximum_storage = input(10)
+var int[] zz = array.new_int(size=1, initial_value=0)
 int current_size = array.size(id=zz)
 
-float sum = 0.
-
-var float avg = sum / current_size
+var float avg = open
 var float deriv = 0.
 
-if change(z) != 0
+if change(z_bar_index) != 0
     if direction != direction[1]
         if current_size <= array_maximum_storage
-            array.insert(id=zz, index=0, value=z)
+            array.insert(id=zz, index=0, value=z_bar_index)
         else
-            array.remove(id=zz, index=array_maximum_storage-1)
-            array.insert(id=zz, index=0, value=z)
+            array.remove(id=zz, index=current_size-1)//array_maximum_storage-1)
+            array.insert(id=zz, index=0, value=z_bar_index)
     else
-        if current_size <= array_maximum_storage
-            array.set(id=zz, index=0, value=z)
-        else
-            array.set(id=zz, index=0, value=z)
+        array.set(id=zz, index=0, value=z_bar_index)
 
+    float sum = 0.    
     for _i = 0 to current_size-1
         _bar = array.get(id=zz, index=_i)
         sum := sum + (direction[bar_index-_bar] ? l[bar_index-_bar] : h[bar_index-_bar])
     
+    f_print(zz, debug)
+    
     avg := sum / current_size
-    deriv := change(avg)
+    
+    float _max = zigzag[bar_index - array.get(id=zz, index=0) + 1]
+    float _min = zigzag[bar_index - array.get(id=zz, index=0) + 1]
+    //label.set_text(id=debug, text=tostring(_min))
+    for _i = 0 to current_size-1
+        _bar = array.get(id=zz, index=_i)
+        float _current_h = h[bar_index-_bar]
+        float _current_l = l[bar_index-_bar]
+        if _current_h >= _max
+            _max := _current_h
+        if _current_l <= _min
+            _min := _current_l
+    deriv := (_max - _min) * 0.5
+
+// deriv := fixnan(deriv)
+// plot(deriv)
 
 var line center = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=extend.both, color=color.silver, width=1)
-// var line top = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=extend.both, color=color.silver, width=1)
-// var line bot = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=extend.both, color=color.silver, width=1)
+var line top = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=extend.both, color=color.silver, width=1)
+var line bot = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=extend.both, color=color.silver, width=1)
 
+float multiplier = input(1.)
 if current_size > 1
     int previous_bar = array.get(id=zz, index=1)
     int current_bar = array.get(id=zz, index=0)
     line.set_xy1(id=center, x=previous_bar, y=avg[bar_index - previous_bar])
     line.set_xy2(id=center, x=current_bar, y=avg[bar_index - current_bar])
+    line.set_xy1(id=top, x=previous_bar, y=avg[bar_index - previous_bar] + deriv * multiplier)
+    line.set_xy2(id=top, x=current_bar, y=avg[bar_index - current_bar] + deriv * multiplier)
+    line.set_xy1(id=bot, x=previous_bar, y=avg[bar_index - previous_bar] - deriv * multiplier)
+    line.set_xy2(id=bot, x=current_bar, y=avg[bar_index - current_bar] - deriv * multiplier)
 
-plot(avg)
+plot(avg, color=color.yellow, transp=40)
+plot(avg+deriv, color=color.yellow, transp=40)
+plot(avg-deriv, color=color.yellow, transp=40)

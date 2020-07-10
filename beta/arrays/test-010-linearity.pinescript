@@ -5,7 +5,7 @@
 study("test-010-linearity", overlay=false)
 
 int length = input(10)
-var float[] prices = array.newfloat(size=length, initial_value=open)
+var float[] prices = array.new_float(size=length, initial_value=open)
 e = array.remove(id=prices, index=0)
 array.push(id=prices, value=close)
 

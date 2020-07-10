@@ -4,7 +4,7 @@
 //@version=4
 study("My Script")
 length = 5
-var float[] a = array.newfloat(length, close)
+var float[] a = array.new_float(length, close)
 _length = array.size(a)
 sum = 0
 for _i = _length-1 to 1

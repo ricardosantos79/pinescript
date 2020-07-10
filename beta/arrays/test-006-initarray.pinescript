@@ -4,7 +4,7 @@
 //@version=4
 study(title="test-006-initarray")
 
-var color[] colors = array.newcolor(size=0, initial_value=#eeeeee)
+var color[] colors = array.new_color(size=0, initial_value=#eeeeee)
 // if array has no elements, initialize the array with its elements:
 if array.size(id=colors) == 0
     array.push(id=colors, value=#000000)

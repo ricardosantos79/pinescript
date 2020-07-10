@@ -4,14 +4,14 @@
 //@version=4
 study("test-011-game")
 int msize = 8
-var int[] A = array.newint(size=msize, initial_value=0)
-var int[] B = array.newint(size=msize, initial_value=0)
-var int[] C = array.newint(size=msize, initial_value=0)
-var int[] D = array.newint(size=msize, initial_value=0)
-var int[] E = array.newint(size=msize, initial_value=0)
-var int[] F = array.newint(size=msize, initial_value=0)
-var int[] G = array.newint(size=msize, initial_value=0)
-var int[] H = array.newint(size=msize, initial_value=0)
+var int[] A = array.new_int(size=msize, initial_value=0)
+var int[] B = array.new_int(size=msize, initial_value=0)
+var int[] C = array.new_int(size=msize, initial_value=0)
+var int[] D = array.new_int(size=msize, initial_value=0)
+var int[] E = array.new_int(size=msize, initial_value=0)
+var int[] F = array.new_int(size=msize, initial_value=0)
+var int[] G = array.new_int(size=msize, initial_value=0)
+var int[] H = array.new_int(size=msize, initial_value=0)
 
 f_xdim(_i)=>(_i==0?A:(_i==1?B:(_i==2?C:(_i==3?D:(_i==4?E:(_i==5?F:(_i==6?G:(_i==7?H:A))))))))
 

@@ -13,10 +13,10 @@ f_print(_A, _B, _C, _D, _label)=>
     label.set_xy(id=_label, x=bar_index, y=0.0)
     label.set_text(id=_label, text=_t)
 
-var int[] r1_totals = array.newint(size=101, initial_value=0)
-var int[] r2_totals = array.newint(size=101, initial_value=0)
-var int[] r3_totals = array.newint(size=101, initial_value=0)
-var int[] r4_totals = array.newint(size=101, initial_value=0)
+var int[] r1_totals = array.new_int(size=101, initial_value=0)
+var int[] r2_totals = array.new_int(size=101, initial_value=0)
+var int[] r3_totals = array.new_int(size=101, initial_value=0)
+var int[] r4_totals = array.new_int(size=101, initial_value=0)
 
 int rsi = round(rsi(close, 14)[1])
 float range = atr(14)

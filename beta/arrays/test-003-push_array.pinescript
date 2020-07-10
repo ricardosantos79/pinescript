@@ -19,8 +19,8 @@ newhigh = high >= h ? 1 : 0
 newlow = low <= l ? 1 : 0
 
 length = input(6)
-var float[] A = array.newfloat(length, close)
-float[] B = array.newfloat(2, 0.0)
+var float[] A = array.new_float(length, close)
+float[] B = array.new_float(2, 0.0)
 
 if change(newhigh) < 0 or change(newlow) < 0
     //array.set(B, 0, avg)

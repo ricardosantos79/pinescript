@@ -23,8 +23,8 @@ float feature02 = round(rsi(close, 14)[1]*10)
 int data_range = 10
 int nclusters = 3
 
-float[] X = array.newfloat(data_range, feature01)
-float[] Y = array.newfloat(data_range, feature02)
+float[] X = array.new_float(data_range, feature01)
+float[] Y = array.new_float(data_range, feature02)
 
 for _i = 0 to data_range-1
     array.set(id=X, index=_i, value=feature01[_i])
