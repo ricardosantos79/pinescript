@@ -1,0 +1,19 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='test-013-global_array_in_local')
+
+var float[] A = array.new_float(size=10, initial_value=open)
+f_test(_value)=>
+    _e = array.pop(id=A)
+    array.insert(id=A, index=0, value=_value)
+
+f_test(close)
+
+plot(close, color=color.gray)
+plot(array.get(id=A, index=0))
+
+var label test_tostring = label.new(bar_index, close, '')
+label.set_xy(id=test_tostring, x=bar_index, y=close)
+label.set_text(id=test_tostring, text=tostring(A))
