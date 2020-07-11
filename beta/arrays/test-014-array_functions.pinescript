@@ -38,62 +38,90 @@ f_variance(_id)=>
         _var := _var + pow(array.get(id=_id, index=_i) - _mean, 2)
     _var
     
-f_covariance(_id1, _id2)=>
-    int _size1 = array.size(id=_id1)
-    int _size2 = array.size(id=_id2)
-    float _mean1 = array.sum(id=_id1) / _size1
-    float _mean2 = array.sum(id=_id2) / _size2
+f_covariance(_X, _Y)=>
+    int _sizeY = array.size(id=_Y)
+    int _sizeX = array.size(id=_X)
+    float _meanY = array.sum(id=_Y) / _sizeY
+    float _meanX = array.sum(id=_X) / _sizeX
     float _cov = 0.0
-    if _size1 == _size2
-        for _i = 0 to _size1 - 1
-            _cov := _cov + (array.get(id=_id1, index=_i) - _mean1) * (array.get(id=_id2, index=_i) - _mean2)
+    if _sizeY == _sizeX
+        for _i = 0 to _sizeY - 1
+            _cov := _cov + (array.get(id=_Y, index=_i) - _meanY) * (array.get(id=_X, index=_i) - _meanX)
     _cov        
 
-f_coefficients(_id1, _id2)=>
-    int _size1 = array.size(id=_id1)
-    int _size2 = array.size(id=_id2)
-    float _mean1 = array.sum(id=_id1) / _size1
-    float _mean2 = array.sum(id=_id2) / _size2
+f_coefficients(_X, _Y)=>
+    int _sizeY = array.size(id=_Y)
+    int _sizeX = array.size(id=_X)
+    float _meanY = array.sum(id=_Y) / _sizeY
+    float _meanX = array.sum(id=_X) / _sizeX
     float _var = 0.0
     float _cov = 0.0
-    if _size1 == _size2
-        for _i = 0 to _size1 - 1
-            _var := _var + pow(array.get(id=_id1, index=_i) - _mean1, 2)
-            _cov := _cov + (array.get(id=_id1, index=_i) - _mean1) * (array.get(id=_id2, index=_i) - _mean2)
+    if _sizeY == _sizeX
+        for _i = 0 to _sizeY - 1
+            _var := _var + pow(array.get(id=_Y, index=_i) - _meanY, 2)
+            _cov := _cov + (array.get(id=_Y, index=_i) - _meanY) * (array.get(id=_X, index=_i) - _meanX)
     float _b1 = _cov / _var
-    float _b0 = _mean1 - _b1 * _mean2
+    float _b0 = _meanY - _b1 * _meanX
 	[_b0, _b1]
 
-// https://machinelearningmastery.com/implement-simple-linear-regression-scratch-python/
-f_simple_linreg(_id1, _id2)=>
-    int _size1 = array.size(id=_id1)
-    int _size2 = array.size(id=_id2)
-    float _mean1 = array.sum(id=_id1) / _size1
-    float _mean2 = array.sum(id=_id2) / _size2
+f_simple_linreg(_X, _Y)=>
+//  https://machinelearningmastery.com/implement-simple-linear-regression-scratch-python/
+    int _sizeY = array.size(id=_Y)
+    int _sizeX = array.size(id=_X)
+    float _meanY = array.sum(id=_Y) / _sizeY
+    float _meanX = array.sum(id=_X) / _sizeX
     float _var = 0.0
     float _cov = 0.0
-    if _size1 == _size2
-        for _i = 0 to _size1 - 1
-            _var := _var + pow(array.get(id=_id1, index=_i) - _mean1, 2)
-            _cov := _cov + (array.get(id=_id1, index=_i) - _mean1) * (array.get(id=_id2, index=_i) - _mean2)
+    if _sizeY == _sizeX
+        for _i = 0 to _sizeY - 1
+            _var := _var + pow(array.get(id=_Y, index=_i) - _meanY, 2)
+            _cov := _cov + (array.get(id=_Y, index=_i) - _meanY) * (array.get(id=_X, index=_i) - _meanX)
+        //_var := _var / _sizeY // skews the angle more
     float _b1 = _cov / _var
-    float _b0 = _mean1 - _b1 * _mean2
+    float _b0 = _meanY - _b1 * _meanX
 	float[] _predictions = array.new_float(size=0, initial_value=0.0)
-	for _i = 0 to _size2 - 1
-	    array.push(id=_predictions, value=_b0 + _b1 * array.get(id=_id2, index=_i))
+	for _i = 0 to _sizeX - 1
+	    array.push(id=_predictions, value=_b0 + _b1 * array.get(id=_X, index=_i))
 	_predictions
 	
+f_alt_linreg(_X, _Y)=>
+//  https://www.statisticshowto.com/probability-and-statistics/regression-analysis/find-a-linear-regression-equation/#FindaLinear
+    int _sizeY = array.size(id=_Y)
+    int _sizeX = array.size(id=_X)
+    float _sumX = array.sum(id=_X)
+    float _sumY = array.sum(id=_Y)
+    float _sumXY = 0.0
+    float _sumX2 = 0.0
+    float _sumY2 = 0.0
+    if _sizeY == _sizeX
+        for _i = 0 to _sizeY - 1
+            float _Xi = array.get(id=_X, index=_i)
+            float _Yi = array.get(id=_Y, index=_i)
+            _sumXY := _sumXY + (_Xi * _Yi)
+            _sumX2 := _sumX2 + pow(_Xi, 2)
+            _sumY2 := _sumY2 + pow(_Yi, 2)
+    float _a = ((_sumY * _sumX2) - (_sumX * _sumXY)) / ((_sizeX * _sumX2) - pow(_sumX, 2))
+    float _b = ((_sizeX * _sumXY) - (_sumX * _sumY)) / ((_sizeX * _sumX2) - pow(_sumX, 2))
+	float[] _predictions = array.new_float(size=0, initial_value=0.0)
+	for _i = 0 to _sizeX - 1
+	    array.push(id=_predictions, value=_a + _b * array.get(id=_X, index=_i))
+	_predictions
 
 float mean = f_mean(prices)
 float stdev = f_stdev(prices)
 float variance = f_variance(prices)
-float covariance = f_covariance(prices, indices)
-[b0, b1] = f_coefficients(prices, indices)
-float[] D = f_simple_linreg(prices, indices)
+float covariance = f_covariance(indices, prices)
+[b0, b1] = f_coefficients(indices, prices)
+//float[] D = f_simple_linreg(indices, prices)
+float[] D = f_alt_linreg(indices, prices)
 
 var label debug = label.new(bar_index, open, '')
 label.set_xy(id=debug, x=bar_index, y=close)
 label.set_text(id=debug, text=tostring(indices) + '\n' + tostring(D))
+var line li = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open)
+first = input(0), last = input(9)
+line.set_xy1(id=li, x=array.get(id=indices, index=first), y=array.get(id=D, index=first))
+line.set_xy2(id=li, x=array.get(id=indices, index=last), y=array.get(id=D, index=last))
 
 plot(mean, color=color.yellow, transp=50)
 plot(mean + stdev, color=color.yellow, transp=50)
