@@ -1,0 +1,21 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-015-sort_parameter")
+var float[] prices = array.new_float(size=10, initial_value=open)
+
+f_test(_A, _order)=>
+//| returns the 1st element in a sorted array:
+//| inputs:
+//|     _A:     array with origin elements.
+//|     _order: order to sort array(lowest: order.ascending, highest: order.descending).
+    float[] _T = array.copy(id=_A)
+    array.sort(id=_T, order=_order) // works if replaced by hardcoded order.ascending or order.descending
+    array.get(id=_T, index=0)
+    
+bool order = input(true)
+float element = f_test(prices, order.ascending)
+plot(element, color=color.yellow, transp=50)
+
+plot(close)
