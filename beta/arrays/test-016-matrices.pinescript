@@ -1,0 +1,46 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-016-matrices")
+plot(close)
+
+f_array_new_matrix(_M, _columns, _rows, _initial_value)=>
+    array.clear(_M)
+    for _i = 0 to (_columns * _rows) - 1
+        array.push(id=_M, value=_initial_value)
+
+var float[] M1 = array.new_float(size=0, initial_value=0.0)
+var float[] M2 = array.new_float(size=0, initial_value=0.0)
+f_array_new_matrix(M1, 3, 3, 1.0)
+f_array_new_matrix(M2, 3, 3, 2.0)
+
+
+f_array_matrix_multiply(_A, _B, _Acol, _Arow, _Bcol, _Brow)=>
+    //_t = ''
+    _R = array.new_float(size=_Arow * _Bcol, initial_value=0.0)
+    if _Acol == _Brow
+        for _i = 0 to _Arow - 1
+            for _j = 0 to _Bcol - 1
+                float _sum = 0.0
+                for _k = 0 to _Acol - 1
+                    //_t := _t + tostring(_i * _Acol + _k) + ':' + tostring(_k * _Bcol + _j) + ', '
+                    _sum := _sum + array.get(id=_A, index=int(_i * _Acol + _k)) * array.get(id=_B, index=int(_k * _Bcol + _j))
+                    //_t := _t + tostring(_sum)
+                // t returns the right values
+                //_t := _t + tostring(_i * _Bcol + _j) + ':' + tostring(_sum) + ', '
+                //
+                //array.set() does not insert the values..
+                array.set(id=_R, index=int(_i * _Bcol + _j), value=_sum)
+    _R
+
+
+float[] array_matrix_multiply = f_array_matrix_multiply(M1, M2, 3, 3, 3, 3)
+bool show_debug = input(false)
+var label debug = label.new(bar_index, open, '')
+if show_debug
+    label.set_xy(id=debug, x=bar_index, y=close)
+    label.set_text(id=debug, text=tostring(M1) + '\n' + tostring(M2) + '\n' + tostring(array_matrix_multiply))
+else
+    label.delete(id=debug)
+
