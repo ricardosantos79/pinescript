@@ -18,18 +18,88 @@ if pivotlow(2, 2)
     array.insert(id=prices, index=0, value=low[2])
     array.insert(id=indices, index=0, value=bar_index[2])
 
-f_array_multiply(_X, _Y)=>
+f_array_ops(_X, _Y, _op)=>
+//| mathematical and logical operations of array elements (X[i] <op> Y[i]) wise.
+//| inputs:
+//|     _X:     array of x elements
+//|     _Y:     array of y elements
+//|     _op:    operator string
     int _sizeY = array.size(id=_Y)
     int _sizeX = array.size(id=_X)
     float[] _Z = array.new_float(size=0, initial_value=0.0)
     if _sizeY == _sizeX
-        for _i = 0 to _sizeX-1
-            array.push(id=_Z, value=array.get(id=_X, index=_i)*array.get(id=_Y, index=_i))
+        if _op == '+'
+        //| addition
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) + array.get(id=_Y, index=_i))
+        else if _op == '-'
+        //| subtraction
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) - array.get(id=_Y, index=_i))
+        else if _op == '*'
+        //| multiplication
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) * array.get(id=_Y, index=_i))
+        else if _op == '/'
+        //| division
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) / array.get(id=_Y, index=_i))
+        else if _op == '%'
+        //| modulus remainder
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) % array.get(id=_Y, index=_i))
+        else if _op == '//'
+        //| floor division
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=round(array.get(id=_X, index=_i) / array.get(id=_Y, index=_i)))
+        else if _op == '**'
+        //| exponention
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=pow(array.get(id=_X, index=_i), array.get(id=_Y, index=_i)))
+        else if _op == '=='
+        //| is equal
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) == array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        else if _op == '!='
+        //| is not equal
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) != array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        else if _op == '>'
+        //| is higher
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) > array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        else if _op == '<'
+        //| is lower
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) < array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        else if _op == '>='
+        //| is higher or equal
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) >= array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        else if _op == '<='
+        //| is lower or equal
+            for _i = 0 to _sizeX-1
+                array.push(id=_Z, value=array.get(id=_X, index=_i) <= array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        else
+            array.clear(id=_Z)
     _Z
+
+// float[] array_ops = f_array_ops(indices, prices, input(''))
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(indices, '#') + '\n' + tostring(prices) + '\n' + tostring(array_ops))
+// else
+//     label.delete(id=debug)
+
 
 f_array_mean(_id)=>
     int _size = array.size(id=_id)
     float _mean = array.sum(id=_id) / _size
+
+float mean = f_array_mean(prices)
+plot(mean, color=color.yellow, transp=50)
 
 f_array_standardize(_X)=>
 //| Standardizes array values against the maximum range in the data set:
@@ -44,6 +114,15 @@ f_array_standardize(_X)=>
         array.set(id=_Z, index=_i, value=(array.get(id=_X, index=_i) - _mean) / _max_range)
     _Z
 
+// float[] array_std = f_array_standardize(prices)
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(prices) + '\n' + tostring(array_std))
+// else
+//     label.delete(id=debug)
+
 f_array_stdev(_id)=>
     int _size = array.size(id=_id)
     float _mean = array.sum(id=_id) / _size
@@ -51,6 +130,9 @@ f_array_stdev(_id)=>
     for _i = 0 to _size - 1
         _dev := _dev + abs(array.get(id=_id, index=_i) - _mean)
     _dev := _dev / _size
+
+// float stdev = f_array_stdev(prices)
+// plot(stdev, color=color.yellow, transp=50)
 
 f_array_variance(_id)=>
     int _size = array.size(id=_id)
@@ -60,6 +142,9 @@ f_array_variance(_id)=>
         _var := _var + pow(array.get(id=_id, index=_i) - _mean, 2)
     _var / _size
     
+// float variance = f_array_variance(prices)
+// plot(variance, color=color.yellow, transp=50, display=display.none)
+
 f_array_covariance(_X, _Y)=>
     int _sizeY = array.size(id=_Y)
     int _sizeX = array.size(id=_X)
@@ -72,15 +157,9 @@ f_array_covariance(_X, _Y)=>
         _meanXY := _meanXY / _sizeX
     _meanXY - (_meanX * _meanY)
 
-float mean = f_array_mean(prices)
-float stdev = f_array_stdev(prices)
-float variance = f_array_variance(prices)
-float covariance = f_array_covariance(indices, prices)
+// float covariance = f_array_covariance(indices, prices)
+// plot(covariance, color=color.yellow, transp=50, display=display.none)
 
-plot(mean, color=color.yellow, transp=50)
-plot(mean + stdev, color=color.yellow, transp=50)
-plot(variance, color=color.yellow, transp=50, display=display.none)
-plot(covariance, color=color.yellow, transp=50, display=display.none)
 
 f_array_linreg(_X, _Y)=>
 //  https://www.statisticshowto.com/probability-and-statistics/regression-analysis/find-a-linear-regression-equation/#FindaLinear
@@ -117,37 +196,37 @@ f_array_linreg(_X, _Y)=>
 	    _stdev := _stdev + abs(_diff)
 	[_predictions, _max_dev, _min_dev, _stdev/_sizeX]
 
-[D, Dmax, Dmin, Dstdev] = f_array_linreg(indices, prices)
+// [D, Dmax, Dmin, Dstdev] = f_array_linreg(indices, prices)
 
-bool show_debug = input(false)
-var label debug = label.new(bar_index, open, '')
-if show_debug
-    label.set_xy(id=debug, x=bar_index, y=close)
-    label.set_text(id=debug, text=tostring(indices) + '\n' + tostring(D))
-else
-    label.delete(id=debug)
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(indices) + '\n' + tostring(D))
+// else
+//     label.delete(id=debug)
 
-color _ln_col = color.aqua
-var line ln_mid = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_solid, width=2)
-var line ln_max = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
-var line ln_min = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
-var line ln_upper = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
-var line ln_lower = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
+// color _ln_col = color.aqua
+// var line ln_mid = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_solid, width=2)
+// var line ln_max = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
+// var line ln_min = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
+// var line ln_upper = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
+// var line ln_lower = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
 
-int first = input(0)
-int last = input(9)
-ln_y1 = array.get(id=D, index=first)
-ln_y2 = array.get(id=D, index=last)
-line.set_xy1(id=ln_mid, x=array.get(id=indices, index=first), y=ln_y1)
-line.set_xy2(id=ln_mid, x=array.get(id=indices, index=last), y=ln_y2)
-line.set_xy1(id=ln_max, x=array.get(id=indices, index=first), y=ln_y1 + Dmax)
-line.set_xy2(id=ln_max, x=array.get(id=indices, index=last), y=ln_y2 + Dmax)
-line.set_xy1(id=ln_min, x=array.get(id=indices, index=first), y=ln_y1 + Dmin)
-line.set_xy2(id=ln_min, x=array.get(id=indices, index=last), y=ln_y2 + Dmin)
-line.set_xy1(id=ln_upper, x=array.get(id=indices, index=first), y=ln_y1 + Dstdev)
-line.set_xy2(id=ln_upper, x=array.get(id=indices, index=last), y=ln_y2 + Dstdev)
-line.set_xy1(id=ln_lower, x=array.get(id=indices, index=first), y=ln_y1 - Dstdev)
-line.set_xy2(id=ln_lower, x=array.get(id=indices, index=last), y=ln_y2 - Dstdev)
+// int first = input(0)
+// int last = input(9)
+// ln_y1 = array.get(id=D, index=first)
+// ln_y2 = array.get(id=D, index=last)
+// line.set_xy1(id=ln_mid, x=array.get(id=indices, index=first), y=ln_y1)
+// line.set_xy2(id=ln_mid, x=array.get(id=indices, index=last), y=ln_y2)
+// line.set_xy1(id=ln_max, x=array.get(id=indices, index=first), y=ln_y1 + Dmax)
+// line.set_xy2(id=ln_max, x=array.get(id=indices, index=last), y=ln_y2 + Dmax)
+// line.set_xy1(id=ln_min, x=array.get(id=indices, index=first), y=ln_y1 + Dmin)
+// line.set_xy2(id=ln_min, x=array.get(id=indices, index=last), y=ln_y2 + Dmin)
+// line.set_xy1(id=ln_upper, x=array.get(id=indices, index=first), y=ln_y1 + Dstdev)
+// line.set_xy2(id=ln_upper, x=array.get(id=indices, index=last), y=ln_y2 + Dstdev)
+// line.set_xy1(id=ln_lower, x=array.get(id=indices, index=first), y=ln_y1 - Dstdev)
+// line.set_xy2(id=ln_lower, x=array.get(id=indices, index=last), y=ln_y2 - Dstdev)
 
 
 
@@ -210,12 +289,12 @@ f_array_polyreg(_X, _Y)=>
 	[_predictions, _max_dev, _min_dev, _stdev/_sizeX]
 
 
-[P, Pmax, Pmin, Pstdev] = f_array_polyreg(indices, prices)
+// [P, Pmax, Pmin, Pstdev] = f_array_polyreg(indices, prices)
 
-color _pr_col = color.red
-for _i = 0 to array.size(id=P)-2
-    _pr_y1 = array.get(id=P, index=_i)
-    _pr_y2 = array.get(id=P, index=_i+1)
+// color _pr_col = color.red
+// for _i = 0 to array.size(id=P)-2
+//     _pr_y1 = array.get(id=P, index=_i)
+//     _pr_y2 = array.get(id=P, index=_i+1)
 
-    line pr_mid = line.new(x1=array.get(id=indices, index=_i), y1=_pr_y1, x2=array.get(id=indices, index=_i+1), y2=_pr_y2, color=_pr_col, style=line.style_solid, width=2)
-    line.delete(id=pr_mid[1])
+//     line pr_mid = line.new(x1=array.get(id=indices, index=_i), y1=_pr_y1, x2=array.get(id=indices, index=_i+1), y2=_pr_y2, color=_pr_col, style=line.style_solid, width=2)
+//     line.delete(id=pr_mid[1])
