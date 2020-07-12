@@ -102,9 +102,9 @@ float mean = f_array_mean(prices)
 plot(mean, color=color.yellow, transp=50)
 
 f_array_standardize(_X)=>
-//| Standardizes array values against the maximum range in the data set:
-//| Input:  _X : Array with data points.
-//| Output: _Z : Array with standardized data points.
+//| returns standardized array values against the maximum range in the data set.
+//| inputs:  
+//|     _X: Array with data points.
     int _size = array.size(id=_X)
     float[] _Z = array.copy(id=_X)
     array.sort(id=_Z, order=order.ascending)
@@ -122,6 +122,26 @@ f_array_standardize(_X)=>
 //     label.set_text(id=debug, text=tostring(prices) + '\n' + tostring(array_std))
 // else
 //     label.delete(id=debug)
+
+
+f_array_reverse(_X)=>
+//| returns a new array with the elements of the origin array in reverse order
+//| inputs:
+//|     _X: Array with origin data points.
+    int _size = array.size(id=_X)
+    float[] _Z = array.new_float(size=0, initial_value=0.0)
+    for _i =_size - 1 to 0
+        array.push(id=_Z, value=array.get(id=_X, index=_i))
+    _Z
+
+float[] array_reverse = f_array_reverse(prices)
+bool show_debug = input(false)
+var label debug = label.new(bar_index, open, '')
+if show_debug
+    label.set_xy(id=debug, x=bar_index, y=close)
+    label.set_text(id=debug, text=tostring(prices) + '\n' + tostring(array_reverse))
+else
+    label.delete(id=debug)
 
 f_array_stdev(_id)=>
     int _size = array.size(id=_id)
@@ -159,6 +179,26 @@ f_array_covariance(_X, _Y)=>
 
 // float covariance = f_array_covariance(indices, prices)
 // plot(covariance, color=color.yellow, transp=50, display=display.none)
+
+
+f_array_nth(_X, _order, _n)=>
+//| returns the highest/lowest nth element in a array:
+//| inputs:
+//|     _X:     array with origin elements.
+//|     _order: order to sort array(lowest: order.ascending, highest: order.descending).
+//|     _n:     nth element in the ordered array.
+    int _sizeX = array.size(id=_X)
+    float[] _T = array.copy(id=_X)
+    if _order
+        array.sort(id=_T, order=order.ascending)
+    else
+        array.sort(id=_T, order=order.descending)
+    array.get(id=_T, index=_n)
+    
+// int nth = input(0)
+// bool order = input(true)
+// float nth_element = f_array_nth(prices, order, nth)
+// plot(nth_element, color=color.yellow, transp=50)
 
 
 f_array_linreg(_X, _Y)=>

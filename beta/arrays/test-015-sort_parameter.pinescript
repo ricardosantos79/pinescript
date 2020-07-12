@@ -4,18 +4,25 @@
 //@version=4
 study("test-015-sort_parameter")
 var float[] prices = array.new_float(size=10, initial_value=open)
+float e = array.pop(id=prices)
+array.insert(id=prices, index=0, value=close)
 
-f_test(_A, _order)=>
+f_test(_X, _order)=>
 //| returns the 1st element in a sorted array:
 //| inputs:
-//|     _A:     array with origin elements.
+//|     _X:     array with origin elements.
 //|     _order: order to sort array(lowest: order.ascending, highest: order.descending).
-    float[] _T = array.copy(id=_A)
-    array.sort(id=_T, order=_order) // works if replaced by hardcoded order.ascending or order.descending
-    array.get(id=_T, index=0)
+    float[] _A = array.copy(id=_X)
+    //array.sort(id=_A, order=_order) // works if replaced by hardcoded order.ascending or order.descending
+    //alt method:
+    if _order
+        array.sort(id=_A, order=order.ascending)
+    else
+        array.sort(id=_A, order=order.descending)
+    array.get(id=_A, index=0)
     
 bool order = input(true)
-float element = f_test(prices, order.ascending)
+float element = f_test(prices, order)
 plot(element, color=color.yellow, transp=50)
 
 plot(close)
