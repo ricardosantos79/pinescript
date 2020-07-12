@@ -200,6 +200,25 @@ f_array_nth(_X, _order, _n)=>
 // float nth_element = f_array_nth(prices, order, nth)
 // plot(nth_element, color=color.yellow, transp=50)
 
+f_array_contains(_X, _value)=>
+//| returns true if atleast 1 element in the array is equal:
+//| inputs:
+//|     _X:     array with origin elements.
+//|     _value: value to compare..
+    int _sizeX = array.size(id=_X)
+    bool _return  = false
+    if _sizeX > 0
+        for _i = 0 to _sizeX - 1
+            if array.get(id=_X, index=_i) == _value
+                _return := true
+                break
+    _return
+
+// var float[] values = array.new_float(size=2, initial_value=1)
+// array.push(id=values, value=2)
+// int test_value = f_array_contains(values, input(0)) ? 1 : 0
+// plot(test_value, color=color.yellow, transp=50)
+
 
 f_array_linreg(_X, _Y)=>
 //  https://www.statisticshowto.com/probability-and-statistics/regression-analysis/find-a-linear-regression-equation/#FindaLinear
