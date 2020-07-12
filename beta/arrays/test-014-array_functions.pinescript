@@ -134,14 +134,14 @@ f_array_reverse(_X)=>
         array.push(id=_Z, value=array.get(id=_X, index=_i))
     _Z
 
-float[] array_reverse = f_array_reverse(prices)
-bool show_debug = input(false)
-var label debug = label.new(bar_index, open, '')
-if show_debug
-    label.set_xy(id=debug, x=bar_index, y=close)
-    label.set_text(id=debug, text=tostring(prices) + '\n' + tostring(array_reverse))
-else
-    label.delete(id=debug)
+// float[] array_reverse = f_array_reverse(prices)
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(prices) + '\n' + tostring(array_reverse))
+// else
+//     label.delete(id=debug)
 
 f_array_stdev(_id)=>
     int _size = array.size(id=_id)
@@ -256,13 +256,43 @@ f_array_last_index_of(_X, _value)=>
                 break
     _return
 
-var float[] values = array.new_float(size=2, initial_value=1)
+// var float[] values = array.new_float(size=2, initial_value=1)
+// if barstate.isfirst
+//     array.push(id=values, value=2)
+//     array.push(id=values, value=5)
+//     array.push(id=values, value=7)
+// int test_value = f_array_last_index_of(values, input(0))
+// plot(test_value, color=color.yellow, transp=50)
+
+
+f_array_remove_range(_X, _index_from, _index_to)=>
+//| returns the index of the first element in the array that is equal to value:
+//| inputs:
+//|     _X:     array with origin elements.
+//|     _value: value to compare..
+    _R = array.copy(id=_X)
+    int _size = array.size(id=_R)
+    if _index_to - _index_from >= 0 and _index_from >= 0 and _index_to < _size
+        for _i = _index_to to _index_from
+            array.remove(id=_R, index=_i)
+    _R
+
+var float[] values = array.new_float(size=5, initial_value=1)
 if barstate.isfirst
     array.push(id=values, value=2)
     array.push(id=values, value=5)
     array.push(id=values, value=7)
-int test_value = f_array_last_index_of(values, input(0))
-plot(test_value, color=color.yellow, transp=50)
+
+int index_from = input(1)
+int index_to = input(1)
+float[] array_remove_range = f_array_remove_range(values, index_from, index_to)
+bool show_debug = input(false)
+var label debug = label.new(bar_index, open, '')
+if show_debug
+    label.set_xy(id=debug, x=bar_index, y=close)
+    label.set_text(id=debug, text=tostring(values) + '\n' + tostring(array_remove_range))
+else
+    label.delete(id=debug)
 
 
 f_array_linreg(_X, _Y)=>
