@@ -18,7 +18,7 @@ if pivotlow(2, 2)
     array.insert(id=prices, index=0, value=low[2])
     array.insert(id=indices, index=0, value=bar_index[2])
 
-f_array_ops(_X, _Y, _op)=>
+f_array_ops(_X, _Y, _op, _value)=>
 //| mathematical and logical operations of array elements (X[i] <op> Y[i]) wise.
 //| inputs:
 //|     _X:     array of x elements
@@ -28,74 +28,136 @@ f_array_ops(_X, _Y, _op)=>
     int _sizeX = array.size(id=_X)
     float[] _Z = array.new_float(size=0, initial_value=0.0)
     if _sizeY == _sizeX
-        if _op == '+'
-        //| addition
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) + array.get(id=_Y, index=_i))
-        else if _op == '-'
-        //| subtraction
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) - array.get(id=_Y, index=_i))
-        else if _op == '*'
-        //| multiplication
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) * array.get(id=_Y, index=_i))
-        else if _op == '/'
-        //| division
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) / array.get(id=_Y, index=_i))
-        else if _op == '%'
-        //| modulus remainder
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) % array.get(id=_Y, index=_i))
-        else if _op == '/%'
-        //| floored modulus remainder
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=(array.get(id=_Y, index=_i) + array.get(id=_X, index=_i)) % array.get(id=_Y, index=_i))
-        else if _op == '//'
-        //| floor division
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=round(array.get(id=_X, index=_i) / array.get(id=_Y, index=_i)))
-        else if _op == '**'
-        //| exponention
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=pow(array.get(id=_X, index=_i), array.get(id=_Y, index=_i)))
-        else if _op == '=='
-        //| is equal
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) == array.get(id=_Y, index=_i) ? 1.0 : 0.0)
-        else if _op == '!='
-        //| is not equal
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) != array.get(id=_Y, index=_i) ? 1.0 : 0.0)
-        else if _op == '>'
-        //| is higher
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) > array.get(id=_Y, index=_i) ? 1.0 : 0.0)
-        else if _op == '<'
-        //| is lower
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) < array.get(id=_Y, index=_i) ? 1.0 : 0.0)
-        else if _op == '>='
-        //| is higher or equal
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) >= array.get(id=_Y, index=_i) ? 1.0 : 0.0)
-        else if _op == '<='
-        //| is lower or equal
-            for _i = 0 to _sizeX-1
-                array.push(id=_Z, value=array.get(id=_X, index=_i) <= array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+        if na(_value)
+            if _op == '+'
+            //| addition
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) + array.get(id=_Y, index=_i))
+            else if _op == '-'
+            //| subtraction
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) - array.get(id=_Y, index=_i))
+            else if _op == '*'
+            //| multiplication
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) * array.get(id=_Y, index=_i))
+            else if _op == '/'
+            //| division
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) / array.get(id=_Y, index=_i))
+            else if _op == '%'
+            //| modulus remainder
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) % array.get(id=_Y, index=_i))
+            else if _op == '/%'
+            //| floored modulus remainder
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=(array.get(id=_Y, index=_i) + array.get(id=_X, index=_i)) % array.get(id=_Y, index=_i))
+            else if _op == '//'
+            //| floor division
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=round(array.get(id=_X, index=_i) / array.get(id=_Y, index=_i)))
+            else if _op == '**'
+            //| exponention
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=pow(array.get(id=_X, index=_i), array.get(id=_Y, index=_i)))
+            else if _op == '=='
+            //| is equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) == array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+            else if _op == '!='
+            //| is not equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) != array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+            else if _op == '>'
+            //| is higher
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) > array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+            else if _op == '<'
+            //| is lower
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) < array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+            else if _op == '>='
+            //| is higher or equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) >= array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+            else if _op == '<='
+            //| is lower or equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) <= array.get(id=_Y, index=_i) ? 1.0 : 0.0)
+            else
+                array.clear(id=_Z)
         else
-            array.clear(id=_Z)
+            if _op == '+'
+            //| addition
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) + _value)
+            else if _op == '-'
+            //| subtraction
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) - _value)
+            else if _op == '*'
+            //| multiplication
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) * _value)
+            else if _op == '/'
+            //| division
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) / _value)
+            else if _op == '%'
+            //| modulus remainder
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) % _value)
+            else if _op == '/%'
+            //| floored modulus remainder
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=(_value + array.get(id=_X, index=_i)) % _value)
+            else if _op == '//'
+            //| floor division
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=round(array.get(id=_X, index=_i) / _value))
+            else if _op == '**'
+            //| exponention
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=pow(array.get(id=_X, index=_i), _value))
+            else if _op == '=='
+            //| is equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) == _value ? 1.0 : 0.0)
+            else if _op == '!='
+            //| is not equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) != _value ? 1.0 : 0.0)
+            else if _op == '>'
+            //| is higher
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) > _value ? 1.0 : 0.0)
+            else if _op == '<'
+            //| is lower
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) < _value ? 1.0 : 0.0)
+            else if _op == '>='
+            //| is higher or equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) >= _value ? 1.0 : 0.0)
+            else if _op == '<='
+            //| is lower or equal
+                for _i = 0 to _sizeX-1
+                    array.push(id=_Z, value=array.get(id=_X, index=_i) <= _value ? 1.0 : 0.0)
+            else
+                array.clear(id=_Z)
     _Z
 
-// float[] array_ops = f_array_ops(indices, prices, input(''))
-// bool show_debug = input(false)
-// var label debug = label.new(bar_index, open, '')
-// if show_debug
-//     label.set_xy(id=debug, x=bar_index, y=close)
-//     label.set_text(id=debug, text=tostring(indices, '#') + '\n' + tostring(prices) + '\n' + tostring(array_ops))
-// else
-//     label.delete(id=debug)
+float byvalue = input(0)
+byvalue := byvalue == 0? na : byvalue
+float[] array_ops = f_array_ops(indices, prices, input(''), byvalue)
+bool show_debug = input(false)
+var label debug = label.new(bar_index, open, '')
+if show_debug
+    label.set_xy(id=debug, x=bar_index, y=close)
+    label.set_text(id=debug, text=tostring(indices, '#') + '\n' + tostring(prices) + '\n' + tostring(array_ops))
+else
+    label.delete(id=debug)
 
 
 f_array_mean(_id)=>
