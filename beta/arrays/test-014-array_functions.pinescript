@@ -24,6 +24,7 @@ f_array_ops(_X, _Y, _op, _value)=>
 //|     _X:     array of x elements
 //|     _Y:     array of y elements
 //|     _op:    operator string
+//|     _value: optional value to do operation instead of _Y array elements, na() to ignore.
     int _sizeY = array.size(id=_Y)
     int _sizeX = array.size(id=_X)
     float[] _Z = array.new_float(size=0, initial_value=0.0)
