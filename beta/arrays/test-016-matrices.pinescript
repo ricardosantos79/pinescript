@@ -17,30 +17,53 @@ f_array_new_matrix(M2, 3, 3, 2.0)
 
 
 f_array_matrix_multiply(_A, _B, _Acol, _Arow, _Bcol, _Brow)=>
-    //_t = ''
     _R = array.new_float(size=_Arow * _Bcol, initial_value=0.0)
-    if _Acol == _Brow
+    int _Asize = array.size(id=_A)
+    int _Bsize = array.size(id=_B)
+    bool _sizes_match = (_Acol == _Brow) and (_Asize == _Acol * _Arow) and (_Bsize == _Bcol * _Brow)
+    float _sum = 0.0
+    if _sizes_match
         for _i = 0 to _Arow - 1
             for _j = 0 to _Bcol - 1
-                float _sum = 0.0
+                _sum := 0.0
                 for _k = 0 to _Acol - 1
-                    //_t := _t + tostring(_i * _Acol + _k) + ':' + tostring(_k * _Bcol + _j) + ', '
                     _sum := _sum + array.get(id=_A, index=int(_i * _Acol + _k)) * array.get(id=_B, index=int(_k * _Bcol + _j))
-                    //_t := _t + tostring(_sum)
-                // t returns the right values
-                //_t := _t + tostring(_i * _Bcol + _j) + ':' + tostring(_sum) + ', '
-                //
-                //array.set() does not insert the values..
                 array.set(id=_R, index=int(_i * _Bcol + _j), value=_sum)
     _R
 
+// float[] array_matrix_multiply = f_array_matrix_multiply(M1, M2, 3, 3, 3, 3)
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(M1) + '\n' + tostring(M2) + '\n' + tostring(array_matrix_multiply))
+// else
+//     label.delete(id=debug)
 
-float[] array_matrix_multiply = f_array_matrix_multiply(M1, M2, 3, 3, 3, 3)
+
+
+f_array_matrix_transpose(_A, _Acol, _Arow)=>
+    _T = array.copy(id=_A)
+    int _size = array.size(id=_A)
+    bool _is_compatible = _size == _Acol * _Arow
+    if _is_compatible
+        for _i = 0 to _Arow - 1
+            for _j = 0 to _Acol - 1
+                // index in the original matrix.
+                int _Ai = _i * _Acol + _j
+                // index in the transpose matrix.
+                int _Ti = _j * _Arow + _i
+                array.set(id=_T, index=_Ti, value=array.get(id=_A, index=_Ai))
+    _T
+
+array.set(id=M1, index=0, value=9)
+array.set(id=M1, index=2, value=9)
+array.set(id=M1, index=8, value=9)
+float[] array_matrix_transpose = f_array_matrix_transpose(M1, 3, 3)
 bool show_debug = input(false)
 var label debug = label.new(bar_index, open, '')
 if show_debug
     label.set_xy(id=debug, x=bar_index, y=close)
-    label.set_text(id=debug, text=tostring(M1) + '\n' + tostring(M2) + '\n' + tostring(array_matrix_multiply))
+    label.set_text(id=debug, text=tostring(M1) + '\n' + tostring(array_matrix_transpose))
 else
     label.delete(id=debug)
-
