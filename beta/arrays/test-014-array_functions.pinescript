@@ -149,24 +149,24 @@ f_array_ops(_X, _Y, _op, _value)=>
                 array.clear(id=_Z)
     _Z
 
-float byvalue = input(0)
-byvalue := byvalue == 0? na : byvalue
-float[] array_ops = f_array_ops(indices, prices, input(''), byvalue)
-bool show_debug = input(false)
-var label debug = label.new(bar_index, open, '')
-if show_debug
-    label.set_xy(id=debug, x=bar_index, y=close)
-    label.set_text(id=debug, text=tostring(indices, '#') + '\n' + tostring(prices) + '\n' + tostring(array_ops))
-else
-    label.delete(id=debug)
+// float byvalue = input(0)
+// byvalue := byvalue == 0? na : byvalue
+// float[] array_ops = f_array_ops(indices, prices, input(''), byvalue)
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(indices, '#') + '\n' + tostring(prices) + '\n' + tostring(array_ops))
+// else
+//     label.delete(id=debug)
 
 
 f_array_mean(_id)=>
     int _size = array.size(id=_id)
     float _mean = array.sum(id=_id) / _size
 
-float mean = f_array_mean(prices)
-plot(mean, color=color.yellow, transp=50)
+// float mean = f_array_mean(prices)
+// plot(mean, color=color.yellow, transp=50)
 
 f_array_standardize(_X)=>
 //| returns standardized array values against the maximum range in the data set.
@@ -281,10 +281,10 @@ f_array_contains(_X, _value)=>
                 break
     _return
 
-var float[] values = array.new_float(size=2, initial_value=1)
-array.push(id=values, value=2)
-int test_value = f_array_contains(values, input(0)) ? 1 : 0
-plot(test_value, color=color.yellow, transp=50)
+// var float[] values = array.new_float(size=2, initial_value=1)
+// array.push(id=values, value=2)
+// int test_value = f_array_contains(values, input(0)) ? 1 : 0
+// plot(test_value, color=color.yellow, transp=50)
 
 f_array_index_of(_X, _value)=>
 //| returns the index of the first element in the array that is equal to value:
@@ -397,7 +397,7 @@ f_array_linreg(_X, _Y)=>
 	    _stdev := _stdev + abs(_diff)
 	[_predictions, _max_dev, _min_dev, _stdev/_sizeX]
 
-// [D, Dmax, Dmin, Dstdev] = f_array_linreg(indices, prices)
+[D, Dmax, Dmin, Dstdev] = f_array_linreg(indices, prices)
 
 // bool show_debug = input(false)
 // var label debug = label.new(bar_index, open, '')
@@ -407,27 +407,27 @@ f_array_linreg(_X, _Y)=>
 // else
 //     label.delete(id=debug)
 
-// color _ln_col = color.aqua
-// var line ln_mid = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_solid, width=2)
-// var line ln_max = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
-// var line ln_min = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
-// var line ln_upper = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
-// var line ln_lower = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
+color _ln_col = color.aqua
+var line ln_mid = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_solid, width=2)
+var line ln_max = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
+var line ln_min = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dotted, width=1)
+var line ln_upper = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
+var line ln_lower = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, color=_ln_col, style=line.style_dashed, width=1)
 
-// int first = input(0)
-// int last = input(9)
-// ln_y1 = array.get(id=D, index=first)
-// ln_y2 = array.get(id=D, index=last)
-// line.set_xy1(id=ln_mid, x=array.get(id=indices, index=first), y=ln_y1)
-// line.set_xy2(id=ln_mid, x=array.get(id=indices, index=last), y=ln_y2)
-// line.set_xy1(id=ln_max, x=array.get(id=indices, index=first), y=ln_y1 + Dmax)
-// line.set_xy2(id=ln_max, x=array.get(id=indices, index=last), y=ln_y2 + Dmax)
-// line.set_xy1(id=ln_min, x=array.get(id=indices, index=first), y=ln_y1 + Dmin)
-// line.set_xy2(id=ln_min, x=array.get(id=indices, index=last), y=ln_y2 + Dmin)
-// line.set_xy1(id=ln_upper, x=array.get(id=indices, index=first), y=ln_y1 + Dstdev)
-// line.set_xy2(id=ln_upper, x=array.get(id=indices, index=last), y=ln_y2 + Dstdev)
-// line.set_xy1(id=ln_lower, x=array.get(id=indices, index=first), y=ln_y1 - Dstdev)
-// line.set_xy2(id=ln_lower, x=array.get(id=indices, index=last), y=ln_y2 - Dstdev)
+int first = input(0)
+int last = input(9)
+ln_y1 = array.get(id=D, index=first)
+ln_y2 = array.get(id=D, index=last)
+line.set_xy1(id=ln_mid, x=array.get(id=indices, index=first), y=ln_y1)
+line.set_xy2(id=ln_mid, x=array.get(id=indices, index=last), y=ln_y2)
+line.set_xy1(id=ln_max, x=array.get(id=indices, index=first), y=ln_y1 + Dmax)
+line.set_xy2(id=ln_max, x=array.get(id=indices, index=last), y=ln_y2 + Dmax)
+line.set_xy1(id=ln_min, x=array.get(id=indices, index=first), y=ln_y1 + Dmin)
+line.set_xy2(id=ln_min, x=array.get(id=indices, index=last), y=ln_y2 + Dmin)
+line.set_xy1(id=ln_upper, x=array.get(id=indices, index=first), y=ln_y1 + Dstdev)
+line.set_xy2(id=ln_upper, x=array.get(id=indices, index=last), y=ln_y2 + Dstdev)
+line.set_xy1(id=ln_lower, x=array.get(id=indices, index=first), y=ln_y1 - Dstdev)
+line.set_xy2(id=ln_lower, x=array.get(id=indices, index=last), y=ln_y2 - Dstdev)
 
 
 
@@ -490,12 +490,80 @@ f_array_polyreg(_X, _Y)=>
 	[_predictions, _max_dev, _min_dev, _stdev/_sizeX]
 
 
-// [P, Pmax, Pmin, Pstdev] = f_array_polyreg(indices, prices)
+[P, Pmax, Pmin, Pstdev] = f_array_polyreg(indices, prices)
 
-// color _pr_col = color.red
-// for _i = 0 to array.size(id=P)-2
-//     _pr_y1 = array.get(id=P, index=_i)
-//     _pr_y2 = array.get(id=P, index=_i+1)
+color _pr_col = color.red
+var line pr_mid00 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid01 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid02 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid03 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid04 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid05 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid06 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid07 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid08 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_mid09 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_solid, width=2)
+var line pr_max00 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max01 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max02 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max03 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max04 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max05 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max06 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max07 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max08 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_max09 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min00 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min01 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min02 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min03 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min04 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min05 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min06 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min07 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min08 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_min09 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dotted, width=1)
+var line pr_upper00 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper01 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper02 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper03 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper04 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper05 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper06 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper07 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper08 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_upper09 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower00 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower01 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower02 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower03 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower04 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower05 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower06 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower07 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower08 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+var line pr_lower09 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, color=_pr_col, style=line.style_dashed, width=1)
+f_pr_mid_line_selector(_i)=>(_i==0?pr_mid00:(_i==1?pr_mid01:(_i==2?pr_mid02:(_i==3?pr_mid03:(_i==4?pr_mid04:(_i==5?pr_mid05:(_i==6?pr_mid06:(_i==7?pr_mid07:(_i==8?pr_mid08:(_i==9?pr_mid09:pr_mid00))))))))))
+f_pr_max_line_selector(_i)=>(_i==0?pr_max00:(_i==1?pr_max01:(_i==2?pr_max02:(_i==3?pr_max03:(_i==4?pr_max04:(_i==5?pr_max05:(_i==6?pr_max06:(_i==7?pr_max07:(_i==8?pr_max08:(_i==9?pr_max09:pr_max00))))))))))
+f_pr_min_line_selector(_i)=>(_i==0?pr_min00:(_i==1?pr_min01:(_i==2?pr_min02:(_i==3?pr_min03:(_i==4?pr_min04:(_i==5?pr_min05:(_i==6?pr_min06:(_i==7?pr_min07:(_i==8?pr_min08:(_i==9?pr_min09:pr_min00))))))))))
+f_pr_upper_line_selector(_i)=>(_i==0?pr_upper00:(_i==1?pr_upper01:(_i==2?pr_upper02:(_i==3?pr_upper03:(_i==4?pr_upper04:(_i==5?pr_upper05:(_i==6?pr_upper06:(_i==7?pr_upper07:(_i==8?pr_upper08:(_i==9?pr_upper09:pr_upper00))))))))))
+f_pr_lower_line_selector(_i)=>(_i==0?pr_lower00:(_i==1?pr_lower01:(_i==2?pr_lower02:(_i==3?pr_lower03:(_i==4?pr_lower04:(_i==5?pr_lower05:(_i==6?pr_lower06:(_i==7?pr_lower07:(_i==8?pr_lower08:(_i==9?pr_lower09:pr_lower00))))))))))
 
-//     line pr_mid = line.new(x1=array.get(id=indices, index=_i), y1=_pr_y1, x2=array.get(id=indices, index=_i+1), y2=_pr_y2, color=_pr_col, style=line.style_solid, width=2)
-//     line.delete(id=pr_mid[1])
+int pr_fractions = 10
+int pr_size = array.size(id=P)
+int pr_step = max(pr_size / pr_fractions, 1)
+for _i = 0 to pr_size - pr_step - 1 by pr_step
+    int _next_step_index = _i + pr_step
+    int _line = _i / pr_step
+
+    line.set_xy1(id=f_pr_mid_line_selector(_line), x=array.get(id=indices, index=_i), y=array.get(id=P, index=_i))
+    line.set_xy2(id=f_pr_mid_line_selector(_line), x=array.get(id=indices, index=_i + pr_step), y=array.get(id=P, index=_i + pr_step))
+    line.set_xy1(id=f_pr_max_line_selector(_line), x=array.get(id=indices, index=_i), y=array.get(id=P, index=_i) + Pmax)
+    line.set_xy2(id=f_pr_max_line_selector(_line), x=array.get(id=indices, index=_i + pr_step), y=array.get(id=P, index=_i + pr_step) + Pmax)
+    line.set_xy1(id=f_pr_min_line_selector(_line), x=array.get(id=indices, index=_i), y=array.get(id=P, index=_i) + Pmin)
+    line.set_xy2(id=f_pr_min_line_selector(_line), x=array.get(id=indices, index=_i + pr_step), y=array.get(id=P, index=_i + pr_step) + Pmin)
+    line.set_xy1(id=f_pr_upper_line_selector(_line), x=array.get(id=indices, index=_i), y=array.get(id=P, index=_i) + Pstdev)
+    line.set_xy2(id=f_pr_upper_line_selector(_line), x=array.get(id=indices, index=_i + pr_step), y=array.get(id=P, index=_i + pr_step) + Pstdev)
+    line.set_xy1(id=f_pr_lower_line_selector(_line), x=array.get(id=indices, index=_i), y=array.get(id=P, index=_i) - Pstdev)
+    line.set_xy2(id=f_pr_lower_line_selector(_line), x=array.get(id=indices, index=_i + pr_step), y=array.get(id=P, index=_i + pr_step) - Pstdev)
+    
