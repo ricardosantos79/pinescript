@@ -5,6 +5,18 @@
 study("test-016-matrices")
 plot(close)
 
+// conversion examples:
+
+// 3Dto1D ( int x, int y, int z )
+    //z * xMax * yMax) + (y * xMax) + x
+
+// 1Dto3D ( int idx ) {
+    // final int z = idx / (xMax * yMax);
+    // idx -= (z * xMax * yMax);
+    // final int y = idx / xMax;
+    // final int x = idx % xMax;
+    // return new int[]{ x, y, z };
+
 f_array_new_matrix(_M, _columns, _rows, _initial_value)=>
     array.clear(_M)
     for _i = 0 to (_columns * _rows) - 1
