@@ -1,0 +1,27 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="test-018-error_input_ITEM_AT")
+  
+var float[] seed = array.new_float(size=1, initial_value=33.3)
+
+f_prng(_range)=>
+    var float _return = 1.0
+    float _seed = array.pop(id=seed)
+    float _reseed =  271.828
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range
+    //array.push(id=seed, value=((_seed * 1.618) % _range) + _return)
+    [_return, ((_seed * 1.618) % _range) + _return]
+
+var label la = label.new(bar_index, 0.0, '')
+string t = ''
+
+[r0, w0] = f_prng(100.0)
+array.push(id=seed, value=w0)
+
+plot(r0)
+[r1, w1] = f_prng(100.0)
+array.push(id=seed, value=w1)
+
+plot(r1)
