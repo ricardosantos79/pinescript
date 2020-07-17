@@ -1,0 +1,110 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='[RS]Standardized Trend Map', shorttitle='STM')
+
+
+f_standardize(_src, _length)=>
+//| Returns the standardized trend output of series momentum versus its active range.
+//| values 1, 0, -1
+    float _mom = _src - _src[_length - 1]
+    float _range = highest(_src, _length) - lowest(_src, _length)
+    float _standard = round(_mom / _range)
+    [_mom, _range, _standard]
+
+float src = ema(close, input(1))
+int length00 = 002, int length10 = 022, int length20 = 042, int length30 = 062
+int length01 = 004, int length11 = 024, int length21 = 044, int length31 = 064
+int length02 = 006, int length12 = 026, int length22 = 046, int length32 = 066
+int length03 = 008, int length13 = 028, int length23 = 048, int length33 = 068
+int length04 = 010, int length14 = 030, int length24 = 050, int length34 = 070
+int length05 = 012, int length15 = 032, int length25 = 052, int length35 = 072
+int length06 = 014, int length16 = 034, int length26 = 054, int length36 = 074
+int length07 = 016, int length17 = 036, int length27 = 056, int length37 = 076
+int length08 = 018, int length18 = 038, int length28 = 058, int length38 = 078
+int length09 = 020, int length19 = 040, int length29 = 060, int length39 = 080
+
+[m00, r00, s00] = f_standardize(src, length00)
+[m01, r01, s01] = f_standardize(src, length01)
+[m02, r02, s02] = f_standardize(src, length02)
+[m03, r03, s03] = f_standardize(src, length03)
+[m04, r04, s04] = f_standardize(src, length04)
+[m05, r05, s05] = f_standardize(src, length05)
+[m06, r06, s06] = f_standardize(src, length06)
+[m07, r07, s07] = f_standardize(src, length07)
+[m08, r08, s08] = f_standardize(src, length08)
+[m09, r09, s09] = f_standardize(src, length09)
+
+[m10, r10, s10] = f_standardize(src, length10)
+[m11, r11, s11] = f_standardize(src, length11)
+[m12, r12, s12] = f_standardize(src, length12)
+[m13, r13, s13] = f_standardize(src, length13)
+[m14, r14, s14] = f_standardize(src, length14)
+[m15, r15, s15] = f_standardize(src, length15)
+[m16, r16, s16] = f_standardize(src, length16)
+[m17, r17, s17] = f_standardize(src, length17)
+[m18, r18, s18] = f_standardize(src, length18)
+[m19, r19, s19] = f_standardize(src, length19)
+
+[m20, r20, s20] = f_standardize(src, length20)
+[m21, r21, s21] = f_standardize(src, length21)
+[m22, r22, s22] = f_standardize(src, length22)
+[m23, r23, s23] = f_standardize(src, length23)
+[m24, r24, s24] = f_standardize(src, length24)
+[m25, r25, s25] = f_standardize(src, length25)
+[m26, r26, s26] = f_standardize(src, length26)
+[m27, r27, s27] = f_standardize(src, length27)
+[m28, r28, s28] = f_standardize(src, length28)
+[m29, r29, s29] = f_standardize(src, length29)
+
+[m30, r30, s30] = f_standardize(src, length30)
+[m31, r31, s31] = f_standardize(src, length31)
+[m32, r32, s32] = f_standardize(src, length32)
+[m33, r33, s33] = f_standardize(src, length33)
+[m34, r34, s34] = f_standardize(src, length34)
+[m35, r35, s35] = f_standardize(src, length35)
+[m36, r36, s36] = f_standardize(src, length36)
+[m37, r37, s37] = f_standardize(src, length37)
+[m38, r38, s38] = f_standardize(src, length38)
+[m39, r39, s39] = f_standardize(src, length39)
+
+f_col(_i)=>(_i<=-1?color.red:(_i>=+1?color.lime:color.silver))
+
+plot(series=000+s00, title='', color=f_col(s00), style=plot.style_columns, transp=50, histbase=000.0)
+plot(series=001+s01, title='', color=f_col(s01), style=plot.style_columns, transp=50, histbase=001.0)
+plot(series=002+s02, title='', color=f_col(s02), style=plot.style_columns, transp=50, histbase=002.0)
+plot(series=003+s03, title='', color=f_col(s03), style=plot.style_columns, transp=50, histbase=003.0)
+plot(series=004+s04, title='', color=f_col(s04), style=plot.style_columns, transp=50, histbase=004.0)
+plot(series=005+s05, title='', color=f_col(s05), style=plot.style_columns, transp=50, histbase=005.0)
+plot(series=005+s05, title='', color=f_col(s05), style=plot.style_columns, transp=50, histbase=005.0)
+plot(series=006+s06, title='', color=f_col(s06), style=plot.style_columns, transp=50, histbase=006.0)
+plot(series=007+s07, title='', color=f_col(s07), style=plot.style_columns, transp=50, histbase=007.0)
+plot(series=008+s08, title='', color=f_col(s08), style=plot.style_columns, transp=50, histbase=008.0)
+plot(series=009+s09, title='', color=f_col(s09), style=plot.style_columns, transp=50, histbase=009.0)
+
+plot(series=010+s10, title='', color=f_col(s10), style=plot.style_columns, transp=50, histbase=010.0)
+plot(series=011+s11, title='', color=f_col(s11), style=plot.style_columns, transp=50, histbase=011.0)
+plot(series=012+s12, title='', color=f_col(s12), style=plot.style_columns, transp=50, histbase=012.0)
+plot(series=013+s13, title='', color=f_col(s13), style=plot.style_columns, transp=50, histbase=013.0)
+plot(series=014+s14, title='', color=f_col(s14), style=plot.style_columns, transp=50, histbase=014.0)
+plot(series=015+s15, title='', color=f_col(s15), style=plot.style_columns, transp=50, histbase=015.0)
+plot(series=015+s15, title='', color=f_col(s15), style=plot.style_columns, transp=50, histbase=015.0)
+plot(series=016+s16, title='', color=f_col(s16), style=plot.style_columns, transp=50, histbase=016.0)
+plot(series=017+s17, title='', color=f_col(s17), style=plot.style_columns, transp=50, histbase=017.0)
+plot(series=018+s18, title='', color=f_col(s18), style=plot.style_columns, transp=50, histbase=018.0)
+plot(series=019+s19, title='', color=f_col(s19), style=plot.style_columns, transp=50, histbase=019.0)
+
+plot(series=020+s20, title='', color=f_col(s20), style=plot.style_columns, transp=50, histbase=020.0)
+plot(series=021+s21, title='', color=f_col(s21), style=plot.style_columns, transp=50, histbase=021.0)
+plot(series=022+s22, title='', color=f_col(s22), style=plot.style_columns, transp=50, histbase=022.0)
+plot(series=023+s23, title='', color=f_col(s23), style=plot.style_columns, transp=50, histbase=023.0)
+plot(series=024+s24, title='', color=f_col(s24), style=plot.style_columns, transp=50, histbase=024.0)
+plot(series=025+s25, title='', color=f_col(s25), style=plot.style_columns, transp=50, histbase=025.0)
+plot(series=025+s25, title='', color=f_col(s25), style=plot.style_columns, transp=50, histbase=025.0)
+plot(series=026+s26, title='', color=f_col(s26), style=plot.style_columns, transp=50, histbase=026.0)
+plot(series=027+s27, title='', color=f_col(s27), style=plot.style_columns, transp=50, histbase=027.0)
+plot(series=028+s28, title='', color=f_col(s28), style=plot.style_columns, transp=50, histbase=028.0)
+
+
+
