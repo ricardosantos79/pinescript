@@ -1,6 +1,6 @@
 // This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
 // © RicardoSantos
-
+ 
 //@version=4
 study("test-019-tuple_security")
 
@@ -8,6 +8,8 @@ f_()=>[open, high, low, close]
 
 tf = input('M')
 
-[o, h, l. c]  = security(syminfo.tickerid, tf, f_(), barmerge.gaps_on, barmerge.lookahead_on)
+// dot after l was causing error
+// no viable alternative at character ' '
+[o, h, l, c]  = security(syminfo.tickerid, tf, f_(), barmerge.gaps_on, barmerge.lookahead_on)
 
-plotcandle(o,h,l,c)
+plotcandle(o, h, l, c)
