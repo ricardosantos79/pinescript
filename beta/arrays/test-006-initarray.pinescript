@@ -7,8 +7,8 @@ study(title="test-006-initarray")
 var color[] colors = array.new_color(size=0, initial_value=#eeeeee)
 // if array has no elements, initialize the array with its elements:
 if array.size(id=colors) == 0
-    array.push(id=colors, value=#000000)
-    array.push(id=colors, value=#ffffff)
+    array.push(id=colors, value=#000000) // i 0
+    array.push(id=colors, value=#ffffff) // i 1
 
 plot(series=0.0, color=array.get(id=colors, index=0))
 plot(series=1.0, color=array.get(id=colors, index=1))

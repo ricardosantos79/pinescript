@@ -2,17 +2,13 @@
 // © RicardoSantos
 
 //@version=4
-study("My Script")
+study("double size every bar")
 length = 5
 var float[] a = array.new_float(length, close)
 _length = array.size(a)
 sum = 0
 for _i = _length-1 to 1
-//     _e = array.get(a, _i-1)
     array.insert(a, _i, _i)
-// array.insert(a, 0, close)
 
 
-plot(array.get(a, 0))
-//plot(close)
-//plot(array.sum(a) / length)
+plot(_length)

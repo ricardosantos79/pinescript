@@ -1,0 +1,64 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='test-020-freq')
+float rounding_value = syminfo.mintick * 10
+
+f_hl(_length)=>
+    _h = high
+    _l = low
+    for _i = 0 to _length-1
+        if high[_i] >= _h
+            _h := high[_i]
+        if low[_i] <= _l
+            _l := low[_i]
+    [_h, _l]
+
+var int[] ranges = array.new_int(size=9999, initial_value=0)
+//var float[] avgbars = array.new_float(size=9999, initial_value=0.0)
+var int[] clean_ranges = array.new_int(size=0, initial_value=0)
+var int[] clean_hits = array.new_int(size=0, initial_value=0)
+
+//register the ranges as indices and its number of hits as value:
+if bar_index > 100
+    for _i = 1 to 100
+        [_h, _l] = f_hl(_i)
+        int _r = round((_h - _l) / rounding_value)
+        int _hits = array.get(id=ranges, index=int(_r)) + 1
+        // if i comment this block out it gives no error:
+        array.set(id=ranges, index=int(_r), value=_hits)
+        // register the average hits for this range
+        // float _alpha = 1 / _hits
+        // float _avgbars_for_this_range = array.get(id=avgbars, index=int(_r)) * (1 - _alpha) + (_i * (1 + _alpha))
+        // array.set(id=avgbars, index=int(_r), value=_avgbars_for_this_range)
+else
+    //to avoid warning:
+    //line 23: The function 'anonym_function_0' should be called on each calculation for consistency. It is recommended to extract the call from this scope.
+    [_h, _l] = f_hl(0)
+
+// filter empty ranges out:
+if bar_index > 100
+    clean_ranges := array.new_int(size=0, initial_value=0)
+    clean_hits := array.new_int(size=0, initial_value=0)
+    for _i = 9998 to 0
+        _value = array.get(id=ranges, index=_i)
+        if _value != 0
+//line 48: Cannot call 'array.push' with arguments (id=series[array], value=const integer); available overloads: array.push(array[<array_type>], <array_type>) => void;
+            array.push(id=clean_ranges, value=_i)
+            array.push(id=clean_hits, value=_value)
+
+total = array.size(id=clean_ranges)
+plot(total)
+// plot(array.size(id=ranges))
+// int[] ranges_clean = array.copy(id=ranges)
+// for _i = array.size(id=ranges_clean)-1 to 0
+//     _value = array.get(id=ranges_clean, index=_i)
+//     if _value == 0
+//         array.remove(id=ranges_clean, index=_i)
+// plot(array.size(id=ranges_clean))
+
+// var label debug = label.new(x=bar_index, y=open, text='')
+// label.set_xy(id=debug, x=bar_index, y=open)
+// t = tostring(ranges)
+// label.set_text(id=debug, text=t)
