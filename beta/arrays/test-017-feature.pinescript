@@ -1,0 +1,195 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='test-017-zz', overlay=true)
+
+// ZigZag options:
+bool show_real_pivots = input(defval=true, title="Show real zigzag pivots:", type=input.bool)
+bool show_zigzag_lines = input(defval=true, title="Show zigzag lines:", type=input.bool)
+
+//  |--------------------------------------------------------------------------||
+//  |   ZigZag:                                                                ||
+//  |--------------------------------------------------------------------------||
+//  |{
+
+string m_000 = '(MANUAL) Percent price move over X * Y'
+string m_001 = 'Percent price move over atr(X) * Y'
+string m_002 = 'Percent price move over max(tr) * Y'
+string m_003 = 'high or low pivot(X, Y)'
+string zigzag_method = input(
+         defval=m_000, 
+         title="Method to use for the zigzag:", 
+         options=[m_000, m_001, m_002, m_003]
+         )
+
+float param_x = input(defval=1.0, title='parameter X')
+float param_y = input(defval=1.0, title='parameter Y')
+
+bool show_real_pivots_zz = input(defval=true, title="Show real pivots:", type=input.bool)
+
+//  ||-------------------------------------------------------------------------||
+//  ||  zigzag function:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_zz(_method, _x, _y)=>
+
+    //  note: linkage to global variables (m000, m001, m002)
+    //      string m_000 = '(MANUAL) Percent price move over X * Y'
+    //      string m_001 = 'Percent price move over atr(X) * Y'
+    //      string m_002 = 'Percent price move over max(tr) * Y'
+
+    var float _percent = na
+    if _method == m_001
+        _percent := atr(int(_x)) / open * _y
+    else if _method == m_002
+        float _tr = (tr / open) * _y
+        if na(_percent)
+            _percent := _tr
+        if _tr > _percent
+            _percent := _tr
+    else
+        _percent := _x * _y
+
+
+    //  direction after last pivot
+    var bool _is_direction_up = na
+    //  track highest price since last lower pivot
+    var float _htrack = na
+    //  track lowest price since last higher pivot
+    var float _ltrack = na
+    //  zigzag variable for ploting
+    var float _pivot = na
+    //  real pivot time
+    var int _real_pivot_time = na
+    var int _htime = na
+    var int _ltime = na
+    //  reverse line
+    var float _reverse_line = 0.0
+
+
+    //  range needed for reaching reversal threshold
+    float _reverse_range = 0.0
+    //  pivots high / low for method m_003
+    // string m_003 = 'high or low pivot(X, Y)'
+    _pivot_h = pivothigh(_x, _y)
+    _pivot_l = pivotlow(_x, _y)
+
+    if bar_index >= 1
+        
+        if na(_is_direction_up)
+            _is_direction_up := true
+        
+        _reverse_range := nz(_pivot[1]) * _percent
+        
+        if _is_direction_up
+            _ltrack := na
+            _ltime := time
+            
+            if na(_htrack)
+                _htrack := high
+                _htime := time
+            else
+                if high >= _htrack
+                    _htrack := high
+                    _htime := time
+
+            if _method == m_003
+                _reverse_line := _htrack
+                if _pivot_h
+                    _pivot := _htrack
+                    _real_pivot_time := _htime
+                    _is_direction_up := false
+            else
+                _reverse_line := (_htrack - _reverse_range)
+                if close <= _reverse_line
+                    _pivot := _htrack
+                    _real_pivot_time := _htime
+                    _is_direction_up := false
+
+        if not _is_direction_up
+            _htrack := na
+            _htime := na
+            
+            if na(_ltrack)
+                _ltrack := low
+                _ltime := time
+            else
+                if low <= _ltrack
+                    _ltrack := low
+                    _ltime := time
+                
+            if _method == m_003
+                _reverse_line := _ltrack
+                if _pivot_l
+                    _pivot := _ltrack
+                    _real_pivot_time := _ltime
+                    _is_direction_up := true
+            else
+                _reverse_line := (_ltrack + _reverse_range)
+                if close >= _reverse_line
+                    _pivot := _ltrack
+                    _real_pivot_time := _ltime
+                    _is_direction_up := true
+
+    [_pivot, _is_direction_up, _reverse_line, _real_pivot_time]
+
+// ||   |}---------------------------------------------------------------------<•
+
+//  ||-------------------------------------------------------------------------||
+//  ||  zigzag data:
+//  ||-------------------------------------------------------------------------||
+//  |{
+[price_a, is_up, reverse, _rl_time] = f_zz(zigzag_method, param_x, param_y)
+alt_time = show_real_pivots_zz ? _rl_time : time
+
+zz_color = is_up ? color.orange : color.teal
+is_new_zig = change(price_a) != 0 ? price_a : na
+//  
+//plot(is_new_zig, title="Z", color=zz_color, linewidth=1, transp=80)
+
+plot(reverse, title="R", color=color.gray, style=plot.style_stepline, linewidth=1, transp=40, offset=1)
+//plot(reverse, title="R", color=color.white, style=plot.style_circles, linewidth=4, transp=40, offset=1, show_last=1)
+
+//  |   Get Pivots:
+var int time_a = na
+var int time_b = na, var float price_b = na
+var int time_c = na, var float price_c = na
+var int time_d = na, var float price_d = na
+var int time_e = na, var float price_e = na
+var int time_f = na, var float price_f = na
+var int time_g = na, var float price_g = na
+
+if is_new_zig
+	time_a := alt_time
+	time_b := time_a[1], price_b := price_a[1]
+	time_c := time_b[1], price_c := price_b[1]
+	time_d := time_c[1], price_d := price_c[1]
+	time_e := time_d[1], price_e := price_d[1]
+	time_f := time_e[1], price_f := price_e[1]
+	time_g := time_f[1], price_g := price_f[1]
+	
+
+float AB_price_difference = abs(price_a - price_b)
+//float AC_price_difference = abs(price_a - price_c)
+
+int AB_time_difference = time_a - time_b
+//int AC_time_difference = time_a - time_c
+
+//  ||-------------------------------------------------------------------------||
+//  ||  Draw zigzag:
+//  ||-------------------------------------------------------------------------||
+//  |{
+f_draw_zigzag_lines()=>
+    var line _li = na
+    _li_color = price_a > price_b ? color.teal : color.orange
+    if is_new_zig
+        _li := line.new(
+             time_a, price_a, 
+             time_b, price_b, 
+             xloc.bar_time, extend=extend.none, color=_li_color, width=2
+             )
+
+if show_zigzag_lines
+    f_draw_zigzag_lines()
+//  ||  |}---------------------------------------------------------------------<•
