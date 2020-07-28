@@ -3,6 +3,7 @@
 
 //@version=4
 study("test-015-sort_parameter")
+//fixed bug were it was not possible to pass the order parameter directly.
 var float[] prices = array.new_float(size=10, initial_value=open)
 float e = array.pop(id=prices)
 array.insert(id=prices, index=0, value=close)
@@ -13,12 +14,12 @@ f_test(_X, _order)=>
 //|     _X:     array with origin elements.
 //|     _order: order to sort array(lowest: order.ascending, highest: order.descending).
     float[] _A = array.copy(id=_X)
-    //array.sort(id=_A, order=_order) // works if replaced by hardcoded order.ascending or order.descending
+    array.sort(id=_A, order=_order) // works if replaced by hardcoded order.ascending or order.descending
     //alt method:
-    if _order
-        array.sort(id=_A, order=order.ascending)
-    else
-        array.sort(id=_A, order=order.descending)
+    // if _order
+    //     array.sort(id=_A, order=order.ascending)
+    // else
+    //     array.sort(id=_A, order=order.descending)
     array.get(id=_A, index=0)
     
 bool order = input(true)
