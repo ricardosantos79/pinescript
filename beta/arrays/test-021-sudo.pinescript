@@ -4,28 +4,57 @@
 //@version=4
 study("test-021-sudo")
 
-//------------------------------------------------------------------------------
-//  pseudo random function:
-//------------------------------------------------------------------------------
-var float[] seed = array.new_float(size=1, initial_value=33.3)
-f_prng(_range)=>
-    var float _return = 1.0
-    float _seed = array.pop(id=seed)
-    float _reseed =  271.828
-    _return := ((3.1416 * _return % _seed) * _reseed) % _range
-    array.push(id=seed, value=((_seed * 1.618) % _range) + _return)
-    _return
-//------------------------------------------------------------------------------
+//| ---------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)              //-|
+f_prng(_range)=>                                                            //-|
+//| pseudo random function:                                                 //-|
+    var float _return = 1.0                                                 //-|
+    float _seed = array.get(id=seed, index=0)                               //-|
+    float _reseed =  271.828                                                //-|
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range              //-|
+    array.set(id=seed, index=0, value=((_seed * 1.618) % _range) + _return) //-|
+    _return                                                                 //-|
+//| ---------------------------------------------------------------------------|
 
 
+//  https://rosettacode.org/wiki/Sudoku
+
+
+//  create array to keep track of numbers added and another to store original values.
 var int[] S = array.new_int(size=81, initial_value=0)
+var int[] C = array.copy(id=S)
 
+//  initial number population inputs
 int number_of_initial_population = input(defval=12, minval=0, maxval=80)
+int population_seed = input(defval=0)
 
-if barstate.isfirst
+//  populate the sudoku table
+if bar_index == population_seed
+    array.set(id=seed, index=0, value=1 + bar_index)
     for _i = 0 to max(0, min(80, number_of_initial_population))
         array.set(id=S, index=int(f_prng(80)), value=int(1+f_prng(8)))
+    //C := array.copy(id=S)
+    //if uncomment the above line the values on the original array S are reseted to 0
 
+int row_01 = input(defval=100001001, minval=0, maxval=999999999)
+int row_02 = input(defval=000000000, minval=0, maxval=999999999)
+int row_03 = input(defval=000000000, minval=0, maxval=999999999)
+int row_04 = input(defval=000000000, minval=0, maxval=999999999)
+int row_05 = input(defval=000000000, minval=0, maxval=999999999)
+int row_06 = input(defval=000000000, minval=0, maxval=999999999)
+int row_07 = input(defval=000000000, minval=0, maxval=999999999)
+int row_08 = input(defval=000000000, minval=0, maxval=999999999)
+int row_09 = input(defval=000000000, minval=0, maxval=999999999)
+
+f_row_to_digits(_row)=>
+    int[] _R = array.new_int(size=0, initial_value=0)
+    int _value = _row
+    for _i = 8 to 0
+        _value := int((_row / pow(10, _i) % 10))
+        array.push(id=_R, value=_value)
+    _R
+
+//plot(close)
 string t = ''
 for _i = 0 to 80
     t := t + tostring(array.get(id=S, index=_i))
@@ -37,19 +66,6 @@ for _i = 0 to 80
         t := t + ' | '
     else
         t := t
-int row_01 = input(defval=000000000, minval=0, maxval=999999999)
-int row_02 = input(defval=000000000, minval=0, maxval=999999999)
-int row_03 = input(defval=000000000, minval=0, maxval=999999999)
-int row_04 = input(defval=000000000, minval=0, maxval=999999999)
-int row_05 = input(defval=000000000, minval=0, maxval=999999999)
-int row_06 = input(defval=000000000, minval=0, maxval=999999999)
-int row_07 = input(defval=000000000, minval=0, maxval=999999999)
-int row_08 = input(defval=000000000, minval=0, maxval=999999999)
-int row_09 = input(defval=000000000, minval=0, maxval=999999999)
-
-
-
-//plot(close)
 
 var label debug = label.new(bar_index, 0.0, '')
 label.set_xy(id=debug, x=bar_index, y=0.0)
