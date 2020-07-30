@@ -6,18 +6,67 @@ study("test-021-sudo")
 
 //| ---------------------------------------------------------------------------|
 var float[] seed = array.new_float(size=1, initial_value=42.0)              //-|
-f_prng(_range)=>                                                            //-|
-//| pseudo random function:                                                 //-|
-    var float _return = 1.0                                                 //-|
-    float _seed = array.get(id=seed, index=0)                               //-|
-    float _reseed =  271.828                                                //-|
-    _return := ((3.1416 * _return % _seed) * _reseed) % _range              //-|
-    array.set(id=seed, index=0, value=((_seed * 1.618) % _range) + _return) //-|
-    _return                                                                 //-|
+f_prng(_range)=>                                                          //---|
+//| pseudo random function:                                             // O O |
+    var float _return = 1.0                                             //- V -|
+    float _seed = array.get(id=seed, index=0)                            //NNNN|
+    float _reseed =  271.828                                              // A |
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range            // V |
+    array.set(id=seed, index=0, value=((_seed * 1.618) % _range) + _return) //||
+    _return                                                                // ||
 //| ---------------------------------------------------------------------------|
 
 
-//  https://rosettacode.org/wiki/Sudoku
+// C# https://rosettacode.org/wiki/Sudoku
+
+// public bool checkValidity(int val, int x, int y)
+//     {
+//         for (int i = 0; i < 9; i++)
+//         {
+//             if (grid[y * 9 + i] == val || grid[i * 9 + x] == val)
+//                 return false;
+//         }
+        // // int startX = (x / 3) * 3;
+        // // int startY = (y / 3) * 3;
+        // for (int i = startY; i < startY + 3; i++)
+        // {
+        //     for (int j = startX; j < startX + 3; j++)
+        //     {
+        //         if (grid[i * 9 + j] == val)
+        //             return false;
+        //     }
+        // }
+    //     return true;
+    // }
+f_sudoku_check_cell_validity(_T, _value, _x, _y)=>
+//| Check if a input value is valid on a Sudoku array(81 elements)
+    bool _is_size_ok = array.size(id=_T) == 81
+    bool _is_lines_valid = true
+    bool _is_box_valid = true
+    string _msg = ''
+    if _is_size_ok
+        for _i = 0 to 8
+            bool _is_value_in_row = array.get(id=_T, index=(_y * 9) + _i) == _value
+            bool _is_value_in_col = array.get(id=_T, index=(_i * 9) + _x) == _value
+            if _is_value_in_row 
+                _is_lines_valid := false
+                _msg := 'Value ' + tostring(_value, '#') + ' present in row at cell: ' + tostring((_y * 9) + _i, '#')
+                break
+            if _is_value_in_col
+                _is_lines_valid := false
+                _msg := 'Value ' + tostring(_value, '#') + ' present in col at cell: ' + tostring((_i * 9) + _x, '#')
+                break
+        if _is_lines_valid
+            int _startX = _x//(_x / 3) * 3
+            int _startY = _y//(_y / 3) * 3
+            for _i = _startY to _startY + 3
+                for _j = _startX to _startX + 3
+                    bool _is_value_in_box = array.get(id=_T, index=(_i * 9) + _j) == _value
+                    if _is_value_in_box
+                        _is_box_valid := false
+                        _msg := 'Value ' + tostring(_value, '#') + ' present in box group.'
+                        break
+    [_is_size_ok and _is_lines_valid and _is_box_valid, _msg]
 
 
 //  create array to keep track of numbers added and another to store original values.
@@ -47,12 +96,30 @@ int row_08 = input(defval=000000000, minval=0, maxval=999999999)
 int row_09 = input(defval=000000000, minval=0, maxval=999999999)
 
 f_row_to_digits(_row)=>
+//| Return a array containing each digit as a element from a integer value
+//|     (ex: 01025 --> [0,1,0,2,5])
     int[] _R = array.new_int(size=0, initial_value=0)
     int _value = _row
     for _i = 8 to 0
         _value := int((_row / pow(10, _i) % 10))
         array.push(id=_R, value=_value)
     _R
+
+update_row(_T, _n_row, _row)=>
+//| Update a row in a array containing Sudoku table
+    int[] _R = f_row_to_digits(_row)
+    string _msg = ''
+    for _i = 8 to 0
+        int _value = array.get(id=_R, index=_i)
+        [_ok, _m] = f_sudoku_check_cell_validity(S, _value, _i, _n_row)
+        if _ok
+            array.set(id=_T, index=(_n_row * 9) + _i, value=_value)
+            _msg
+        else
+            _msg := _msg + '\n' + _m
+    _msg
+
+    
 
 //plot(close)
 string t = ''
@@ -67,6 +134,13 @@ for _i = 0 to 80
     else
         t := t
 
+// t_v = input(0), t_x = input(0), t_y = input(0)
+// [test, _m] = f_sudoku_check_cell_validity(S, t_v, t_x, t_y)
+// plot(test?1:0)
+
+_m =  update_row(S, 0, row_01)
+
+
 var label debug = label.new(bar_index, 0.0, '')
 label.set_xy(id=debug, x=bar_index, y=0.0)
-label.set_text(id=debug, text=t)
+label.set_text(id=debug, text=t+'\n'+_m)
