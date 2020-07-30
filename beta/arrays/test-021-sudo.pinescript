@@ -1,0 +1,56 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-021-sudo")
+
+//------------------------------------------------------------------------------
+//  pseudo random function:
+//------------------------------------------------------------------------------
+var float[] seed = array.new_float(size=1, initial_value=33.3)
+f_prng(_range)=>
+    var float _return = 1.0
+    float _seed = array.pop(id=seed)
+    float _reseed =  271.828
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range
+    array.push(id=seed, value=((_seed * 1.618) % _range) + _return)
+    _return
+//------------------------------------------------------------------------------
+
+
+var int[] S = array.new_int(size=81, initial_value=0)
+
+int number_of_initial_population = input(defval=12, minval=0, maxval=80)
+
+if barstate.isfirst
+    for _i = 0 to max(0, min(80, number_of_initial_population))
+        array.set(id=S, index=int(f_prng(80)), value=int(1+f_prng(8)))
+
+string t = ''
+for _i = 0 to 80
+    t := t + tostring(array.get(id=S, index=_i))
+    if _i % 9 == 8 and _i != 80
+        t := t + '\n'
+        if _i == 26 or _i == 53
+            t := t + '\n―――――――――\n'
+    else if _i % 3 == 2 and _i != 80
+        t := t + ' | '
+    else
+        t := t
+int row_01 = input(defval=000000000, minval=0, maxval=999999999)
+int row_02 = input(defval=000000000, minval=0, maxval=999999999)
+int row_03 = input(defval=000000000, minval=0, maxval=999999999)
+int row_04 = input(defval=000000000, minval=0, maxval=999999999)
+int row_05 = input(defval=000000000, minval=0, maxval=999999999)
+int row_06 = input(defval=000000000, minval=0, maxval=999999999)
+int row_07 = input(defval=000000000, minval=0, maxval=999999999)
+int row_08 = input(defval=000000000, minval=0, maxval=999999999)
+int row_09 = input(defval=000000000, minval=0, maxval=999999999)
+
+
+
+//plot(close)
+
+var label debug = label.new(bar_index, 0.0, '')
+label.set_xy(id=debug, x=bar_index, y=0.0)
+label.set_text(id=debug, text=t)
