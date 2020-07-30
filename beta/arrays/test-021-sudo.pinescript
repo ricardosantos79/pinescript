@@ -139,6 +139,14 @@ for _i = 0 to 80
 // plot(test?1:0)
 
 _m =  update_row(S, 0, row_01)
+_m := _m + update_row(S, 1, row_02)
+_m := _m + update_row(S, 2, row_03)
+_m := _m + update_row(S, 3, row_04)
+_m := _m + update_row(S, 4, row_05)
+_m := _m + update_row(S, 5, row_06)
+_m := _m + update_row(S, 6, row_07)
+_m := _m + update_row(S, 7, row_08)
+_m := _m + update_row(S, 8, row_09)
 
 
 var label debug = label.new(bar_index, 0.0, '')
