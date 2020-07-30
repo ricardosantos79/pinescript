@@ -1,0 +1,23 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-022-copy")
+
+// issue: conflict with array.set() inside loop causes following array.copy() to set values on both arrays to value stored on B previously
+
+var int[] A = array.new_int(size=5, initial_value=1)
+var int[] B = array.copy(id=A)
+
+if true
+    //array.fill(id=A, value=1)
+    for i=0 to 4
+        array.set(id=A, index=i, value=i)
+    B := array.copy(id=A)
+
+t = 'A: ' + tostring(A) + '\nB: ' + tostring(B)
+var label debug = label.new(bar_index, 0.0, '')
+label.set_xy(id=debug, x=bar_index, y=0.0)
+label.set_text(id=debug, text=t)
+
+plot(close)
