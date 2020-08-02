@@ -4,9 +4,20 @@
 //@version=4
 study("test-023-mdim")
 
-// https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays
 
 f_mdim_coord(_indices, _limits)=>
+//| returns the flatten index of a array of N dimensions.
+//|
+//| https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays
+//|     offset = n_D + N_D * ( ... (n_3 + N_3 * ( n_2 + N_2 * ( n_1 ) ) ) )
+//|         D = number of dimensions    (1D=[0,1], 2D=[0,1][0,1], 3D=[0,1][0,1][0,1])
+//|         n = indice in dimension     (3D=[2][1][1])
+//|         N = limit in dimension      (3D=[3][3][3])
+//|
+//|         offset =                    (3D=[1][1][1]) in (3D=[2][2][2]) = (13) --> 1 + 3 × (1 + (3 × (1) ))
+//|         offset =                    (3D=[1][2][1]) in (3D=[2][2][2]) = (16) --> 1 + 3 × (2 + (3 × (1) ))
+//|         offset =                    (3D=[2][1][1]) in (3D=[2][2][2]) = (22) --> 1 + 3 * (1 + (3 * (2) ))
+//|
     int _offset = 0//int(na)
     // size of the arrays containing indices and dimensions
     int _i_size = array.size(id=_indices)
@@ -14,21 +25,14 @@ f_mdim_coord(_indices, _limits)=>
     // check for validity
     bool _size_match = _i_size == _l_size and _i_size > 0 and _l_size > 0
     if _size_match
-        //  offset = n_D + N_D * ( ... (n_3 + N_3 * ( n_2 + N_2 * ( n_1 ) ) ) )
-        //      D = number of dimensions    (1D=[0,1], 2D=[0,1][0,1], 3D=[0,1][0,1][0,1])
-        //      n = indice in dimension     (3D=[2][1][1])
-        //      N = limit in dimension      (3D=[3][3][3])
-        //
-        //      offset =                    (3D=[1][1][1]) in (3D=[2][2][2]) = (13) --> 1 + 3 × (1 + (3 × (1) ))
-        //      offset =                    (3D=[1][2][1]) in (3D=[2][2][2]) = (16) --> 1 + 3 × (2 + (3 × (1) ))
-        //      offset =                    (3D=[2][1][1]) in (3D=[2][2][2]) = (22) --> 1 + 3 * (1 + (3 * (2) ))
         // last value in indices:
         _offset := array.get(id=_indices, index=0)
         // if higher than 1D array
         if _l_size > 1
             for _i = 1 to _l_size - 1
                 int _ind = array.get(id=_indices, index=_i)
-                int _dim = array.get(id=_limits, index=_i) + 1 // if you want to keep dimension size as base 0, for base 1 remove the '+ 1'
+                int _dim = array.get(id=_limits, index=_i) + 1
+                // to keep dimension size as base 0, for base 1 remove the '+ 1'
                 _offset := _offset * _dim + _ind
     else
         _offset := na
