@@ -1,0 +1,38 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-024-newfu")
+//—— NOTE -——
+//At the moment the function array.normalized and array.mode are not working correctly, we are working on fixes. 
+
+
+string t = 'tests for the new functions:'
+
+int[] A = array.new_int(size=0, initial_value=0)
+
+for _i = 0 to 9
+    array.unshift(id=A, value=_i)
+t := t + '\n unshift: ' + tostring(A)
+
+array.reverse(id=A)
+t := t + '\n reverse: ' + tostring(A)
+t := t + '\n indexof(6): ' + tostring(array.indexof(id=A, value=6))
+t := t + '\n shift: ' + tostring(array.shift(id=A)) + ' from '+ tostring(A)
+t := t + '\n lastindexof(6): ' + tostring(array.lastindexof(id=A, value=6)) + ' <----- should be 4'
+t := t + '\n includes(3): ' + tostring(array.includes(id=A, value=3)?1:0) + ' includes(0): ' + tostring(array.includes(id=A, value=0)?1:0)
+t := t + '\n avg: ' + tostring(array.avg(id=A))
+t := t + '\n stdev: ' + tostring(array.stdev(id=A))
+t := t + '\n variance: ' + tostring(array.variance(id=A))
+
+int[] B = array.copy(id=A)
+array.sort(id=B, order=false)
+t := t + '\n covariance: ' + tostring(array.covariance(id1=A, id2=B))
+t := t + '\n mode: ' + tostring(array.mode(id=A)) + ' <------- not using na when since they all different from each other'
+t := t + '\n median: ' + tostring(array.median(id=A))
+t := t + '\n standardize: ' + tostring(array.standardize(id=A))
+
+
+var label debug = label.new(x=bar_index, y=0.0, text='', style=label.style_label_lower_left, textalign=text.align_left)
+label.set_xy(id=debug, x=bar_index, y=0.0)
+label.set_text(id=debug, text=t)
