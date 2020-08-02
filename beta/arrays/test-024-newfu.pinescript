@@ -19,7 +19,7 @@ array.reverse(id=A)
 t := t + '\n reverse: ' + tostring(A)
 t := t + '\n indexof(6): ' + tostring(array.indexof(id=A, value=6))
 t := t + '\n shift: ' + tostring(array.shift(id=A)) + ' from '+ tostring(A)
-t := t + '\n lastindexof(6): ' + tostring(array.lastindexof(id=A, value=6)) + ' <----- should be 4'
+t := t + '\n lastindexof(6): ' + tostring(array.lastindexof(id=A, value=6))
 t := t + '\n includes(3): ' + tostring(array.includes(id=A, value=3)?1:0) + ' includes(0): ' + tostring(array.includes(id=A, value=0)?1:0)
 t := t + '\n avg: ' + tostring(array.avg(id=A))
 t := t + '\n stdev: ' + tostring(array.stdev(id=A))
@@ -28,7 +28,7 @@ t := t + '\n variance: ' + tostring(array.variance(id=A))
 int[] B = array.copy(id=A)
 array.sort(id=B, order=false)
 t := t + '\n covariance: ' + tostring(array.covariance(id1=A, id2=B))
-t := t + '\n mode: ' + tostring(array.mode(id=A)) + ' <------- not using na when since they all different from each other'
+t := t + '\n mode: ' + tostring(array.mode(id=A)) + ' <------- not using na when the values are all different from each other'
 t := t + '\n median: ' + tostring(array.median(id=A))
 t := t + '\n standardize: ' + tostring(array.standardize(id=A))
 
