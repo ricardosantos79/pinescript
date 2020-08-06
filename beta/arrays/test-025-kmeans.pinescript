@@ -2,56 +2,19 @@
 // © RicardoSantos
 
 //@version=4
-study("test-025-kmeans")
+study("test-025-kmeans", overlay=true)
 
-//| ---------------------------------------------------------------------------|
-var float[] seed = array.new_float(size=1, initial_value=42.0)              //-|
-f_prng(_range)=>                                                          //---|
-//| pseudo random function:                                             // O O |
-    var float _return = 1.0                                             //- V -|
-    float _seed = array.get(id=seed, index=0)                            //NNNN|
-    float _reseed =  271.828                                              // A |
-    _return := ((3.1416 * _return % _seed) * _reseed) % _range            // V |
+//| -------------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)                  //-|
+f_prng(_range)=>                                                              //---|
+//| pseudo random function:                                                 // O O |
+    var float _return = 1.0                                                 //- V -|
+    float _seed = array.get(id=seed, index=0)                                //NNNN|
+    float _reseed =  271.828                                                  // A |
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range                // V |
     array.set(id=seed, index=0, value=(1 + (_seed * 1.618) % _range) + _return) //||
-    _return                                                                // ||
-//| ---------------------------------------------------------------------------|
-
-f_mdim_coord(_indices, _limits)=>
-//| returns the flatten index of a array of N dimensions.
-//|
-//| https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays
-//|     offset = n_D + N_D * ( ... (n_3 + N_3 * ( n_2 + N_2 * ( n_1 ) ) ) )
-//|         D = number of dimensions    (1D=[0,1], 2D=[0,1][0,1], 3D=[0,1][0,1][0,1])
-//|         n = indice in dimension     (3D=[2][1][1])
-//|         N = limit in dimension      (3D=[3][3][3])
-//|
-//|         offset =                    (3D=[1][1][1]) in (3D=[2][2][2]) = (13) --> 1 + 3 × (1 + (3 × (1) ))
-//|         offset =                    (3D=[1][2][1]) in (3D=[2][2][2]) = (16) --> 1 + 3 × (2 + (3 × (1) ))
-//|         offset =                    (3D=[2][1][1]) in (3D=[2][2][2]) = (22) --> 1 + 3 * (1 + (3 * (2) ))
-//|
-    int _offset = 0
-    // size of the arrays containing indices and dimensions
-    int _i_size = array.size(id=_indices)
-    int _l_size = array.size(id=_limits)
-    // check for validity
-    bool _size_match = _i_size == _l_size and _i_size > 0 and _l_size > 0
-    if _size_match
-        // last value in indices:
-        _offset := array.get(id=_indices, index=0)
-        // if higher than 1D array
-        if _l_size > 1
-            for _i = 1 to _l_size - 1
-                int _ind = array.get(id=_indices, index=_i)
-                int _dim = array.get(id=_limits, index=_i) + 1
-                // to keep dimension size as base 0, for base 1 remove the '+ 1'
-                _offset := _offset * _dim + _ind
-    else
-        _offset := na
-    _offset
-
-f_distance(_ax, _ay, _bx, _by)=>sqrt(pow(_ax - _bx, 2) + pow(_ay - _by, 2))
-
-//| http://rosettacode.org/wiki/K-means%2B%2B_clustering
+    _return                                                                    // ||
+//| -------------------------------------------------------------------------------|
 
 f_kmeans_cluster(_X, _Y, _number_of_clusters)=>
 //| Returns the cluster centers for the given data.
@@ -61,6 +24,9 @@ f_kmeans_cluster(_X, _Y, _number_of_clusters)=>
 //|     _Y: array y data points
 //|
 //|     _number_of_clusters: number of clusters to find center.
+//|
+//| Reference:
+//| http://rosettacode.org/wiki/K-means%2B%2B_clustering
 //| -----------------------------------------------------------
 //| 1:  setup and errors
     int _X_size = array.size(id=_X)
@@ -71,7 +37,7 @@ f_kmeans_cluster(_X, _Y, _number_of_clusters)=>
 
     float[] _centers_x = array.new_float(size=0, initial_value=0.)
     float[] _centers_y = array.new_float(size=0, initial_value=0.)
-    int[] _centers_count = array.new_int(size=_number_of_clusters, initial_value=0)
+    int[] _centers_count = array.new_int(size=_number_of_clusters, initial_value=1)
     
     float[] _distances = array.new_float(size=0, initial_value=0.)
     int[] _group = array.new_int(size=0, initial_value=0)
@@ -83,7 +49,6 @@ f_kmeans_cluster(_X, _Y, _number_of_clusters)=>
             int _value = int(f_prng(_X_size))
             array.push(id=_centers_x, value=array.get(id=_X, index=_value))
             array.push(id=_centers_y, value=array.get(id=_Y, index=_value))
-
 //|     2.b: calculate distances to centers:
         for _i = 0 to _number_of_clusters - 1
             float _total_sum_of_distance = 0.0
@@ -114,7 +79,6 @@ f_kmeans_cluster(_X, _Y, _number_of_clusters)=>
                     array.set(id=_centers_x, index=_i, value=array.get(id=_X, index=_j))
                     array.set(id=_centers_y, index=_i, value=array.get(id=_Y, index=_j))
                     break
-            
 //| 3:  Choose center with probability proportional to its squared distance from existing centers.
             for _j = 0 to _X_size - 1
                 float _x = array.get(id=_X, index=_j)
@@ -151,27 +115,9 @@ f_kmeans_cluster(_X, _Y, _number_of_clusters)=>
             
             array.set(id=_centers_x, index=_i, value=_center_x / _center_count)
             array.set(id=_centers_y, index=_i, value=_center_y / _center_count)
-    // missing part:
-    // http://rosettacode.org/wiki/K-means%2B%2B_clustering
-    //  python
-    //     # find closest centroid of each PointPtr
-    //     changed = 0
-    //     for p in points:
-    //         min_i = nearest_cluster_center(p, cluster_centers)[0]
-    //         if min_i != p.group:
-    //             changed += 1
-    //             p.group = min_i
- 
-    //     # stop when 99.9% of points are good
-    //     if changed <= lenpts10:
-    //         break
- 
-    // for i, cc in enumerate(cluster_centers):
-    //     cc.group = i
-
 //| 6:  Output.
     [_centers_x, _centers_y]
-//    [_group, _distances]
+
 
 if barstate.isfirst
     array.set(id=seed, index=0, value=1337)
@@ -179,16 +125,53 @@ if barstate.isfirst
 int[] X = array.new_int(size=0, initial_value=0)
 float[] Y = array.new_float(size=0, initial_value=0)
 
-for _i = 0 to 20
+ndata = input(20)
+nclusters = input(3)
+for _i = 0 to ndata
     array.push(id=X, value=bar_index[_i])
     array.push(id=Y, value=close[_i])
 
-[g, d] = f_kmeans_cluster(X, Y, 3)
-t = tostring(g) + '\n' + tostring(d)
+[CX, CY] = f_kmeans_cluster(X, Y, nclusters)
+
+// sort centers by ascending index:
+CX_size = array.size(id=CX) - 1
+
+float[] tX = array.new_float(size=0, initial_value=0)
+float[] tY = array.new_float(size=0, initial_value=0)
+
+for _i = 0 to CX_size
+    int _index = array.indexof(id=CX, value=array.min(id=CX))
+    array.push(id=tX, value=array.remove(id=CX, index=_index))
+    array.push(id=tY, value=array.remove(id=CY, index=_index))
+
+
+color _cdiv_col = color.red
+string _xtend = extend.both
+var line _cdiv00 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv01 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv02 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv03 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv04 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv05 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv06 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv07 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv08 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+var line _cdiv09 = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, extend=_xtend, color=_cdiv_col, style=line.style_solid, width=2)
+f_cdiv_line_selector(_i)=>(_i==0?_cdiv00:(_i==1?_cdiv01:(_i==2?_cdiv02:(_i==3?_cdiv03:(_i==4?_cdiv04:(_i==5?_cdiv05:(_i==6?_cdiv06:(_i==7?_cdiv07:(_i==8?_cdiv08:(_i==9?_cdiv09:_cdiv00))))))))))
+
+// plot the lines
+for _i = 0 to min(8, max(0, nclusters - 2))
+    int _cx1 = round(array.get(id=tX, index=_i))
+    int _cx2 = round(array.get(id=tX, index=_i+1))
+    float _cy1 = array.get(id=tY, index=_i)
+    float _cy2 = array.get(id=tY, index=_i+1)
+    line.set_xy1(id=f_cdiv_line_selector(_i), x=_cx2, y=_cy1)
+    line.set_xy2(id=f_cdiv_line_selector(_i), x=_cx1, y=_cy2)
+
+t = 'Coordinates of cluster centers:\nindex:' + tostring(tX, '#') + '\nprice:' + tostring(tY)
 
 var label debug = label.new(bar_index, 0.0, '')
 label.set_xy(id=debug, x=bar_index, y=0.0)
 label.set_text(id=debug, text=t)
 
 
-//plot(f_distance(bar_index, close, bar_index[1], close[1]))
