@@ -1,0 +1,32 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-027-undeclared_input")
+//issue: lvl2 bool not being recognized
+
+
+// no error if: replace "input(false)" with either literal ("true","false")
+bool lvl2 = input(false)
+bool is_new_zig = bar_index > 50 and close > open
+
+var int[] X = array.new_int(size=0, initial_value=0)
+
+if barstate.isfirst
+    for _i = 0 to 50
+        array.push(id=X, value=_i)
+        array.push(id=X, value=_i)
+
+float test = 0.
+
+if is_new_zig
+// no error if: replace lvl2 with either (true, false)
+    if lvl2 and array.size(id=X) > 3
+        float _x0 = array.get(id=X, index=0)
+    if array.size(id=X) > 2
+        for _i = 0 to array.size(id=X) - 2
+            int _x1 = array.get(id=X, index=_i)
+            //no error if: dont use _x1
+            test := _x1
+
+plot(test)
