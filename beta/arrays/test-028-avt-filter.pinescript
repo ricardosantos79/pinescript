@@ -1,0 +1,33 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-028-algo_avt", overlay=true)
+
+f_avt_filter(_data, _min_filter, _max_filter)=>
+//| Returns a outlier clean avg
+//|     https://en.wikipedia.org/wiki/AVT_Statistical_filtering_algorithm
+    _size = array.size(id=_data)
+    _avg = array.avg(id=_data)
+    _std = array.stdev(id=_data)
+    //filter out outliers:
+    _copy = array.copy(id=_data)
+    for _i = array.size(id=_copy) - 1 to 0
+        _value = array.get(id=_copy, index=_i)
+        if abs(_value - _avg) > _std * _min_filter and abs(_value - _avg) < _std * _max_filter
+            array.remove(id=_copy, index=_i)
+    _return = array.avg(id=_copy)
+    
+var float[] prices = array.new_float(size=0, initial_value=0.)
+
+length = input(100)
+min = input(1.)
+max = input(99.)
+
+array.unshift(id=prices, value=close)
+
+if array.size(id=prices) > length
+    array.pop(id=prices)
+
+avt = f_avt_filter(prices, min, max)
+plot(avt)
