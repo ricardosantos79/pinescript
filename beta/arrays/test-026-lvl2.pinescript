@@ -2,13 +2,14 @@
 // © RicardoSantos
 
 //@version=4
-study("test-023-lvl2", overlay=true)
+study("test-026-lvl2", overlay=true)
 
 //| Line functions:
-f_initline()=>line.new(time, 0., time, 0., xloc.bar_time)
-f_line_pos(_id, _x1, _y1, _x2, _y2)=>
+f_initline()=>line.new(time, 0., time, 0., xloc.bar_time, width=2)
+f_line_updater(_id, _x1, _y1, _x2, _y2)=>
     line.set_xy1(id=_id, x=_x1, y=_y1)
     line.set_xy2(id=_id, x=_x2, y=_y2)
+    line.set_color(id=_id, color=_y1 > _y2 ? color.teal : color.orange)
 
 var line L00 = f_initline(), var line L10 = f_initline(), var line L20 = f_initline(), var line L30 = f_initline(), var line L40 = f_initline()
 var line L01 = f_initline(), var line L11 = f_initline(), var line L21 = f_initline(), var line L31 = f_initline(), var line L41 = f_initline()
@@ -55,67 +56,96 @@ f_isAny(_pos)           => true
 var bool trend = false
 var bool direction = false
 
-var float tlow = low
-var float thigh = high
+var float elow = low
+var int tlow = time
+var float ehigh = high
+var int thigh = time
 var float zz = open
+var int tz = time
 
 if trend
     if direction
-        thigh := max(thigh, high)
+        if high > ehigh
+            ehigh := high
+            thigh := time
         if f_isDownBar(0)
-            tlow := low
-            zz := thigh
+            elow := low
+            tlow := time
+            zz := ehigh
+            tz := thigh
     else
-        tlow := min(tlow, low)
+        if low < elow
+            elow := low
+            tlow := time
         if f_isUpBar(0)
-            thigh := high
-            zz := tlow
+            ehigh := high
+            thigh := time
+            zz := elow
+            tz := tlow
 else
     if direction
-        thigh := max(thigh, high)
+        if high > ehigh
+            ehigh := high
+            thigh := time
         if f_isDownBar(0)
-            tlow := low
-            zz := thigh
+            elow := low
+            tlow := time
+            zz := ehigh
+            tz := thigh
             direction := false
     else
-        tlow := min(tlow, low)
+        if low < elow
+            elow := low
+            tlow := time
         if f_isUpBar(0)
-            thigh := high
-            zz := tlow
+            ehigh := high
+            thigh := time
+            zz := elow
+            tz := tlow
             direction := true
 
-plot(zz, color=direction?color.green:color.maroon, style=plot.style_circles, linewidth=2)
+plot(zz!=zz[1]?zz:na, color=direction?color.green:color.maroon, style=plot.style_circles, linewidth=2)
 
-bool lvl2 = input(false)
+int degree = input(1)
 bool is_new_zig = change(zz) != 0
 
 var int[] X = array.new_int(size=0, initial_value=0)
 var float[] Y = array.new_float(size=0, initial_value=0)
 
+
+f_filter_pass(_X, _Y, _degree, _value)=>
+//| Alters _X, _Y vector arrays to filter out abcd type continuation patterns.
+    if _degree > 0 and array.size(id=_X) > 1 + 2 * _degree
+        for _i = 1 to _degree
+            float _y0 = array.get(id=_Y, index=0)
+            float _y1 = array.get(id=_Y, index=1)
+            float _y2 = array.get(id=_Y, index=2)
+            if (_value > _y0 and _value >= _y1 and _y0 > _y2) or (_value < _y0 and _value <= _y1 and _y0 < _y2)
+                array.shift(id=_X)
+                array.shift(id=_X)
+                array.shift(id=_Y)
+                array.shift(id=_Y)
+
+
 if is_new_zig
-    if lvl2 and array.size(id=X) > 5
-        float _y0 = array.get(id=Y, index=0)
-        float _y1 = array.get(id=Y, index=1)
-        float _y2 = array.get(id=Y, index=2)
-        if zz > _y0 and zz > _y1 and _y0 > _y2
-            array.shift(id=X)
-            array.shift(id=X)
-            array.shift(id=Y)
-            array.shift(id=Y)
-    array.unshift(id=X, value=time)
+    f_filter_pass(X, Y, degree, zz)
+    // add new vector
+    array.unshift(id=X, value=tz)
     array.unshift(id=Y, value=zz)
 
+    // resize if too many vectors
     if array.size(id=X) > 50
         array.pop(id=X)
         array.pop(id=Y)
-    //redraw
+    
+    //redraw lines
     if array.size(id=X) > 2
         for _i = 0 to array.size(id=X) - 2
             int _x1 = array.get(id=X, index=_i)
             int _x2 = array.get(id=X, index=_i + 1)
             float _y1 = array.get(id=Y, index=_i)
             float _y2 = array.get(id=Y, index=_i + 1)
-            f_line_pos(f_line_id(_i), _x1, _y1, _x2, _y2)
+            f_line_updater(f_line_id(_i), _x1, _y1, _x2, _y2)
 
 
 
