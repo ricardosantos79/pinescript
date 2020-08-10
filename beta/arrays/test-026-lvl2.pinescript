@@ -30,29 +30,6 @@ f_line_id(_i)=>(_i==00?L00:(_i==01?L01:(_i==02?L02:(_i==03?L03:(_i==04?L04:(_i==
 
 
 
-
-float body_range = abs(close - open)
-float hl_range = high - low
-float upperwick = high - max(close, open)
-float lowerwick = min(close, open) - low
-bool risinghigh = high > high[1]
-bool fallinghigh = high < high[1]
-bool risinglow = low > low[1]
-bool fallinglow = low < low[1]
-
-f_isHighUp(_pos)    => risinghigh[_pos]
-f_isHighDown(_pos)  => fallinghigh[_pos]
-f_isLowUp(_pos)     => risinglow[_pos]
-f_isLowDown(_pos)   => fallinglow[_pos]
-
-f_isInsideBar(_pos)     => f_isHighDown(_pos) and f_isLowUp(_pos)
-f_isOutsideBar(_pos)    => f_isHighUp(_pos) and f_isLowDown(_pos)
-f_isUpBar(_pos)         => f_isHighUp(_pos) and f_isLowUp(_pos)
-f_isDownBar(_pos)       => f_isHighDown(_pos) and f_isLowDown(_pos)
-f_isPinUp(_pos)         => risinghigh[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (upperwick[_pos] * 0.66) > lowerwick[_pos]
-f_isPinDown(_pos)       => fallinglow[_pos] and body_range[_pos] < (hl_range[_pos] * 0.33) and (lowerwick[_pos] * 0.66) > upperwick[_pos]
-f_isAny(_pos)           => true
-
 var bool trend = false
 var bool direction = false
 
@@ -68,7 +45,7 @@ if trend
         if high > ehigh
             ehigh := high
             thigh := time
-        if f_isDownBar(0)
+        if high < high[1] and (low < low[1] or (close-low < (high-low) * 0.5)) //down or engulfing closing low
             elow := low
             tlow := time
             zz := ehigh
@@ -77,7 +54,7 @@ if trend
         if low < elow
             elow := low
             tlow := time
-        if f_isUpBar(0)
+        if high > high[1] and (low > low[1] or (high-close < (high-low) * 0.5))//up or engulfing closing high
             ehigh := high
             thigh := time
             zz := elow
@@ -87,9 +64,13 @@ else
         if high > ehigh
             ehigh := high
             thigh := time
-        if f_isDownBar(0)
-            elow := low
-            tlow := time
+        if high < high[1] and (low < low[1] or (close-low < (high-low) * 0.5)) //down or engulfing closing low
+            if low < low[1]
+                elow := low
+                tlow := time
+            else
+                elow := low[1]
+                tlow := time[1]
             zz := ehigh
             tz := thigh
             direction := false
@@ -97,9 +78,13 @@ else
         if low < elow
             elow := low
             tlow := time
-        if f_isUpBar(0)
-            ehigh := high
-            thigh := time
+        if high > high[1] and (low > low[1] or (close-low > (high-low) * 0.5))//up or engulfing closing high
+            if high > high[1]
+                ehigh := high
+                thigh := time
+            else
+                ehigh := high[1]
+                thigh := time[1]
             zz := elow
             tz := tlow
             direction := true
