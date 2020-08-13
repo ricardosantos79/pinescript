@@ -4,18 +4,17 @@
 //@version=4
 study("test-021-sudo")
 
-//| ---------------------------------------------------------------------------|
-var float[] seed = array.new_float(size=1, initial_value=42.0)              //-|
-f_prng(_range)=>                                                          //---|
-//| pseudo random function:                                             // O O |
-    var float _return = 1.0                                             //- V -|
-    float _seed = array.get(id=seed, index=0)                            //NNNN|
-    float _reseed =  271.828                                              // A |
-    _return := ((3.1416 * _return % _seed) * _reseed) % _range            // V |
-    array.set(id=seed, index=0, value=((_seed * 1.618) % _range) + _return) //||
-    _return                                                                // ||
-//| ---------------------------------------------------------------------------|
-
+//| -------------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)                  //-|
+f_prng(_range)=>                                                              //---|
+//| pseudo random function:                                                 // O O |
+    var float _return = 1.0                                                 //- V -|
+    float _seed = array.get(id=seed, index=0)                                //NNNN|
+    float _reseed =  271.828                                                  // A |
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range                // V |
+    array.set(id=seed, index=0, value=(1 + (_seed * 1.618) % _range) + _return) //||
+    _return                                                                    // ||
+//| -------------------------------------------------------------------------------|
 
 // C# https://rosettacode.org/wiki/Sudoku
 
