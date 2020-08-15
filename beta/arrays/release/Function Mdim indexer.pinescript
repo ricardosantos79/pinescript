@@ -1,0 +1,69 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='Function: Multi Dimension Indexer')
+
+
+f_mdim_i(_indices, _limits)=>
+//| returns the flatten index of a array of N dimensions.
+//|
+//| https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays
+//|     offset = n_D + N_D * ( ... (n_3 + N_3 * ( n_2 + N_2 * ( n_1 ) ) ) )
+//|         D = number of dimensions    (1D=[0,1], 2D=[0,1][0,1], 3D=[0,1][0,1][0,1])
+//|         n = indice in dimension     (3D=[2][1][1])
+//|         N = limit in dimension      (3D=[3][3][3])
+//|
+//|         offset =                    (3D=[1][1][1]) in (3D=[2][2][2]) = (13) --> 1 + 3 × (1 + (3 × (1) ))
+//|         offset =                    (3D=[1][2][1]) in (3D=[2][2][2]) = (16) --> 1 + 3 × (2 + (3 × (1) ))
+//|         offset =                    (3D=[2][1][1]) in (3D=[2][2][2]) = (22) --> 1 + 3 * (1 + (3 * (2) ))
+//|
+    int _offset = 0//int(na)
+    // size of the arrays containing indices and dimensions
+    int _i_size = array.size(id=_indices)
+    int _l_size = array.size(id=_limits)
+    // check for validity
+    bool _size_match = _i_size == _l_size and _i_size > 0 and _l_size > 0
+    if _size_match
+        // last value in indices:
+        _offset := array.get(id=_indices, index=0)
+        // if higher than 1D array
+        if _l_size > 1
+            for _i = 1 to _l_size - 1
+                int _ind = array.get(id=_indices, index=_i)
+                int _dim = array.get(id=_limits, index=_i) + 1
+                // to keep dimension size as base 0, for base 1 remove the '+ 1'
+                _offset := _offset * _dim + _ind
+    else
+        _offset := na
+    _offset
+
+
+int[] C = array.new_int(size=0, initial_value=0)
+int[] D = array.new_int(size=0, initial_value=0)
+
+x = input(0)
+y = input(0)
+z = input(0)
+max_x = input(0)
+max_y = input(0)
+max_z = input(0)
+
+// need to be carefull of empty dimensions
+if max_x > 0
+    array.push(id=C, value=x)
+    array.push(id=D, value=max_x)
+if max_y > 0
+    array.push(id=C, value=y)
+    array.push(id=D, value=max_y)
+if max_z > 0
+    array.push(id=C, value=z)
+    array.push(id=D, value=max_z)
+
+//r = f_3Dto1D(x, y, z, max_x, max_y, max_z)
+r = f_mdim_i(C, D)
+plot(r)
+
+// var label debug = label.new(bar_index, 0.0, '')
+// label.set_xy(id=debug, x=bar_index, y=0.0)
+// label.set_text(id=debug, text=t)

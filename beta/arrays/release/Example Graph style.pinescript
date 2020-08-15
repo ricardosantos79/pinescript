@@ -1,0 +1,85 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='Example: Graph style - 4th Dimension RSI')
+
+f_grad(_value)=>
+    _value >= 11 ? #0002A2 :
+         _value == 10 ? #0045A9 :
+         _value == 09 ? #008EB0 :
+         _value == 08 ? #00B690 :
+         _value == 07 ? #00BD4A :
+         _value == 06 ? #01C400 :
+         _value == 05 ? #52CA00 :
+         _value == 04 ? #A8D100 :
+         _value == 03 ? #D7AC00 :
+         _value == 02 ? #DE5800 :
+         _value == 01 ? #E50000 : color.white
+
+float feature01 = close-close[1]
+float feature02 = round(rsi(close, 14)[1]*10)
+
+int data_range = 10
+int nclusters = 3
+
+float[] X = array.new_float(data_range, feature01)
+float[] Y = array.new_float(data_range, feature02)
+
+for _i = 0 to data_range-1
+    array.set(id=X, index=_i, value=feature01[_i])
+    array.set(id=Y, index=_i, value=feature02[_i])
+
+plot(series=array.get(X, 0), color=f_grad(0), linewidth=10, style=plot.style_circles, offset=int(-1000+array.get(Y, 0)), show_last=1)
+plot(series=array.get(X, 1), color=f_grad(1), linewidth=9, style=plot.style_circles, offset=int(-1000+array.get(Y, 1)), show_last=1)
+plot(series=array.get(X, 2), color=f_grad(2), linewidth=8, style=plot.style_circles, offset=int(-1000+array.get(Y, 2)), show_last=1)
+plot(series=array.get(X, 3), color=f_grad(3), linewidth=7, style=plot.style_circles, offset=int(-1000+array.get(Y, 3)), show_last=1)
+plot(series=array.get(X, 4), color=f_grad(4), linewidth=6, style=plot.style_circles, offset=int(-1000+array.get(Y, 4)), show_last=1)
+plot(series=array.get(X, 5), color=f_grad(5), linewidth=5, style=plot.style_circles, offset=int(-1000+array.get(Y, 5)), show_last=1)
+plot(series=array.get(X, 6), color=f_grad(6), linewidth=4, style=plot.style_circles, offset=int(-1000+array.get(Y, 6)), show_last=1)
+plot(series=array.get(X, 7), color=f_grad(7), linewidth=3, style=plot.style_circles, offset=int(-1000+array.get(Y, 7)), show_last=1)
+plot(series=array.get(X, 8), color=f_grad(8), linewidth=2, style=plot.style_circles, offset=int(-1000+array.get(Y, 8)), show_last=1)
+plot(series=array.get(X, 9), color=f_grad(9), linewidth=1, style=plot.style_circles, offset=int(-1000+array.get(Y, 9)), show_last=1)
+
+// plot different shapes:
+// plotshape(series=array.get(X, 9), title='', style=shape.cross, location=location.absolute, color=f_grad(9), transp=25, offset=int(-1000+array.get(Y, 9)), size=size.normal, show_last=1)
+// plotshape(series=array.get(X, 5), title='', style=shape.diamond, location=location.absolute, color=f_grad(5), transp=25, offset=int(-1000+array.get(Y, 5)), size=size.normal, show_last=1)
+
+// not centered location
+//plotchar(series=array.get(X, 2), title='', char='*', location=location.absolute, color=f_grad(2), transp=25, offset=int(-1000+array.get(Y, 2)), size=size.normal, show_last=1)
+
+var line box_top = line.new(x1=bar_index, y1=0.0, x2=bar_index, y2=0.0, xloc=xloc.bar_index, extend=extend.none, color=color.gray, style=line.style_solid, width=1)
+var line box_bot = line.new(x1=bar_index, y1=0., x2=bar_index, y2=0., xloc=xloc.bar_index, extend=extend.none, color=color.gray, style=line.style_solid, width=1)
+var line box_left = line.new(x1=bar_index, y1=0., x2=bar_index, y2=0., xloc=xloc.bar_index, extend=extend.none, color=color.gray, style=line.style_solid, width=1)
+var line box_right = line.new(x1=bar_index, y1=0., x2=bar_index, y2=0., xloc=xloc.bar_index, extend=extend.none, color=color.gray, style=line.style_solid, width=1)
+
+var line box_ob = line.new(x1=bar_index, y1=0., x2=bar_index, y2=0., xloc=xloc.bar_index, extend=extend.none, color=color.olive, style=line.style_dashed, width=1)
+var line box_os = line.new(x1=bar_index, y1=0., x2=bar_index, y2=0., xloc=xloc.bar_index, extend=extend.none, color=color.orange, style=line.style_dashed, width=1)
+
+var float top = 0.0
+var float bot = 0.0
+int left = bar_index-1000
+int right = bar_index
+int ob = bar_index-250
+int os = bar_index-750
+
+top := cum(array.max(id=X)) / (bar_index + 1)//max(nz(top), array.max(id=X))
+bot := cum(array.min(id=X)) / (bar_index + 1)//min(nz(bot), array.min(id=X)) 
+
+// plot(series=top)
+// plot(series=bot)
+hline(0)
+
+line.set_xy1(id=box_top, x=left, y=top)
+line.set_xy2(id=box_top, x=right, y=top)
+line.set_xy1(id=box_bot, x=left, y=bot)
+line.set_xy2(id=box_bot, x=right, y=bot)
+line.set_xy1(id=box_left, x=left, y=top)
+line.set_xy2(id=box_left, x=left, y=bot)
+line.set_xy1(id=box_right, x=right, y=top)
+line.set_xy2(id=box_right, x=right, y=bot)
+line.set_xy1(id=box_ob, x=ob, y=top)
+line.set_xy2(id=box_ob, x=ob, y=bot)
+line.set_xy1(id=box_os, x=os, y=top)
+line.set_xy2(id=box_os, x=os, y=bot)
+
