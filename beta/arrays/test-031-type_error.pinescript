@@ -1,0 +1,28 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-031-type_error")
+
+//| -------------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)
+f_prng(_range)=>
+    float _seed = array.get(id=seed, index=0) 
+    array.set(id=seed, index=0, value=_seed*2)
+    _seed
+//| -------------------------------------------------------------------------------|
+
+string test = ''
+
+int length = input(20)
+var float[] T = array.new_float(size=0, initial_value=0.)
+
+if barstate.isfirst
+    for _i = 0 to length-1
+        array.push(id=T, value=f_prng(1.))
+
+test := test + '\n Array: ' + tostring(T)
+
+var label debug = label.new(bar_index, 0.0, '')
+label.set_xy(id=debug, x=bar_index, y=0.0)
+label.set_text(id=debug, text=test)
