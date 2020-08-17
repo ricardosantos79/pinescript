@@ -1,0 +1,130 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("test-32-perlin")
+
+//| Resources:
+//|     https://longwelwind.net/blog/perlin-noise/
+
+
+//| -------------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)                  //-|
+f_prng(_range)=>                                                              //---|
+//| pseudo random function:                                                 // O O |
+    var float _return = 1.0                                                 //- V -|
+    float _seed = array.get(id=seed, index=0)                                //NNNN|
+    float _reseed =  271.828                                                  // A |
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range                // V |
+    array.set(id=seed, index=0, value=(1 + (_seed * 1.618) % _range) + _return) //||
+    _return                                                                    // ||
+//| -------------------------------------------------------------------------------|
+
+
+f_random_vector2D()=>
+//| Generate random 2D vector (-1 to 1 values)
+    float _angle = f_prng(1.0) * 2.0 * 3.14159265359
+    float _x = cos(_angle)
+    float _y = sin(_angle)
+    [_x, _y]
+// [x, y] = f_random_vector2D()
+// plot(x), plot(y)
+
+
+f_fade(_x) => 6 * pow(_x, 5) - 15 * pow(_x, 4) + 10 * pow(_x, 3)
+f_dot(_x1, _y1, _x2, _y2) => _x1 * _x2 + _y1 * _y2
+f_lerp(_a, _b, _t) => _a * (1 - _t) + _b * _t
+f_i2Dto1D(_x, _y, _xD, _yD) => int(_x + _y * _yD)
+
+f_get_gradient_vectors(_width, _height, _period)=>
+//| Generate gradient vectors:
+//| Returns 2 (flat 2D) arrays of size(_width * _height) with vector information.
+    float _grid_width = ceil(_width / _period) + 1
+    float _grid_height = ceil(_height / _period) + 1
+
+    float[] _gridX = array.new_float(size=int(_grid_height * _grid_width), initial_value=0)
+    float[] _gridY = array.new_float(size=int(_grid_height * _grid_width), initial_value=0)
+    
+    for _y = 0 to _grid_height - 1
+        for _x = 0 to _grid_width - 1
+        //| flatten 2D index in 1D
+            int _i2Dto1d = f_i2Dto1D(_x, _y, _grid_width, _grid_height)//int(_x + _y * _grid_width)
+            [_vx, _vy] = f_random_vector2D()
+            array.set(id=_gridX, index=_i2Dto1d, value=_vx)
+            array.set(id=_gridY, index=_i2Dto1d, value=_vy)
+    [_gridX, _gridY]
+
+
+f_get_perlin_value(_width, _height, _x, _y, _perlin_vectors_X, _perlin_vectors_Y, _period)=>
+    // Coordinate of the cell
+    int _cell_x = int(_x / _period)
+    int _cell_y = int(_y / _period)
+    
+    // Relative coordinate of the point in the cell, normalized so that they are in [0, 1].
+    float _relative_x = f_fade((_x - _cell_x * _period) / _period)
+    float _relative_y = f_fade((_y - _cell_y * _period) / _period)
+
+    // fetch the 4 gradient vectors at the 4 corners of our cell.
+    float _top_left_gradient_x = array.get(id=_perlin_vectors_X, index=f_i2Dto1D(_cell_x, _cell_y, _width, _height))
+    float _top_left_gradient_y = array.get(id=_perlin_vectors_Y, index=f_i2Dto1D(_cell_x, _cell_y, _width, _height))
+    float _top_right_gradient_x = array.get(id=_perlin_vectors_X, index=f_i2Dto1D(_cell_x + 1, _cell_y, _width, _height))
+    float _top_right_gradient_y = array.get(id=_perlin_vectors_Y, index=f_i2Dto1D(_cell_x + 1, _cell_y, _width, _height))
+    float _bottom_left_gradient_x = array.get(id=_perlin_vectors_X, index=f_i2Dto1D(_cell_x, _cell_y + 1, _width, _height))
+    float _bottom_left_gradient_y = array.get(id=_perlin_vectors_Y, index=f_i2Dto1D(_cell_x, _cell_y + 1, _width, _height))
+    float _bottom_right_gradient_x = array.get(id=_perlin_vectors_X, index=f_i2Dto1D(_cell_x + 1, _cell_y + 1, _width, _height))
+    float _bottom_right_gradient_y = array.get(id=_perlin_vectors_Y, index=f_i2Dto1D(_cell_x + 1, _cell_y + 1, _width, _height))
+    
+    float _top_left_contribution = f_dot(_top_left_gradient_x, _top_left_gradient_y, _relative_x, _relative_y)
+    float _top_right_contribution = f_dot(_top_right_gradient_x, _top_right_gradient_y, _relative_x - 1, _relative_y)
+    float _bottom_left_contribution = f_dot(_bottom_left_gradient_x, _bottom_left_gradient_y, _relative_x, _relative_y - 1)
+    float _bottom_right_contribution = f_dot(_bottom_right_gradient_x, _bottom_right_gradient_y, _relative_x - 1, _relative_y - 1)
+    
+    float _top_lerp = f_lerp(_top_left_contribution, _top_right_contribution, _relative_x)
+    float _bottom_lerp = f_lerp(_bottom_left_contribution, _bottom_right_contribution, _relative_x)
+    float _final_value = f_lerp(_top_lerp, _bottom_lerp, _relative_y)
+
+    _final_value / (sqrt(2) / 2)
+
+
+
+// f_octaved_perlin_noise_grid(_width, _height, _start_period, _octaves, _attenuation)=>
+        
+//     float[] _final_grid = array.new_float(size=_width * _height, initial_value=0.)
+
+//     for _octave = 0 to _octaves
+//         float _period = _start_period * pow(1 / 2, _octave)
+//         float _octave_attenuation = pow(_attenuation, _octave)
+    
+//         [octave_grid_x, octave_grid_y] = f_get_gradient_vectors(_width, _height, _period)
+//         for _y = 0 to _height - 1
+//             for _x = 0 to _width - 1
+//                 array.set(id=_final_grid, index=f_i2Dto1D(_x, _y, _width, _height), value=array.get(id=))
+//                 _final_grid[y][x] += octave_grid[y][x] * octave_attenuation;
+
+//     let max_value = 0;
+//     for (let octave = 0; octave < octaves; octave++) {
+//         max_value += Math.pow(attenuation, octave);
+
+//     for (let y = 0; y < height; y++) {
+//         for (let x = 0; x < width; x++) {
+//             final_grid[y][x] = final_grid[y][x] / max_value;
+    
+//     _final_grid
+
+
+width = input(3)
+height = input(3)
+period = input(.6)
+x = input(2.0)
+y = input(2.0)
+
+[gridX, gridY] = f_get_gradient_vectors(width, height, period)
+
+
+t = tostring(gridX, '#.####') + '\n' + tostring(gridY, '#.####')
+
+float value = f_get_perlin_value(width, height, x, y, gridX, gridY, period)
+plot(value)
+var label debug = label.new(bar_index, 0.0, '')
+label.set_xy(id=debug, x=bar_index, y=0.0)
+label.set_text(id=debug, text=t)
