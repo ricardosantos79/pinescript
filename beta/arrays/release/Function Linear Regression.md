@@ -1,4 +1,4 @@
-Method:
+Description:
     A Function that returns a linear regression channel using (X,Y) vector points.
 
 Inputs:

@@ -1,5 +1,5 @@
-Method:
-    A Function that returns the flatten index of a array of N dimensions.
+Description:
+    A Function that returns the flat index of a array of N dimensions.
 
 Inputs:
     _indices: Array containing dimension indices.¹
@@ -9,7 +9,7 @@ Inputs:
         ¹: _indices and _limits size must match. indices must be within dimension size.
 
 Outputs:
-    _offset: the flatten 1D index.
+    _offset: the flat 1D index.
 
 Resources:
     https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays

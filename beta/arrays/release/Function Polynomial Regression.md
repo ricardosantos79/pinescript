@@ -1,4 +1,4 @@
-Method:
+Description:
     A function that returns a polynomial regression and deviation information for a data set.
 
 Inputs:

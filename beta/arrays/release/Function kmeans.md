@@ -1,4 +1,4 @@
-Method:
+Description:
     A Function that returns cluster centers for given data (X,Y) vector points.
 
 Inputs:
