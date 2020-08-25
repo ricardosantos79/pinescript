@@ -4,7 +4,7 @@ Description:
 Inputs:
     _X: Array containing x data points.¹
     _Y: Array containing y data points.¹
-    _number_of_clusters: number of clusters to find center.
+    _number_of_clusters: number of clusters.
 
     Note:
         ¹: _X and _Y size must match. 

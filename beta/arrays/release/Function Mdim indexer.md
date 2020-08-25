@@ -1,5 +1,5 @@
 Description:
-    A Function that returns the flat index of a array of N dimensions.
+    A Function that returns the flat index of a N dimensions array.
 
 Inputs:
     _indices: Array containing dimension indices.¹
