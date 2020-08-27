@@ -1,0 +1,33 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="test-033-distribution", max_bars_back=501)
+
+
+var float max_range = 0.0
+var float min_range = 0.0
+
+float range = abs(change(close))//atr(14)
+float avg_range = cum(range) / (bar_index + 1)
+
+if bar_index > 14
+    max_range := max(range, max_range)
+    min_range := min(range, min_range)
+else
+    max_range := range
+    min_range := range
+
+int rate = int((range - min_range) / (max_range - min_range) * 100)
+
+int length = input(500)
+var int[] distribution = array.new_int(size=101, initial_value=0)
+if barstate.islast and bar_index > length
+    for _i = 0 to length
+        array.set(id=distribution, index=rate[_i], value=array.get(id=distribution, index=rate[_i]) + 1)
+        
+t = tostring(distribution)
+
+var label la = label.new(bar_index, 0.0, '')
+label.set_xy(id=la, x=bar_index, y=0.0)
+label.set_text(id=la, text=t)
