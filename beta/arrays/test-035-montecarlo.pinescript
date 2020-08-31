@@ -2,7 +2,8 @@
 // © RicardoSantos
 
 //@version=4
-study("test-034-montecarlo")
+study("test-035-montecarlo", max_bars_back=5000)
+t = ''
 
 //| -------------------------------------------------------------------------------|
 var float[] seed = array.new_float(size=1, initial_value=42.0)                  //-|
@@ -23,19 +24,40 @@ f_decision_tree(_node_weights, _depth)=>
     int _sumweights = ceil(array.sum(id=_node_weights))
     if _nweights > 0 and _depth > 0 and _sumweights == 1
         for _d = 1 to _depth
-            for _w = 0 to _nweights - 1
+            for _w = 0 to 999
                 float _rng = f_prng(1.0)
-                float _weight = array.get(id=_node_weights, index=_w)
-                if _weight >= _rng or _w == (_nweights - 1)
-                    array.push(id=_path, value=_w)
+                float _weight = array.get(id=_node_weights, index=_w % _nweights)
+                if _weight >= _rng
+                    array.push(id=_path, value=_w % _nweights)
                     break
     _path
 
-var float[] node_weights = array.new_float(size=0, initial_value=0)
-if barstate.isfirst
-    array.push(id=node_weights, value=0.25)
-    array.push(id=node_weights, value=0.4)
-    array.push(id=node_weights, value=0.35)
+//|----------------------------------------------------------------------------||
+//| find the price change distribution:
+int data_size = input(500)
+int distribution_resolution = input(defval=10, options=[10, 100])
+
+var float max_range = 0.0
+var float min_range = 0.0
+
+float range = change(close)
+//float avg_range = cum(range) / (bar_index + 1)
+
+if bar_index > 1
+    max_range := max(range, max_range)
+    min_range := min(range, min_range)
+else
+    max_range := range
+    min_range := range
+
+int rate = int((range - min_range) / (max_range - min_range) * 100)
+
+
+// var float[] node_weights = array.new_float(size=0, initial_value=0)
+// if barstate.isfirst
+//     array.push(id=node_weights, value=0.25)
+//     array.push(id=node_weights, value=0.4)
+//     array.push(id=node_weights, value=0.35)
 
 int depth = input(10)
 int simulations = input(10)
@@ -46,31 +68,57 @@ var float[] distribution_std_upper = array.new_float(size=0, initial_value=0.)
 var float[] distribution_std_lower = array.new_float(size=0, initial_value=0.)
 var float[] distribution_mean = array.new_float(size=0, initial_value=0.)
 
-var float[] distributions = array.new_float(size=0, initial_value=0.)
+var int[] paths = array.new_int(size=0, initial_value=0)
 
-if barstate.islast
+
+if barstate.islast and bar_index > data_size
+    
+    var float[] node_weights = array.new_float(size=0, initial_value=0.)
+
+    var int[] distribution_counters = array.new_int(size=101, initial_value=1)
+
+    for _i = 0 to data_size
+        array.set(id=distribution_counters, index=rate[_i], value=array.get(id=distribution_counters, index=rate[_i]) + 1)
+
+    int _total = array.sum(id=distribution_counters)
+    
+    for _i = 0 to array.size(id=distribution_counters)-1
+        array.push(id=node_weights, value=array.get(id=distribution_counters, index=_i) / _total)
+        
+    t := t + tostring(node_weights) + '\n'
+
+    // run simulations:
     for _s = 0 to simulations-1
         _path = f_decision_tree(node_weights, depth)
+        //
         for _d = 0 to depth-1
             for _w = 0 to array.size(id=node_weights) - 1
                 int _v = array.get(id=_path, index=_d)
                 if _v == _w
-                    array.push(id=distributions, value=_w)
-                else
-                    array.push(id=distributions, value=na)
+                    array.push(id=paths, value=_w)
+
     // analize the distribution data:
-    // sugestions on how to read the distributions onwards into:
-    // decision distributions stats per depth step?
+    // sugestions on how to read the paths onwards into:
+    // decision distribution stats per depth step?
     // decision cones over chart?
     // best fit path?
-    for _d = 0 to depth-1
-        _a = 0
-        for _step = 0 to array.size(id=distributions) by depth * array.size(id=node_weights)
-            float _v = array.get(id=distributions, index=_d)
+    // for _d = 0 to depth-1
+    //     _a = 0
+    //     for _step = 0 to array.size(id=paths) by depth * array.size(id=node_weights)
+    //         float _v = array.get(id=paths, index=_d)
     
 
-t = ''
-t := t + '\n' + tostring(distributions)
+    for _d = 0 to depth-1//array.size(id=paths)-1 by depth*array.size(id=node_weights)
+        //t := t + '\n' + 'step ' + tostring(_d) + '/' + tostring(depth-1) + ': '
+        int[] _weight_counters = array.new_int(size=array.size(id=node_weights), initial_value=0)
+        
+        for _s = 0 to simulations-1//depth-1//*array.size(id=node_weights)-1
+            int _i = array.get(id=paths, index=_d + _s * depth)
+            int _new_count = array.get(id=_weight_counters, index=_i) + 1
+            array.set(id=_weight_counters, index=_i, value=_new_count)
+        
+        int _best_fit_weight = array.indexof(id=_weight_counters, value=array.max(id=_weight_counters))
+        t := t + tostring(_best_fit_weight) + ', '
 
 var label la = label.new(bar_index, 0.0, '')
 label.set_xy(id=la, x=bar_index, y=0.0)
