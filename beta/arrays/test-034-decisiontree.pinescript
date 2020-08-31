@@ -23,11 +23,11 @@ f_decision_tree(_node_weights, _depth)=>
     int _sumweights = ceil(array.sum(id=_node_weights))
     if _nweights > 0 and _depth > 0 and _sumweights == 1
         for _d = 1 to _depth
-            for _w = 0 to _nweights - 1
+            for _w = 0 to 999
                 float _rng = f_prng(1.0)
-                float _weight = array.get(id=_node_weights, index=_w)
-                if _weight >= _rng or _w == (_nweights - 1)
-                    array.push(id=_path, value=_w)
+                float _weight = array.get(id=_node_weights, index=_w % _nweights)
+                if _weight >= _rng
+                    array.push(id=_path, value=_w % _nweights)
                     break
     _path
 
