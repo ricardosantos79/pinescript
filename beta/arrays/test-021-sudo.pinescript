@@ -17,6 +17,7 @@ f_prng(_range)=>                                                              //
 //| -------------------------------------------------------------------------------|
 
 // C# https://rosettacode.org/wiki/Sudoku
+// extra: https://dev.to/christinamcmahon/use-backtracking-algorithm-to-solve-sudoku-270
 
 // public bool checkValidity(int val, int x, int y)
 //     {
