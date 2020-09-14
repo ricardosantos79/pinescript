@@ -2,7 +2,7 @@
 // © RicardoSantos
 
 //@version=4
-study("test-034-decisiontree")
+study(title='Function: Decision Tree')
 
 //| -------------------------------------------------------------------------------|
 var float[] seed = array.new_float(size=1, initial_value=42.0)                  //-|
@@ -32,17 +32,22 @@ f_decision_tree(_node_weights, _depth)=>
                     break
     _path
 
+//| Array to contain weights, sum of array values must be 1.
 var float[] node_weights = array.new_float(size=0, initial_value=0)
 if barstate.isfirst
     array.push(id=node_weights, value=0.5)
     array.push(id=node_weights, value=0.5)
 
-int depth = input(1)
-path1 = f_decision_tree(node_weights, depth)
-path2= f_decision_tree(node_weights, depth)
-t = ''
-t := t + '\n' + tostring(path1)
-t := t + '\n' + tostring(path2)
+//| Input Parameters:
+int depth = input(defval=1, minval=1)
+int paths = input(defval=2, minval=1)
+
+string t = ''
+
+for _p = 1 to paths
+    _path = f_decision_tree(node_weights, depth)
+
+    t := t + '\nPath ' + tostring(_p, '#') + ': ' + tostring(_path)
 
 var label la = label.new(bar_index, 0.0, '')
 label.set_xy(id=la, x=bar_index, y=0.0)
