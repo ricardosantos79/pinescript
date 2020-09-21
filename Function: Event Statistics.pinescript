@@ -1,0 +1,127 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='function: Event Statistics')
+int window = input(200)
+float h = highest(window)
+float l = lowest(window)
+int hb = highestbars(window)
+int lb = lowestbars(window)
+
+f_change_to_window(_window)=>close - close[_window]
+f_change_to_highest_point(_window)=>h - close[_window] // highest(_window) - close[_window]
+f_change_to_lowest_point(_window)=>l - close[_window] // lowest(_window) - close[_window]
+f_highest_bar_from_event(_window)=>_window + hb//highestbars(_window)
+f_lowest_bar_from_event(_window)=>_window + lb//lowestbars(_window)
+
+var float[] stats_change = array.new_float(size=0, initial_value=0.)
+var float[] stats_max = array.new_float(size=0, initial_value=0.)
+var float[] stats_min = array.new_float(size=0, initial_value=0.)
+var int[] stats_peakbar = array.new_int(size=0, initial_value=0)
+var int[] stats_deepbar = array.new_int(size=0, initial_value=0)
+
+f_stat(_event, _window)=>
+//| updates a array with new value
+    if _event[_window]
+        array.push(id=stats_change, value=f_change_to_window(_window))
+        array.push(id=stats_max, value=f_change_to_highest_point(_window))
+        array.push(id=stats_min, value=f_change_to_lowest_point(_window))
+        array.push(id=stats_peakbar, value=f_highest_bar_from_event(_window))
+        array.push(id=stats_deepbar, value=f_lowest_bar_from_event(_window))
+
+float ma = sma(close, 10)
+bool event = crossover(close, ma)
+f_stat(event, window)
+
+float avg = array.avg(id=stats_change)
+float avg_max = array.avg(id=stats_max)
+float avg_min = array.avg(id=stats_min)
+int avg_peakbar = array.avg(id=stats_peakbar)
+int avg_deepbar = array.avg(id=stats_deepbar)
+
+plot(event?0:na, title='event', style=plot.style_circles, linewidth=4)
+plot(avg, title='avg', color=#000000, offset=-window)
+plot(avg_max, title='max', color=#00ff00, offset=-window)
+plot(avg_min, title='min', color=#ff0000, offset=-window)
+// plot(avg_peakbar, title='peak', color=#ff0000, offset=-window)
+// plot(avg_deepbar, title='deep', color=#ff0000, offset=-window)
+
+_size = array.size(id=stats_change)
+stavg(_i)=> _size > _i ? array.get(id=stats_change, index=_size - _i) : na
+stmax(_i)=> _size > _i ? array.get(id=stats_max, index=_size - _i) : na
+stpeak(_i)=> _size > _i ? array.get(id=stats_peakbar, index=_size - _i) : na
+
+stmin(_i)=> _size > _i ? array.get(id=stats_min, index=_size - _i) : na
+stdeep(_i)=> _size > _i ? array.get(id=stats_deepbar, index=_size - _i) : na
+
+plot(stavg(01), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(02), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(03), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(04), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(05), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(06), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(07), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(08), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(09), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(10), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(11), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(12), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(13), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(14), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(15), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(16), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(17), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(18), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(19), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+plot(stavg(20), title='', color=#000000, style=plot.style_circles, offset=window, show_last=1)
+
+plot(stmax(01), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(01), show_last=1)
+plot(stmax(02), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(02), show_last=1)
+plot(stmax(03), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(03), show_last=1)
+plot(stmax(04), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(04), show_last=1)
+plot(stmax(05), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(05), show_last=1)
+plot(stmax(06), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(06), show_last=1)
+plot(stmax(07), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(07), show_last=1)
+plot(stmax(08), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(08), show_last=1)
+plot(stmax(09), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(09), show_last=1)
+plot(stmax(10), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(10), show_last=1)
+plot(stmax(11), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(11), show_last=1)
+plot(stmax(12), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(12), show_last=1)
+plot(stmax(13), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(13), show_last=1)
+plot(stmax(14), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(14), show_last=1)
+plot(stmax(15), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(15), show_last=1)
+plot(stmax(16), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(16), show_last=1)
+plot(stmax(17), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(17), show_last=1)
+plot(stmax(18), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(18), show_last=1)
+plot(stmax(19), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(19), show_last=1)
+plot(stmax(20), title='', color=#00ff00, style=plot.style_circles, offset=stpeak(20), show_last=1)
+
+plot(stmin(01), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(01), show_last=1)
+plot(stmin(02), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(02), show_last=1)
+plot(stmin(03), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(03), show_last=1)
+plot(stmin(04), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(04), show_last=1)
+plot(stmin(05), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(05), show_last=1)
+plot(stmin(06), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(06), show_last=1)
+plot(stmin(07), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(07), show_last=1)
+plot(stmin(08), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(08), show_last=1)
+plot(stmin(09), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(09), show_last=1)
+plot(stmin(10), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(10), show_last=1)
+plot(stmin(11), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(11), show_last=1)
+plot(stmin(12), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(12), show_last=1)
+plot(stmin(13), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(13), show_last=1)
+plot(stmin(14), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(14), show_last=1)
+plot(stmin(15), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(15), show_last=1)
+plot(stmin(16), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(16), show_last=1)
+plot(stmin(17), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(17), show_last=1)
+plot(stmin(18), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(18), show_last=1)
+plot(stmin(19), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(19), show_last=1)
+plot(stmin(20), title='', color=#ff0000, style=plot.style_circles, offset=stdeep(20), show_last=1)
+
+// t = ''
+// size = array.size(stats_min)
+// if barstate.islast
+//     t := tostring(array.slice(id=stats_min, index_from=size-10, index_to=size))
+// var label la = label.new(0, 0., '')
+// label.set_x(id=la, x=bar_index)
+// label.set_text(id=la, text=t)
