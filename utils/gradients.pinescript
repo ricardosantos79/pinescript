@@ -1,0 +1,53 @@
+study(title='Gradients', shorttitle='g', overlay=false)
+
+string type000 = 'hsl(step:10, saturation:40%, lightness:60%)'
+string type = input(defval=type000)
+int transparency = input(0)
+var color gradient = array.newcolor(size=0, initial_value=#000000)
+
+if barstate.isfirst
+    if type == type000//'36 colors hsl(step:10, saturation:40%, lightness:60%)'
+        //red
+        array.push(id=gradient, value=color.new(color=#c27070, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c27e70, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c28b70, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c29970, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c2a770, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c2b470, transp=transparency))
+        //yellow
+        array.push(id=gradient, value=color.new(color=#c2c270, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#b4c270, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#a7c270, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#99c270, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#8bc270, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#7ec270, transp=transparency))
+        //green
+        array.push(id=gradient, value=color.new(color=#70c270, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70c27e, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70c28b, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70c299, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70c2a7, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70c2b4, transp=transparency))
+        //blue
+        array.push(id=gradient, value=color.new(color=#70c2c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70b4c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#70a7c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#7099c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#708bc2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#707ec2, transp=transparency))
+        //purple
+        array.push(id=gradient, value=color.new(color=#7070c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#7e70c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#8b70c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#9970c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#a770c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#b470c2, transp=transparency))
+        //pink
+        array.push(id=gradient, value=color.new(color=#c270c2, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c270b4, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c270a7, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c27099, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c2708b, transp=transparency))
+        array.push(id=gradient, value=color.new(color=#c2707e, transp=transparency))
+        //red
+        //array.push(id=gradient, value=color.new(color=#c27070, transp=transparency))
