@@ -1,0 +1,108 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='test-alphabet')
+
+
+// f_encode(_integers)=>
+// //https://upscaledb.com/0009-32bit-integer-compression-algorithms.html
+//     int _size = array.size(id=_integers)
+//     int _value = na
+//     if _size > 0
+//         _value := array.get(id=_integers, index=0)
+//         for _i = 1 to _size - 1
+//             _value := array.get(id=_integers, index=_i) - _value
+
+
+
+f_ndigit(_value)=>
+    _abs = abs(_value)
+    _count = 0
+    for _i = 0 to 9999999
+        if _abs == 0
+            break
+        _abs := floor(_abs / 10)
+        _count := _count + 1
+    _count
+
+f_int_shift_digit(_integer, _shift)=>
+    int(floor(_integer / pow(10, _shift)))
+
+f_upper_alphabet(_i)=>
+    (_i==00?'':(_i==01?'A':(_i==02?'B':(_i==03?'C':(_i==04?'D':(_i==05?'E':(_i==06?'F':(_i==07?'G':(_i==08?'H':(_i==09?'I':
+     (_i==10?'J':(_i==11?'K':(_i==12?'L':(_i==13?'M':(_i==14?'N':(_i==15?'O':(_i==16?'P':(_i==17?'Q':(_i==18?'R':(_i==19?'S':
+     (_i==20?'T':(_i==21?'U':(_i==22?'V':(_i==23?'W':(_i==24?'X':(_i==25?'Y':(_i==26?'Z':(_i==27?'':(_i==28?'':(_i==29?'':''
+     )))))))))) )))))))))) ))))))))))
+     
+f_ascii_alphabet(_i)=>
+    (_i==00?'':(_i==01?'!':(_i==02?'"':(_i==03?'#':(_i==04?'$':(_i==05?'%':(_i==06?'&':(_i==07?"'":(_i==08?'(':(_i==09?')':
+     (_i==10?'*':(_i==11?'+':(_i==12?',':(_i==13?'-':(_i==14?'.':(_i==15?'/':(_i==16?'0':(_i==17?'1':(_i==18?'2':(_i==19?'3':
+     (_i==20?'4':(_i==21?'5':(_i==22?'6':(_i==23?'7':(_i==24?'8':(_i==25?'9':(_i==26?':':(_i==27?';':(_i==28?'<':(_i==29?'=':
+     (_i==30?'>':(_i==31?'?':(_i==32?'@':(_i==33?'A':(_i==34?'B':(_i==35?'C':(_i==36?'D':(_i==37?'E':(_i==38?'F':(_i==39?'G':
+     (_i==40?'H':(_i==41?'I':(_i==42?'J':(_i==43?'K':(_i==44?'L':(_i==45?'M':(_i==46?'N':(_i==47?'O':(_i==48?'P':(_i==49?'Q':
+     (_i==50?'R':(_i==51?'S':(_i==52?'T':(_i==53?'U':(_i==54?'V':(_i==55?'W':(_i==56?'X':(_i==57?'Y':(_i==58?'Z':(_i==59?'[':
+     (_i==60?'\\':(_i==61?']':(_i==62?'^':(_i==63?'_':(_i==64?'`':(_i==65?'a':(_i==66?'b':(_i==67?'c':(_i==68?'d':(_i==69?'e':
+     (_i==70?'f':(_i==71?'g':(_i==72?'h':(_i==73?'i':(_i==74?'j':(_i==75?'k':(_i==76?'l':(_i==77?'m':(_i==78?'n':(_i==79?'o':
+     (_i==80?'p':(_i==81?'q':(_i==82?'r':(_i==83?'s':(_i==84?'t':(_i==85?'u':(_i==86?'v':(_i==87?'w':(_i==88?'x':(_i==89?'y':
+     (_i==90?'z':(_i==91?'{':(_i==92?'|':(_i==93?'}':(_i==94?'~':(_i==95?'':(_i==96?'':(_i==97?'':(_i==98?'':(_i==99?'':''
+     )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) ))))))))))
+
+f_select_alphabet(_i, _v)=>
+    (_i==00?f_ascii_alphabet(_v):(_i==01?f_upper_alphabet(_v):na))
+
+f_indices_to_string(_indices, _alphabet)=>
+    int _size = array.size(id=_indices)
+    string _output = ''
+    if _size > 0
+        for _c = 0 to _size-1
+            int _indice = array.get(id=_indices, index=_c)
+            _output := _output + f_select_alphabet(_alphabet, _indice)
+    _output
+
+f_int_to_alphabet_indices(_integer)=>
+    int[] _integers = array.new_int(0)
+    int _digits = f_ndigit(_integer)
+    int _old = _integer
+    for _i = 0 to _digits
+        if _old <= 0
+            break
+        float _shifted = _old / 100
+        int _new = floor(_shifted)
+        int _indice = int((_shifted - floor(_new)) * 100)
+        array.unshift(id=_integers, value=_indice)
+        _old := floor(_new)
+    _integers
+
+string _text = f_ascii_alphabet(input(-1))
+int _N = input(0102030405060708)//09//10//11121314151617181920212223242526
+if barstate.ishistory[1] and barstate.isrealtime
+    int[] indices = f_int_to_alphabet_indices(_N)
+    _text := _text + '\n' + tostring(_N) + ' -> looks ok\n'
+    _text := _text + '\n' + tostring(indices) + ' -> repeats 6 and doesnt print first step\n'
+    _text := _text + f_indices_to_string(indices, 1) + ' -> conversion correct'// 0:ascii, 1:upper
+    // for _i = 0 to 999999
+    //     _text := _text + '\n' + tostring(_i) + ' : '
+    //     if _N <= 0
+    //         break
+    //     float _shifted = _N / 100
+    //     int _new = floor(_shifted)
+    //     int _rest = int((_shifted - _new) * 100)
+    //     string _str = f_upper_alphabet(_rest)
+    //     _text := _text + tostring(_N) + ' : ' + _str
+    //     _N := _new
+    
+    label.new(bar_index, close, _text)
+
+
+//|----------------------------------------------------------------------------|
+// BINARY           >>>>    01
+// OCTAL            >>>>    01234567
+// DECIMAL          >>>>    0123456789
+// HEXADECIMAL      >>>>    0123456789ABCDEF
+// DNA              >>>>    ACGT
+// LOWERCASE        >>>>    abcdefghijklmnopqrstuvwxyz
+// UPPERCASE        >>>>    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+// PROTEIN          >>>>    ACDEFGHIKLMNPQRSTVWY
+// BASE64           >>>>    ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
+// ASCII base-95    >>>>    !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
