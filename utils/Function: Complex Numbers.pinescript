@@ -1,0 +1,370 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='Function: Complex Numbers')
+
+//| Complex numbers prototype: {
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+//|     @description:
+//|         A set of utility functions to handle complex numbers.
+//|     @references:
+//|         https://en.wikipedia.org/wiki/Complex_number
+//|         js: https://rosettacode.org/wiki/Fast_Fourier_transform
+//|         https://github.com/trekhleb/javascript-algorithms/blob/477f30b0bdac6024874d2976de1eca7afe0176dd/src/algorithms/math/complex-number/ComplexNumber.js#L3
+//|         https://github.com/infusion/Complex.js/
+//|         http://jmvidal.cse.sc.edu/talks/javascript/complexnumbersexample.html
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+
+f_complex_new(_real, _imaginary)=>
+//| @description:
+//|     Creates a prototype array to handle complex numbers.
+//| @parameters:
+//|     _real: real value of the complex number.
+//|     _imaginary: imaginary number of the complex number. optional(use float(na) to not define value)
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+    array.set(id=_complex, index=0, value=_real)
+    array.set(id=_complex, index=1, value=na(_imaginary)?0.0:_imaginary)
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary].
+    _complex
+
+f_complex_real_get(_a)=>
+//| @description:
+//|     Get the real part of complex number _a.
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+    _real = array.get(id=_a, index=0)
+//| @return:
+//|     _real: Real part of the complex number _a.
+    _real
+
+f_complex_imaginary_get(_a)=>
+//| @description:
+//|     Get the imaginary part of complex number _a.
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+    _imaginary = array.get(id=_a, index=1)
+//| @return:
+//|     _imaginary: Imaginary part of the complex number _a.
+    _imaginary
+
+f_complex_add(_a, _b)=>
+//| @description:
+//|     Adds complex number _b to _a, in the form:
+//|         [_a.real + _b.real, _a.imaginary + _b.imaginary].
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+//|     _b: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+    array.set(id=_complex, index=0, value=f_complex_real_get(_a) + f_complex_real_get(_b))
+    array.set(id=_complex, index=1, value=f_complex_imaginary_get(_a) + f_complex_imaginary_get(_b))
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+	_complex
+
+f_complex_subtract(_a, _b)=>
+//| @description:
+//|     Subtract complex number _b from _a, in the form: 
+//|         [_a.real - _b.real, _a.imaginary - _b.imaginary].
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+//|     _b: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+    array.set(id=_complex, index=0, value=f_complex_real_get(_a) - f_complex_real_get(_b))
+    array.set(id=_complex, index=1, value=f_complex_imaginary_get(_a) - f_complex_imaginary_get(_b))
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+    _complex
+
+f_complex_multiply(_a, _b)=>
+//| @description:
+//|     Multiply complex number _a with _b, in the form: 
+//|         [(_a.real * _b.real) - (_a.imaginary * _b.imaginary), (_a.real * _b.imaginary) + (_a.imaginary * _b.real)]
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+//|     _b: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+	float _b_real = f_complex_real_get(_b)
+	float _b_imaginary = f_complex_imaginary_get(_b)
+	float _r = _a_real * _b_real - _a_imaginary * _b_imaginary
+    float _i = _a_real * _b_imaginary + _a_imaginary * _b_real
+    array.set(id=_complex, index=0, value=_r)
+    array.set(id=_complex, index=1, value=_i)
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+	_complex
+
+f_complex_negative(_a)=>
+//| @description:
+//|     Negative of complex number _a, in the form: [-_a.real, -_a.imaginary]
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+    array.set(id=_complex, index=0, value=-_a_real)
+    array.set(id=_complex, index=1, value=-_a_imaginary)
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+	_complex
+
+f_complex_cexp(_a)=>
+//| @description:
+//|     Exponential of complex number _a, in the form: 
+//|         reference:  https://en.cppreference.com/w/c/numeric/complex/cexp
+//|                     http://cboard.cprogramming.com/c-programming/89116-how-implement-complex-exponential-functions-c.html#post637921
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+	var _er = exp(_a_real)
+    array.set(id=_complex, index=0, value=_er * cos(_a_imaginary))
+    array.set(id=_complex, index=1, value=_er * sin(_a_imaginary))
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+	_complex
+
+f_complex_tostring(_a)=>
+//| @description:
+//|     Converts complex number _a to a string format, in the form: "a+bi" 
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+	string _str = ''
+	if na(_a_real)
+		_str := tostring(_a_imaginary) + 'i'
+	else if _a_imaginary < 0
+		_str := tostring(_a_real) + '' + tostring(_a_imaginary) + 'i'
+	else
+		_str := tostring(_a_real) + '+' + tostring(_a_imaginary) + 'i'
+//| @return:
+//|     _str: a string int "a+bi" format
+	_str
+
+f_complex_conjugate(_a)=>
+//| @description:
+//|     Computes the conjugate of complex number _a by reversing the sign of the imaginary part.
+//|         reference: https://en.cppreference.com/w/c/numeric/complex/conj
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+    float[] _complex = f_complex_new(_a_real, -1 * _a_imaginary)
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+    _complex
+
+f_complex_divide(_a, _b)=>
+//| @description:
+//|     Divide complex number _a with _b, in the form: 
+//|         [(_a.real * _b.real) - (_a.imaginary * _b.imaginary), (_a.real * _b.imaginary) + (_a.imaginary * _b.real)]
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+//|     _b: pseudo complex number in the form of a array [real, imaginary].
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+	float _b_real = f_complex_real_get(_b)
+	float _b_imaginary = f_complex_imaginary_get(_b)
+    // Make sure we're dealing with complex number.
+    float[] _complexDivider = f_complex_new(_b_real, _b_imaginary)
+    // Multiply dividend by divider's conjugate.
+    float[] _finalDivident = f_complex_multiply(_a, f_complex_conjugate(_complexDivider))
+    // Calculating final divider using formula (a + bi)(a − bi) = a^2 + b^2
+    float finalDivider = pow(f_complex_real_get(_complexDivider), 2) + pow(f_complex_imaginary_get(_complexDivider), 2)
+	float _finaldivident_real = f_complex_real_get(_finalDivident)
+	float _finaldivident_imaginary = f_complex_imaginary_get(_finalDivident)
+    array.set(id=_complex, index=0, value=_finaldivident_real / finalDivider)
+    array.set(id=_complex, index=1, value=_finaldivident_imaginary / finalDivider)
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+	_complex
+
+f_complex_get_radius(_a)=>
+//| @description:
+//|     Radius of _a, in the form: [sqrt(pow(_a))]
+//|     Return the magnitude of a complex number. This is defined
+//|         as its distance from the origin (0,0) of the complex plane.
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+    float _radius= sqrt(pow(f_complex_real_get(_a), 2) + pow(f_complex_imaginary_get(_a), 2))
+//| @return:
+//|     _radius: float value with radius.
+    _radius
+
+f_complex_get_phase(_a, _inRadians)=>
+//| @description:
+//|     The phase value of complex number _a.
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+//|     _inRadians: boolean value for the type of angle value, (true: radians, false: degrees)
+    float _pi = 3.14159265359
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+    float _phase = atan(abs(_a_imaginary) / abs(_a_real))
+
+    if not _inRadians
+        _phase := _phase * (180 / _pi) // radian to degrees
+    else
+        if _a_real < 0 and _a_imaginary > 0
+            _phase := _pi - nz(_phase)
+        else if _a_real < 0 and _a_imaginary < 0
+            _phase := -(_pi - nz(_phase))
+        else if _a_real > 0 and _a_imaginary < 0
+            _phase := -nz(_phase)
+        else if _a_real == 0 and _a_imaginary > 0
+            _phase := _pi / 2.0
+        else if _a_real == 0 and _a_imaginary < 0
+            _phase := -_pi / 2.0
+        else if _a_real < 0 and _a_imaginary == 0
+            _phase := _pi
+        else if _a_real > 0 and _a_imaginary == 0
+            _phase := 0.0
+        else if _a_real == 0 and _a_imaginary == 0
+            // More correctly would be to set 'indeterminate'.
+            // But just for simplicity reasons let's set zero.
+            _phase := 0.0
+        else
+            na
+//| @return:
+//|     _phase: float value with phase.
+    _phase
+
+f_complex_get_polar_form(_a, _inRadians)=>
+//| @description:
+//|     The polar form value of complex number _a.
+//| @parameters:
+//|     _a: pseudo complex number in the form of a array [real, imaginary].
+//|     _inRadians: boolean value for the type of angle value, (true: radians, false: degrees)
+    float[] _complex = f_complex_new(f_complex_get_radius(_a), f_complex_get_phase(_a, _inRadians))
+//| @return:
+//|     _complex: **pseudo complex number in the form of a array [real, imaginary]
+//|     ** returns a array [radius, phase]
+    _complex
+
+f_complex_array_new(_size, _initial_complex)=>
+//| @description:
+//|     Prototype to initialize a array of complex numbers.
+//| @parameters:
+//|     _size: size of the array.
+//|     _initial_complex: Complex number to be used as default value, in the form of array [real, imaginary].
+	float _init_real = array.get(id=_initial_complex, index=0)
+	float _init_imaginary = array.get(id=_initial_complex, index=1)
+
+    float[] _complex_array = array.new_float(0)
+    for _i = 0 to _size-1
+        array.push(id=_complex_array, value=_init_real)
+        array.push(id=_complex_array, value=_init_imaginary)
+//| @return:
+//|     _complex_array: pseudo complex Array in the form of a array [0:real, 1:imaginary, 2:real, 3:imaginary,...]
+    _complex_array
+
+
+f_complex_array_get(_id, _index)=>
+//| @description:
+//|     Get the complex number in a array, in the form of a array [real, imaginary]
+//| @parameters:
+//|     _id: ID of the array.
+//|     _index: Index of the complex number.
+    float[] _complex = array.new_float(size=2, initial_value=0.0)
+    int _size = round(array.size(id=_id) / 2)
+    int _index2 = _index * 2
+    if _index > -1 and _index < _size
+        array.set(id=_complex, index=0, value=array.get(id=_id, index=_index2))
+        array.set(id=_complex, index=1, value=array.get(id=_id, index=_index2 + 1))
+//| @return:
+//|     _complex: pseudo complex number in the form of a array [real, imaginary]
+    _complex
+
+
+f_complex_array_set(_id, _index, _a)=>
+//| @description:
+//|     Sets the values complex number in a array.
+//| @parameters:
+//|     _id: ID of the array.
+//|     _index: Index of the complex number.
+//|     _a:     Complex number, in the form: [real, imaginary].
+	float _a_real = f_complex_real_get(_a)
+	float _a_imaginary = f_complex_imaginary_get(_a)
+    int _size = array.size(id=_id)-1
+    int _index2 = _index * 2
+    if _index > -1 and _index2 < _size
+        array.set(id=_id, index=_index2, value=_a_real)
+        array.set(id=_id, index=_index2 + 1, value=_a_imaginary)
+//| @return: Void, updates array _id.
+
+
+f_complex_array_tostring(_id)=>
+//| @description:
+//|     Reads a array of complex numbers into a string, of the form: "[ [a+bi], ... ]""
+//| @parameters:
+//|     _id: ID of the array.
+    int _size = round(array.size(id=_id) / 2)
+    string _str = '[ '
+    if _size > 0
+        for _i = 0 to _size-1
+            _str := _str + '[ ' + f_complex_tostring(f_complex_array_get(_id, _i)) + ' ]'
+            if _i == _size
+                _str := _str + ' ]'
+            else
+                _str := _str + ', '
+//| @return:
+//|     _str: Translated complex array into string.
+    _str
+
+//|----------------------------------------------------------------------------||
+//|--------------------------------}-------------------------------------------||
+
+
+
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+
+
+
+if barstate.ishistory[1] and barstate.isrealtime
+    float[] a = f_complex_new(0.10, -0.25)
+    float[] b = f_complex_new(0.66, float(na))
+    float[] c = f_complex_add(a, b)
+    float[] d = f_complex_subtract(c, b)
+    float[] e = f_complex_multiply(a, d)
+    float[] f = f_complex_cexp(e)
+    float[] g = f_complex_conjugate(f)
+    float[] h = f_complex_divide(f, g)
+    float i = f_complex_get_radius(h)
+    float j = f_complex_get_phase(h, true)
+    float[] k = f_complex_get_polar_form(h, true)
+    float[] L = f_complex_array_new(4, f_complex_new(0, 0))
+    f_complex_array_set(L, 0, a)
+    f_complex_array_set(L, 1, b)
+    f_complex_array_set(L, 2, c)
+    f_complex_array_set(L, 3, d)
+    float[] m = f_complex_array_get(L, 2)
+    float[] n = f_complex_negative(m)
+    _text = ''
+    _text := _text + 'a: ' + f_complex_tostring(a) + '\n'
+    _text := _text + 'b: ' + f_complex_tostring(b) + '\n'
+    _text := _text + 'c: ' + f_complex_tostring(c) + '\n'
+    _text := _text + 'd: ' + f_complex_tostring(d) + '\n'
+    _text := _text + 'e: ' + f_complex_tostring(e) + '\n'
+    _text := _text + 'f: ' + f_complex_tostring(f) + '\n'
+    _text := _text + 'g: ' + f_complex_tostring(g) + '\n'
+    _text := _text + 'h: ' + f_complex_tostring(h) + '\n'
+    _text := _text + 'i: ' + tostring(i) + '\n'
+    _text := _text + 'j: ' + tostring(j) + '\n'
+    _text := _text + 'k: ' + tostring(k) + '\n'
+    _text := _text + 'L: ' + f_complex_array_tostring(L) + '\n'
+    _text := _text + 'm: ' + f_complex_tostring(m) + '\n'
+    _text := _text + 'n: ' + f_complex_tostring(n) + '\n'
+    label.new(x=bar_index, y=0.0, text=_text, textalign=text.align_left)
+
+
