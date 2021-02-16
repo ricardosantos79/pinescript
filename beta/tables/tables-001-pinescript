@@ -1,0 +1,60 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("tables-001")
+
+i_tb_pos = input(title='Table Position:', defval=position.middle_center, options=[
+     position.top_left, 
+     position.top_center, 
+     position.top_right, 
+     position.middle_left, 
+     position.middle_center, 
+     position.middle_right, 
+     position.bottom_left, 
+     position.bottom_center, 
+     position.bottom_right])
+i_tb_row = input(title='Table Rows:', defval=1)
+i_tb_col = input(title='Table Columns:', defval=2)
+i_tb_bg_color = input(title='Table Background Color:', type=input.color, defval=color.red)
+i_tb_fr_width = input(title='Table Frame Width:', defval=2)
+i_tb_fr_color = input(title='Table Frame Color', type=input.color, defval=color.gray)
+i_tb_br_width = input(title='Table Border Width:', defval=2)
+i_tb_br_color = input(title='Table Border Color', type=input.color, defval=color.silver)
+
+var a = table.new(position=i_tb_pos, 
+     rows=i_tb_row, columns=i_tb_col, bgcolor=i_tb_bg_color, 
+     frame_color=i_tb_fr_color, frame_width=i_tb_fr_width, 
+     border_color=i_tb_br_color, border_width=i_tb_br_width)
+
+f_fill_cells()=>
+    for _r = 0 to i_tb_row-1
+        bool _r_iseven = _r % 2 == 0
+        for _c = 0 to i_tb_col-1
+            bool _c_isodd = _c % 2 == 0
+            if _r_iseven and _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='hello',
+                     width=0, height=0, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 90))
+            else if _r_iseven and not _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='world',
+                     width=0, height=0, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 80))
+            else if not _r_iseven and _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='good',
+                     width=0, height=0, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 90))
+            else if not _r_iseven and not _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='',
+                     width=0, height=0, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 80))
+    
+
+if barstate.islast or barstate.isconfirmed[1]
+    f_fill_cells()
+
+plot(close)
