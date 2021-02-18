@@ -1,0 +1,78 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("tables-002-matrixscreen")
+
+f_ascii_alphabet(_i)=>//{
+//| @description: returns the character at a index from the ASCII alphabet.
+    (_i==00?'':(_i==01?'!':(_i==02?'"':(_i==03?'#':(_i==04?'$':(_i==05?'%':(_i==06?'&':(_i==07?"'":(_i==08?'(':(_i==09?')':
+     (_i==10?'*':(_i==11?'+':(_i==12?',':(_i==13?'-':(_i==14?'.':(_i==15?'/':(_i==16?'0':(_i==17?'1':(_i==18?'2':(_i==19?'3':
+     (_i==20?'4':(_i==21?'5':(_i==22?'6':(_i==23?'7':(_i==24?'8':(_i==25?'9':(_i==26?':':(_i==27?';':(_i==28?'<':(_i==29?'=':
+     (_i==30?'>':(_i==31?'?':(_i==32?'@':(_i==33?'A':(_i==34?'B':(_i==35?'C':(_i==36?'D':(_i==37?'E':(_i==38?'F':(_i==39?'G':
+     (_i==40?'H':(_i==41?'I':(_i==42?'J':(_i==43?'K':(_i==44?'L':(_i==45?'M':(_i==46?'N':(_i==47?'O':(_i==48?'P':(_i==49?'Q':
+     (_i==50?'R':(_i==51?'S':(_i==52?'T':(_i==53?'U':(_i==54?'V':(_i==55?'W':(_i==56?'X':(_i==57?'Y':(_i==58?'Z':(_i==59?'[':
+     (_i==60?'\\':(_i==61?']':(_i==62?'^':(_i==63?'_':(_i==64?'`':(_i==65?'a':(_i==66?'b':(_i==67?'c':(_i==68?'d':(_i==69?'e':
+     (_i==70?'f':(_i==71?'g':(_i==72?'h':(_i==73?'i':(_i==74?'j':(_i==75?'k':(_i==76?'l':(_i==77?'m':(_i==78?'n':(_i==79?'o':
+     (_i==80?'p':(_i==81?'q':(_i==82?'r':(_i==83?'s':(_i==84?'t':(_i==85?'u':(_i==86?'v':(_i==87?'w':(_i==88?'x':(_i==89?'y':
+     (_i==90?'z':(_i==91?'{':(_i==92?'|':(_i==93?'}':(_i==94?'~':(_i==95?'':(_i==96?'':(_i==97?'':(_i==98?'':(_i==99?'':''
+     )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) )))))))))) ))))))))))
+//}
+
+//| Random number generation function:
+//| -------------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)                  //-|
+f_prng(_range)=>                                                              //---|
+//| pseudo random function:                                                 // O O |
+    var float _return = 1.0                                                 //- V -|
+    float _seed = array.get(id=seed, index=0)                                //NNNN|
+    float _reseed =  271.828                                                  // A |
+    _return := ((3.1416 * _return % _seed) * _reseed) % _range                // V |
+    array.set(id=seed, index=0, value=(1 + (_seed * 1.618) % _range) + _return) //||
+    _return                                                                    // ||
+//| -------------------------------------------------------------------------------|
+
+i_tb_row = input(title='Table Rows:', defval=32)
+i_tb_col = input(title='Table Columns:', defval=32)
+
+//-----------------------------------------------------------------------------||
+// issue: chart space by N cells causes bleed
+i_tb_cwidth = 98/i_tb_col
+i_tb_cheigth = 98/i_tb_row
+
+var a = table.new(position=position.top_left, 
+     rows=i_tb_row, columns=i_tb_col, bgcolor=color.black, 
+     frame_color=color.black, frame_width=0, 
+     border_color=color.black, border_width=0)
+
+f_fill_cells()=>
+    for _r = 0 to i_tb_row-1
+        bool _r_iseven = _r % 2 == 0
+        for _c = 0 to i_tb_col-1
+            bool _c_isodd = _c % 2 == 0
+            if _r_iseven and _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='º',
+                     width=i_tb_cwidth, height=i_tb_cheigth, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 90))
+            else if _r_iseven and not _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='+',
+                     width=i_tb_cwidth, height=i_tb_cheigth, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 80))
+            else if not _r_iseven and _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='*',
+                     width=i_tb_cwidth, height=i_tb_cheigth, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 90))
+            else if not _r_iseven and not _c_isodd
+                table.cell(table_id=a,
+                     column=_c, row=_r, text='|',
+                     width=i_tb_cwidth, height=i_tb_cheigth, 
+                     text_color=#ffffff, text_halign=text.align_center, bgcolor=color.new(#060606, 80))
+    
+
+if barstate.islast or barstate.isconfirmed[1]
+    f_fill_cells()
+
+plot(close)
