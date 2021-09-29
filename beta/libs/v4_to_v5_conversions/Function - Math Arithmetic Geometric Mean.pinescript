@@ -1,0 +1,58 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Math Arithmetic Geometric Mean', precision=12)
+
+math_agm(_value_a, _value_b, _tolerance_value) =>  //{
+//  @function: Calculate the arithmetic-geometric mean of two numbers (_value_a, _value_b).
+//  @parameters:
+//      _value_a: number value.
+//      _value_b: number value.
+//      _tolerance_value: number value, if float(na) is used, default: 1e-12.
+//  @reference: http://rosettacode.org/wiki/Arithmetic-geometric_mean#Basic_Version
+//  @usage:
+//      float a = 1.0 , float b = 1.0 / sqrt(2.0) , plot(math_agm(a, b, float(na))) // 0.847213084835
+//      float a = sqrt(2.0) , float b = 1.0 , plot(math_agm(a, b, float(na))) // 1.1981402347355922074...
+//{
+    float _tolerance = 1e-12
+    if not na(_tolerance_value)
+        _tolerance := _tolerance_value
+        _tolerance
+
+    float _an = 0.5 * (_value_a + _value_b)
+    float _gn = math.sqrt(_value_a * _value_b)
+    for _i = 0 to 999999999 by 1
+        _at = _an
+        _gt = _gn
+        if math.abs(_at - _gt) > _tolerance
+            _an := 0.5 * (_at + _gn)
+            _gn := math.sqrt(_at * _gt)
+            continue
+        else
+            break
+    _an
+//}//}
+
+array_math_agm(_sample) =>  //{
+//  @function: computes the arithmetic geometric mean of a sequence of values.
+//{
+    int _size = array.size(_sample)
+    float _agm = float(na)
+    if _size > 0
+        _agm := array.get(_sample, 0)
+        if _size > 1
+            for _i = 1 to _size - 1 by 1
+                _agm := math_agm(_agm, array.get(_sample, _i), float(na))
+                _agm
+    _agm
+//}//}
+// plot(math_agm(1., 1./sqrt(2.), float(na))) // 0.847213084835
+// plot(math_agm(sqrt(2.), 1., float(na))) // 1.1981402347355922074...
+
+plot(math_agm(close[1], close, float(na)))
+plot(close, color=color.new(color.black, 0))
+plot(array_math_agm(array.from(close[0], close[1], close[2], close[3])), color=color.new(color.orange, 0))
+plot(array_math_agm(array.from(close[3], close[2], close[1], close[0])), color=color.new(color.red, 0))
+
+

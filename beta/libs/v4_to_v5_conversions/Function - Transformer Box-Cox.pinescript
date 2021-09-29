@@ -1,0 +1,47 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Array Transform Box-Cox')
+//      https://www.statology.org/box-cox-transformation-excel/
+//      https://www.geeksforgeeks.org/box-cox-transformation-using-python/
+//      https://github.com/business-science/timetk/blob/master/R/vec-box_cox.R
+//      https://frost-lee.github.io/box-cox-linear-model/
+//      https://otexts.com/fpp2/transformations.html
+//      
+
+array_transform_boxcox_regular(_sample, _lambda) =>
+    int _size = array.size(id=_sample)
+    if _size > 0
+        _X = array.copy(id=_sample)
+        for _i = 0 to _size - 1 by 1
+            _xi = array.get(id=_X, index=_i)
+            if _lambda == 0
+                array.set(id=_X, index=_i, value=math.log(_xi))
+            else
+                array.set(id=_X, index=_i, value=math.sign(_xi) * (math.pow(math.abs(_xi), _lambda) - 1) / _lambda)
+        _X
+
+array_transform_boxcox_inverse(_sample, _lambda) =>
+    int _size = array.size(id=_sample)
+    if _size > 0
+        _X = array.copy(id=_sample)
+        for _i = 0 to _size - 1 by 1
+            _xi = array.get(id=_X, index=_i)
+            if _lambda == 0
+                array.set(id=_X, index=_i, value=math.exp(_xi))
+            else
+                _xe = _lambda * _xi + 1.0
+                array.set(id=_X, index=_i, value=math.sign(_xe) * math.pow(math.abs(_xe), 1.0 / _lambda))
+        _X
+
+lambda = input(0.5225)
+sample_data = array.from(4.0, 5.0, 2.0, 3.0, 3.0, 2.0, 2.0, 3.0, 2.0, 3.0, 4.0, 3.0, 8.0, 6.0)
+Y = array_transform_boxcox_regular(sample_data, lambda)
+iY = array_transform_boxcox_inverse(Y, lambda)
+var label la = label.new(bar_index, 0.0, '')
+label.set_xy(la, bar_index, 0.0)
+label.set_text(la, 'sample: ' + str.tostring(sample_data) + '\ninverse: ' + str.tostring(iY) + '\nregular: ' + str.tostring(Y))
+plot(array.get(Y, bar_index % array.size(Y)))
+
+

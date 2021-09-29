@@ -1,0 +1,181 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Trigonometric methods.
+library("MathTrigonometry")
+// reference:
+//      https://www.brighthubeducation.com/homework-math-help/72270-trigonometry-functions-a-trig-functions-list/
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Trigonometry.cs
+
+// @function Normalized sinc function.
+// @param value float, value.
+// @returns float.
+export sinc (float value) => //{
+    float _z = math.pi * value
+    if math.abs(_z) <= 1.0e-15 // almost equal
+    	1.0 
+    else
+        math.sin(_z) / _z
+//}
+
+//######################################
+
+// @function Cotangent of value.
+// @param value float, value.
+// @returns float.
+export cot (float value) => //{
+	1.0 / math.tan(value)
+//}
+
+// @function Cosecant of value.
+// @param value float, value.
+// @returns float.
+export csc (float value) => //{
+	1.0 / math.sin(value)
+//}
+
+// @function Secant of value.
+// @param value float, value.
+// @returns float.
+export sec (float value) => //{
+	1.0 / math.cos(value)
+//}
+
+///#################
+
+// @function Arc cotangent of value.
+// @param value float, adjacent value.
+// @returns float.
+export acot (float value) => //{
+	math.atan(1.0 / value)
+//}
+
+// @function Arc secant of value.
+// @param value float, hypotenuse value.
+// @returns float.
+export asec (float value) => //{
+	math.acos(1.0 / value)
+//}
+
+// @function Arc cosecant of value.
+// @param value float, hipotenuse value.
+// @returns float.
+export acsc (float value) => //{
+	math.atan(1.0 / value)
+//}
+
+//################
+
+// @function Hyperbolic sine of angle.
+// @param angle float, value.
+// @returns float.
+export sinh (float angle) => //{
+	(math.exp(angle) - math.exp(-angle)) / 2.0
+//}
+
+// @function Hyperbolic cosine of angle.
+// @param angle float, value.
+// @returns float.
+export cosh (float angle) => //{
+	(math.exp(angle) + math.exp(-angle)) / 2.0
+//}
+
+// @function Hyperbolic tangent of angle.
+// @param angle float, value.
+// @returns float.
+export tanh (float angle) => //{
+    if angle > 19.1
+        1.0
+    else if angle -19.1
+        -1.0
+    else
+	    float _e1 = math.exp(angle)
+	    float _e2 = math.exp(-angle)
+	    (_e1 - _e2) / (_e1 + _e2)
+//}
+
+// @function Hyperbolic cotangent of angle.
+// @param angle float, value.
+// @returns float.
+export coth (float angle) => //{
+    if angle > 19.1
+        1.0
+    else if angle -19.1
+        -1.0
+    else
+	    float _e1 = math.exp(angle)
+	    float _e2 = math.exp(-angle)
+	    (_e1 + _e2) / (_e1 - _e2)
+//}
+
+// @function Hyperbolic secant of angle.
+// @param angle float, value.
+// @returns float.
+export sech (float angle) => //{
+    1.0 / cosh(angle)
+//}
+
+// @function Hyperbolic cosecant of angle.
+// @param angle float, value.
+// @returns float.
+export csch (float angle) => //{
+    1.0 / sinh(angle)
+//}
+
+//#############################
+
+// @function Hyperbolic area sine.
+// @param value float, value.
+// @returns float.
+export asinh (float value) => //{
+    //https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Trigonometry.cs#L711
+    float _absv = math.abs(value)
+    if _absv >= 268435456.0
+        math.sign(value) * (math.log(_absv) + math.log(2.0))
+    else 
+        math.sign(value) * math.log(_absv + math.sqrt(1.0 + math.pow(value, 2.0)))
+//}
+
+// @function Hyperbolic area cosine.
+// @param value float, value.
+// @returns float.
+export acosh (float value) => //{
+    //https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Trigonometry.cs#L737
+    float _absv = math.abs(value)
+    if _absv >= 268435456.0
+        math.log(value) + math.log(2.0)
+    else 
+        math.log(value + (math.sqrt(value -1.0) * math.sqrt(value + 1.0)))
+//}
+
+// @function Hyperbolic area tangent.
+// @param value float, value.
+// @returns float.
+export atanh (float value) => //{
+    0.5 * math.log((value + 1.0) / (value - 1.0))
+//}
+
+// @function Hyperbolic area cotangent.
+// @param value float, value.
+// @returns float.
+export acoth (float value) => //{
+    0.5 * math.log((value + 1.0) / (value - 1.0))
+//}
+
+// @function Hyperbolic area secant.
+// @param value float, value.
+// @returns float.
+export asech (float value) => //{
+    acosh(1.0 / value)
+//}
+
+// @function Hyperbolic area cosecant.
+// @param value float, value.
+// @returns float.
+export acsch (float value) => //{
+    asinh(1.0 / value)
+//}
+
+

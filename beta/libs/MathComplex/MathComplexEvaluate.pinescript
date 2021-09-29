@@ -1,0 +1,118 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description TODO: add library description here
+library(title='MathComplexEvaluate')
+
+// imports:
+import RicardoSantos/DebugConsole/2 as console
+[__T, __C] = console.init(20)
+
+import RicardoSantos/MathComplexCore/3 as complex
+import RicardoSantos/MathComplexOperator/2 as complex_op
+import RicardoSantos/MathComplexExtension/2 as complex_ex
+import RicardoSantos/MathComplexArray/2 as complex_ar
+
+import RicardoSantos/StringEvaluation/2 as str_eval
+// Helper Functions:
+
+// @function Check if char is a operator.
+// @param char string, 1 character string.
+// @returns bool.
+export is_op (string char) => //{
+    switch char
+        '+' => true
+        '-' => true
+        '*' => true
+        '/' => true
+        '^' => true
+        '%' => true
+        => false
+//}
+
+// @function operation between left and right values.
+// @param op string, operator string character.
+// @param left float, left value of operation.
+// @param right float, right value of operation.
+export operator (string op, float[] left, float[] right) => //{
+    switch op
+        '+' => complex_op.add(left, right)
+        '-' => complex_op.subtract(left, right)
+        '*' => complex_op.multiply(left, right)
+        '/' => complex_op.divide(left, right)
+        '^' => complex_ex.power(left, right)
+        '%' => complex_op.divide(left, right) // modulo of complex number is sqrt(a^2 + b^2) or abs(a+bi) 
+        => array.new_float(na)
+//}
+
+// @function level of precedence of operator.
+// @param op string, operator 1 char string.
+// @returns int.
+export operator_precedence (string op) => //{
+    switch op
+        '+' => 2
+        '-' => 2
+        '*' => 3
+        '/' => 3
+        '^' => 4
+        '%' => 3
+        => 0
+//}
+
+// @function evaluate a string with references to a array of arguments.
+//| @param tokens string, arithmetic operations with references to indices in arguments, ex:"0+1*0+2*2+3" arguments[1, 2, 3]
+//| @param arguments float array, arguments.
+//| @returns float, solution.
+export eval (string tokens, float[] arguments) => //{
+    int _size_a = array.size(id=arguments)
+    if _size_a < 1
+        runtime.error('MathComplexEvaluate -> eval(): "arguments" is empty.')
+        array.new_float(na)
+    else
+        string[] _tokens = str_eval.generate_rpn(str_eval.cleanup(tokens))
+        float[] _args = array.copy(arguments)
+        int _size_t = array.size(id=_tokens)
+        if _size_t < 1
+            runtime.error('MathComplexEvaluate -> eval(): "tokens" is empty.')
+            array.new_float(na)
+        else
+            // calculate solution:
+            float[] _solution = array.new_float(na)
+            _stack = array.new_int()
+            for _i = 0 to _size_t-1
+                string _token = array.get(id=_tokens, index=_i)
+                float _number = str.tonumber(_token)
+                if not na(_number)//
+                    array.push(id=_stack, value=int(_number))
+                else
+                    if array.size(id=_stack) > 1
+                    //     runtime.error('StringEvaluation -> generate_rpn(): insufficient operands!!.\n' + str.tostring(_stack))
+                    // else
+                        o2 = array.pop(id=_stack)
+                        o1 = array.pop(id=_stack)
+                        if is_op(_token)
+                            float[] _op = operator(_token, complex_ar.get(_args, o1), complex_ar.get(_args, o2))
+                            complex_ar.push(_args, _op)
+                            array.push(id=_stack, value=int(array.size(_args)/2)-1)
+                        else
+                            runtime.error('MathComplexEvaluate -> eval(): unrecognized operator: (' + _token + ' ).')
+            _solution := complex_ar.pop(_args)//array.pop(id=_stack)
+            _solution
+//{ usage:
+float[] args = complex.new(3.141, 1.618)
+for _i = 0 to 5
+    complex_ar.push(args, complex.new(math.random(), math.random()))
+string ev1 = input.string('((0+ 0 *2/1-3)%0)^4')
+string ev2 = input.string('((0+ 0 *2/1-3)+0)^4')
+console.queue_one(__C, str.format('arguments: {0}', complex_ar.to_string(args, '#.##')))
+console.queue_one(__C, str.format('expression using idx: {0} = {1}', ev1, complex.to_string(eval(ev1, args), '#.##')))
+console.queue_one(__C, str.format('expression using idx: {0} = {1}', ev2, complex.to_string(eval(ev2, args), '#.##')))
+//{ reference:
+//     https://rosettacode.org/wiki/Parsing/RPN_calculator_algorithm
+//}}}
+
+
+
+console.update(__T, __C)

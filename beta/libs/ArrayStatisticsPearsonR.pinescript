@@ -1,0 +1,27 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Pearson correlation coefficient measures the linear relationship between two datasets.
+library("ArrayStatisticsPearsonR")
+
+// @function Pearson correlation coefficient measures the linear relationship between two datasets.
+// @param sample_a float array, sample with data.
+// @param sample_b float array, sample with data.
+// @returns float p 
+export pearsonr(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    int _size_b = array.size(id=sample_b)
+    if _size_a > 0 and _size_b > 0
+        float _err_sum_ab = array.covariance(id1=sample_a, id2=sample_b)
+        float _err_sum_a2 = array.stdev(id=sample_a)
+        float _err_sum_b2 = array.stdev(id=sample_b)
+        float _r = _err_sum_ab / (_err_sum_a2 * _err_sum_b2)
+//{
+// usage:
+float[] a = array.from(1.0, 2.0, 3.0, 4.0, 5.0)
+float[] b = array.from(10.0, 9.0, 2.5, 6.0, 4.0)
+plot(pearsonr(a, b))// 0.74
+//}}
+

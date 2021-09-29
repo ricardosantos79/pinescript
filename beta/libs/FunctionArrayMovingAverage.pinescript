@@ -1,0 +1,47 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+library(title='FunctionArrayMovingAverage')
+
+// @function Moving Average values for selected data.
+// @param sample float array, sample data values.
+// @param length int, length to smooth the data.
+// @param ommit_initial bool, default=true, ommit values at the start of the data under the length.
+// @param fillna string, default='na', options='na', '0', 'avg'
+// @returns float array
+//  errors: 
+//      length > sample size "Canot call array methods when id of array is na."
+export array_moving_average (float[] sample, int length, bool ommit_initial=true, string fillna='na') => //{
+    int _size = array.size(id=sample)
+    if _size > 1 and _size > length
+        float[] _ma = array.copy(id=sample)
+        float _nav = float(na)
+        if fillna == '0'
+            _nav := 0
+        if fillna == 'avg'
+            _nav := array.avg(id=sample)
+        float[] _ma_total = array.new_float(0)
+        for _i = 0 to _size-1
+            array.push(id=_ma_total, value=array.get(id=sample, index=_i))
+            if array.size(id=_ma_total) > length
+                array.shift(id=_ma_total)
+            if ommit_initial and _i < length
+                array.set(id=_ma, index=_i, value=_nav)
+            else
+                float _avg = array.avg(id=_ma_total)
+                array.set(id=_ma, index=_i, value=_avg)
+        _ma
+//{
+// usage:
+int length = input.int(defval=6)
+bool ommit_init = input.bool(true)
+string fill_na = input.string(defval='na', options=['na', '0', 'avg'])
+rngs0 = array.from(79, 47, 5, 82, 31, 77, 58, 45, 15, 76, 76, 33, 47, 8, 1, 14, 65, 16, 16, 10, 60)
+string tex = str.format('S: {0}', rngs0) 
+for _i = 2 to length
+    tex += str.format('\n{0}: {1}', _i, str.tostring(array_moving_average(rngs0, _i, ommit_init, fill_na), '#.##'))
+if barstate.islast
+    label.new(bar_index, 0.0, tex)
+//}}
+

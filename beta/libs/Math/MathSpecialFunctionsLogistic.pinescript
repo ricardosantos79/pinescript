@@ -1,0 +1,33 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Methods for logistic equation.
+library(title='MathSpecialFunctionsLogistic')
+
+// @function Computes the logistic function.
+// @param probability float, value to compute the logistic function.
+// @returns float
+export logistic (float probability) => //{
+    1.0 / (math.exp(-probability) + 1.0)
+//{ usage:
+plot(logistic(0.618))
+//{ remarks:
+//      http://en.wikipedia.org/wiki/Logistic
+//}}}
+
+// @function Computes the logit function, the inverse of the sigmoid logistic function.
+// @param probability float, value to compute the logit function.
+// @returns float
+export logit (float probability) => //{
+    if probability < 0.0 or probability > 1.0
+        runtime.error('MathSpecialFunctionsLogistic -> logit(): "probability" must be within 0 and 1.')
+    math.log(probability / (1.0 - probability))
+//{ usage:
+plot(logit(0.618))
+//{ remarks:
+//      http://en.wikipedia.org/wiki/Logistic
+//}}}
+
+

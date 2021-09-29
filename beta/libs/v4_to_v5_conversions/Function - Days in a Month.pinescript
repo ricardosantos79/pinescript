@@ -1,0 +1,11 @@
+//@version=5
+indicator(title='[RS]Function - Days in a Month')
+
+f_daysinmonth(_year, _month) =>
+//  Reference:
+//      https://cmcenroe.me/2014/12/05/days-in-month-formula.html
+    _m = _month < 1 ? 1 : _month > 12 ? 12 : _month  // Ari Fayn
+    28 + (_m == 2 and _year % 4 == 0 ? 1 : 0) + (_m + math.floor(_m / 8)) % 2 + 2 % _m + 2 * math.floor(1 / _m)
+m = f_daysinmonth(input(2019), input(1))
+plot(m)
+

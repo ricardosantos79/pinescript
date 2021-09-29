@@ -1,0 +1,297 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Activation functions for Neural networks.
+library(title='MLActivationFunctions')
+
+// reference: 
+//      https://www.educba.com/perceptron-learning-algorithm/
+//      https://blog.primen.dk/basic-neural-network-model-insights/
+//      https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
+//      https://en.wikipedia.org/wiki/Artificial_neural_network
+//      https://blog.primen.dk/basic-neural-network-code-example-java/
+//      https://mlfromscratch.com/activation-functions-explained/
+//      https://www.analyticssteps.com/blogs/7-types-activation-functions-neural-network
+//      http://binaryplanet.org/category/activation-function/
+//      https://keras.io/api/layers/activations/
+
+// @function Enumerate available activation function names.
+// @param idx int, index of the function name, unbound range (names: 1 to 17).
+// @returns string
+export names_enum (int idx) => //{
+    switch (idx)
+        01 => 'binary step'
+        02 => 'linear'
+        03 => 'sigmoid'
+        04 => 'sigmoid derivative'
+        05 => 'tahn'
+        06 => 'tahn derivative'
+        07 => 'relu'
+        08 => 'relu derivative'
+        09 => 'leaky relu'
+        10 => 'leaky relu derivative'
+        11 => 'relu-6'
+        12 => 'softmax'
+        13 => 'softplus'
+        14 => 'softsign'
+        15 => 'elu'
+        16 => 'selu'
+        17 => 'exponential'
+        => ''
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function available activation function names in a array.
+// @returns string array
+export names_array () => //{
+    array.from( 
+     'binary step', 
+     'linear', 
+     'sigmoid', 
+     'sigmoid derivative', 
+     'tahn', 
+     'tahn derivative', 
+     'relu', 
+     'relu derivative', 
+     'leaky relu', 
+     'leaky relu derivative', 
+     'relu-6', 
+     'softmax', 
+     'softplus', 
+     'softsign', 
+     'elu', 
+     'selu', 
+     'exponential')
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Basic threshold output classifier to activate/deactivate neuron.
+// @param value float, value to process.
+// @returns float
+export binary_step (float value) => //{
+    value > 0.0 ? 1.0 : 0.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Input is the same as output.
+// @param value float, value to process.
+// @returns float
+export linear (float value) => //{
+    value
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Sigmoid or logistic function.
+// @param value float, value to process.
+// @returns float
+export sigmoid (float value) => //{
+    1.0 / (1.0 + math.exp(-value))
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Derivative of sigmoid function.
+// @param value float, value to process.
+// @returns float
+export sigmoid_derivative (float value) => //{
+    float _f = sigmoid(value)
+    _f * (1.0 - _f)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Hyperbolic tangent function.
+// @param value float, value to process.
+// @returns float
+export tahn (float value) => //{
+    float _ep = math.exp(value)
+    float _en = math.exp(-value)
+    (_ep - _en) / (_ep + _en)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Hyperbolic tangent function derivative.
+// @param value float, value to process.
+// @returns float
+export tahn_derivative (float value) => //{
+    1.0 - math.pow(tahn(value), 2)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Rectified linear unit (RELU) function.
+// @param value float, value to process.
+// @returns float
+export relu (float value) => //{
+    value <= 0.0 ? 0.0 : value
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function RELU function derivative.
+// @param value float, value to process.
+// @returns float
+export relu_derivative (float value) => //{
+    value <= 0 ? 0 : 1.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Leaky RELU function.
+// @param value float, value to process.
+// @returns float
+export leaky_relu (float value) => //{
+    value < 0.0 ? 0.01 * value : value
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Leaky RELU function derivative.
+// @param value float, value to process.
+// @returns float
+export leaky_relu_derivative (float value) => //{
+    value < 0 ? 0.01 : 1.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function RELU-6 function.
+// @param value float, value to process.
+// @returns float
+export relu6 (float value) => //{
+    switch
+        (value < 0.0) => 0.01 * value
+        (value > 6.0) => 6.0
+        => value
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Softmax function.
+// @param value float array, values to process.
+// @returns float
+export softmax (float[] values) => //{
+    int _size_v = array.size(values)
+    switch
+        _size_v < 1 => runtime.error(str.format('MLActivationFunctions -> softmax(): "values" has the wrong size: {0}', _size_v))
+
+    float[] _tmp = array.copy(values)
+    for _i = 0 to (_size_v - 1)
+        array.set(_tmp, _i, math.exp(array.get(values, _i)))
+    float _tot = array.sum(_tmp)
+    for _i = 0 to (_size_v - 1)
+        array.set(_tmp, _i, array.get(_tmp, _i) / _tot)
+    _tmp
+//{ usage:
+// var a = array.from(0.0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+// var b = softmax(a)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, str.tostring(b))//ok
+//{ remarks:
+//}}}
+
+// @function Softplus function.
+// @param value float, value to process.
+// @returns float
+export softplus (float value) => //{
+    math.log(math.exp(value) + 1.0)
+//{ usage:
+// var a = array.from(-20.0, -1, 0, 1, 20)
+// if barstate.islastconfirmedhistory
+//     b = array.new_float(5)
+//     for _i = 0 to 4
+//         array.set(b, _i, softplus(array.get(a, _i)))
+//     label.new(bar_index, 0.0, str.tostring(b))//ok
+//{ remarks:
+//}}}
+
+// @function Softsign function.
+// @param value float, value to process.
+// @returns float
+export softsign (float value) => //{
+    value / (math.abs(value) + 1.0)
+//{ usage:
+// var a = array.from(-1.0, 0, 1)
+// if barstate.islastconfirmedhistory
+//     b = array.new_float(3)
+//     for _i = 0 to 2
+//         array.set(b, _i, softsign(array.get(a, _i)))
+//     label.new(bar_index, 0.0, str.tostring(b))//ok
+//{ remarks:
+//}}}
+
+// @function Exponential Linear Unit (ELU) function.
+// @param value float, value to process.
+// @param alpha float, default=1.0, predefined constant, controls the value to which an ELU saturates for negative net inputs. .
+// @returns float
+export elu (float value, float alpha=1.0) => //{
+    switch
+        (value > 0.0) => value
+        (value < 0.0) => alpha * (math.exp(value) - 1.0)
+        => 0.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Scaled Exponential Linear Unit (SELU) function.
+// @param value float, value to process.
+// @param alpha float, default=1.67326324, predefined constant, controls the value to which an SELU saturates for negative net inputs. .
+// @param scale float, default=1.05070098, predefined constant.
+// @returns float
+export selu (float value, float alpha=1.67326324, float scale=1.05070098) => //{
+    switch
+        (value > 0) => scale * value
+        (value < 0) => scale * alpha * (math.exp(value) - 1.0)
+        => 0.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Pointer to math.exp() function.
+// @param value float, value to process.
+// @returns float
+export exponential (float value) => //{
+    math.exp(value)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Run a activation function from provided string name.
+// @param name string, activation function name.
+// @returns float
+export function (float value, string name='sigmoid', float alpha=na, float scale=na) => //{
+    switch (name)
+        'binary step'           => binary_step(value)
+        'linear'                => linear(value)
+        'sigmoid'               => sigmoid(value)
+        'sigmoid derivative'    => sigmoid_derivative(value)
+        'tahn'                  => tahn(value)
+        'tahn derivative'       => tahn_derivative(value)
+        'relu'                  => relu(value)
+        'relu derivative'       => relu_derivative(value)
+        'leaky relu'            => leaky_relu(value)
+        'leaky relu derivative' => leaky_relu_derivative(value)
+        'relu-6'                => relu6(value)
+        'softmax'               => runtime.error('MLActivationFunctions -> function(): softmax function is not implemented via selection due to signature incompatibility.'), float(na)
+        'softplus'              => softplus(value)
+        'softsign'              => softsign(value)
+        'elu'                   => na(alpha) ? elu(value) : elu(value, alpha)
+        'selu'                  => 
+            switch
+                (na(alpha) and na(scale))     => selu(value)
+                (not na(alpha) and na(scale)) => selu(value, alpha=alpha)
+                (na(alpha) and not na(scale)) => selu(value, scale=scale)
+                =>                               selu(value, alpha, scale)
+        'exponential'           => exponential(value)
+        => runtime.error(str.format('MLActivationFunctions -> function(): "name" is not a valid function name. found: {0}', name)), float(na)
+//{ usage:
+//{ remarks:
+//}}}
+

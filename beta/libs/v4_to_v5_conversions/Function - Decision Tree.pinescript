@@ -1,0 +1,57 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function: Decision Tree')
+
+//| -------------------------------------------------------------------------------|
+var float[] seed = array.new_float(size=1, initial_value=42.0)  //-|
+f_prng(_range) =>  //---|
+//| pseudo random function:                                                 // O O |
+    var float _return = 1.0  //- V -|
+    float _seed = array.get(id=seed, index=0)  //NNNN|
+    float _reseed = 271.828  // A |
+    _return := 3.1416 * _return % _seed * _reseed % _range  // V |
+    array.set(id=seed, index=0, value=1 + _seed * 1.618 % _range + _return)  //||
+    _return  // ||
+//| -------------------------------------------------------------------------------|
+
+
+f_decision_tree(_node_weights, _depth) =>
+    int[] _path = array.new_int(size=0, initial_value=0)
+    int _nweights = array.size(id=_node_weights)
+    int _sumweights = math.ceil(array.sum(id=_node_weights))
+    if _nweights > 0 and _depth > 0 and _sumweights == 1
+        for _d = 1 to _depth by 1
+            for _w = 0 to 999 by 1
+                int _select_weight_index = int(f_prng(_nweights))
+                float _rng = f_prng(1.0)
+                float _weight = array.get(id=_node_weights, index=_select_weight_index)
+                if _weight >= _rng
+                    array.push(id=_path, value=_select_weight_index)
+                    break
+    _path
+
+//| Array to contain weights, sum of array values must be 1.
+var float[] node_weights = array.new_float(size=0, initial_value=0)
+if barstate.isfirst
+    array.push(id=node_weights, value=0.5)
+    array.push(id=node_weights, value=0.5)
+
+//| Input Parameters:
+int depth = input.int(defval=1, minval=1)
+int paths = input.int(defval=2, minval=1)
+
+string t = ''
+
+for _p = 1 to paths by 1
+    _path = f_decision_tree(node_weights, depth)
+
+    t := t + '\nPath ' + str.tostring(_p, '#') + ': ' + str.tostring(_path)
+    t
+
+var label la = label.new(bar_index, 0.0, '')
+label.set_xy(id=la, x=bar_index, y=0.0)
+label.set_text(id=la, text=t)
+
+

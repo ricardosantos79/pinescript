@@ -1,0 +1,76 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Forecast Linear')
+f_sequence_from_series(_src, _length, _shift, _direction_forward) =>  //{
+//  @function: Creates a array from a series sample range.
+//  @parameters:
+//      _src: series, any kind.
+//      _length: int, window period in bars to sample series.
+//      _shift: int, window period in bars to shift backwards the data sample.
+//      _direction_forward: bool, sample from start to end or end to start order.
+    _start = _direction_forward ? _length + _shift : 0 + _shift
+    _end = _direction_forward ? 0 + _shift : _length + _shift
+    _data = array.from(_src)  //defines type
+    array.clear(_data)
+    if bar_index <= _length + _shift
+        array.clear(_data)
+    else
+        for _i = _start to _end by 1
+            array.push(_data, _src[_i])
+    _data
+//}
+
+f_forecast_linear(_X, _Y, _target_x) =>  //{
+//  @function: Linear forecast, same as excel and other sheet packages. calculates the future value given known data.
+//  @parameters:
+//      _X: float[] or int[], data sample for X.
+//      _Y: float[] or int[], data sample for Y.
+//      _target_x: float or int, 0>x, value of X to predict Y.
+//  @reference:
+//      https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99?ui=en-us&rs=en-us&ad=us
+//      https://stackoverflow.com/questions/39373328/forecast-formula-from-excel-in-javascript
+    _sizex = array.size(_X)
+    _sizey = array.size(_Y)
+    _nr = 0.
+    _dr = 0.
+    _ax = array.avg(_X)
+    _ay = array.avg(_Y)
+    if _sizex != _sizey
+        _nr := na
+        _dr := na
+        _dr
+    else if _sizex < 1
+        _nr := na
+        _dr := na
+        _dr
+    else
+        for _i = 0 to _sizex - 1 by 1
+            _xi = array.get(_X, _i)
+            _yi = array.get(_Y, _i)
+            _nr := _nr + (_xi - _ax) * (_yi - _ay)
+            _dr := _dr + (_xi - _ax) * (_xi - _ax)
+            _dr
+    _b = _nr / _dr
+    _a = _ay - _b * _ax
+    _a + _b * _target_x
+//}
+
+//test samples from: https://corporatefinanceinstitute.com/resources/excel/functions/forecast-linear-function/
+test_earnings = array.from(879., 1259., 1230., 1471., 1562., 1526., 1437., 1637., 1689., 1720., 1456., 1653.)
+test_expenses = array.from(263.7, 377.7, 369., 441.3, 468.6, 457.8, 431.1, 491.1, 506.7, 516., 436.8, 495.9)
+
+f0 = f_forecast_linear(array.from(1, 2, 3, 4, 5), array.from(6., 7., 8., 9., 10.), 6)
+f1 = f_forecast_linear(test_earnings, test_expenses, 1705.25)
+// f0 = f_forecast_linear(array.from(20, 28, 31, 38, 40), array.from(6, 7, 9, 15, 21), 30)
+f2 = f_forecast_linear(f_sequence_from_series(bar_index, 100, 0, true), f_sequence_from_series(close, 100, 0, true), bar_index + 30)
+
+t = str.format('forecast linear sample: {0}\nforecast from data sample: {1}\nforecast from series: {2}', f0, f1, f2)
+
+if barstate.islast
+
+    label.new(bar_index, 0.0, t)
+
+
+

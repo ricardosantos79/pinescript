@@ -1,0 +1,342 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description A color scheme generator.
+library(title='ColorScheme')
+
+import RicardoSantos/ColorExtension/1 as colex
+
+// @function Initiate the array data registry that will hold the color profile.
+// @returns tuple with 2 arrays (string array, color array)
+export init() => //{
+    var string[] keys = array.new_string(0)
+    var color[] colors = array.new_color(0)
+    [keys, colors]
+//{ usage:
+// [__K, __V] = init(0, '', #ffffff)
+//{ remarks:
+//}}}
+
+// @function Checks the integrity of the registers.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data holder array.
+// @returns void.
+export check_registry_integrity (string[] key_registry, color[] color_registry) => //{
+    int _size_k = array.size(key_registry)
+    int _size_c = array.size(color_registry)
+    if _size_k != _size_c
+        runtime.error('ColorScheme -> check_registry_integrity(): registers size do not match.')
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Add new (key, color) entry to the registry.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @param key string, the unique key to reference the value.
+// @param value color, the color value of the specified key.
+// @returns void.
+export add (string[] key_registry, color[] color_registry, string key, color value) => //{
+    check_registry_integrity(key_registry, color_registry)
+    int is_key_in = array.indexof(key_registry, key)
+    if is_key_in > -1
+        runtime.error('ColorScheme -> add(): key is already present in registry.')
+    else
+        array.push(key_registry, key)
+        array.push(color_registry, value)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Get a (key, color) entry from the registry.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @param key string, the unique key to reference the value.
+// @returns void.
+export get_color (string[] key_registry, color[] color_registry, string key) => //{
+    check_registry_integrity(key_registry, color_registry)
+    int _key_index = array.indexof(key_registry, key)
+    if _key_index < 0
+        runtime.error('ColorScheme -> delete(): key is not present in registry.')
+        color(na)
+    else
+        array.get(color_registry, _key_index)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Edit a (key, color) entry in the registry.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @param key string, the unique key to reference the value.
+// @param new_key string, the unique key to reference the value.
+// @returns void.
+export edit_key (string[] key_registry, color[] color_registry, string key, string new_key) => //{
+    check_registry_integrity(key_registry, color_registry)
+    int _key_index = array.indexof(key_registry, key)
+    int _new_key_index = array.indexof(key_registry, key)
+    if _key_index < 0
+        runtime.error('ColorScheme -> edit_key(): key is not present in registry.')
+    if _new_key_index > -1
+        runtime.error('ColorScheme -> edit_key(): new key is already present in registry.')
+    else
+        array.set(key_registry, _key_index, new_key)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Edit a (key, color) entry in the registry.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @param key string, the unique key to reference the value.
+// @param new_value color, the color value of the specified key.
+// @returns void.
+export edit_color (string[] key_registry, color[] color_registry, string key, color new_value) => //{
+    check_registry_integrity(key_registry, color_registry)
+    int _key_index = array.indexof(key_registry, key)
+    if _key_index < 0
+        runtime.error('ColorScheme -> edit_color(): key is not present in registry.')
+    else
+        array.set(color_registry, _key_index, new_value)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Delete a (key, color) entry from the registry.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @param key string, the unique key to reference the value.
+// @returns void.
+export delete (string[] key_registry, color[] color_registry, string key) => //{
+    check_registry_integrity(key_registry, color_registry)
+    int _key_index = array.indexof(key_registry, key)
+    if _key_index < 0
+        runtime.error('ColorScheme -> delete(): key is not present in registry.')
+        color(na)
+    else
+        array.remove(key_registry, _key_index)
+        array.remove(color_registry, _key_index)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Delete all (key, color) entrys from the registry.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @returns void.
+export delete_all (string[] key_registry, color[] color_registry) => //{
+    array.clear(key_registry)
+    array.clear(color_registry)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Enumerate models available to profile colors.
+// @param index int, index of model. (1:'monochromatic', 2:'analog', 3:'triadic', 4:'tetradic', 5:'square', anything else:'monochromatic')
+// @returns string.
+export model (int index=0) => //{
+    switch index
+        1 => 'monochromatic'
+        2 => 'analog'
+        3 => 'triadic'
+        4 => 'tetradic'
+        5 => 'square'
+        => 'monochromatic'
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Generate a multi color scheme.
+// @param key_registry string array, key data holder array.
+// @param color_registry color array, color value data array.
+// @param primary color, the origin color to base the profile.
+// @param model string, default='monochromatic', options=('monochromatic', 'triadic near', 'triadic far', 'tetradic')
+// @returns void.
+export generate_scheme(string[] key_registry, color[] color_registry, color primary, string model='monochromatic') =>
+    check_registry_integrity(key_registry, color_registry)
+    // delete_all(key_registry, color_registry) // possible implementation to clear registry conflicts?
+    add(key_registry, color_registry, 'primary 0', primary)
+    // primary color hsl properties:
+    [_primary_hue, _primary_saturation, _primary_lightness] = colex.rgb_to_hsl(color.r(primary), color.g(primary), color.b(primary))
+    switch model
+        model(1) =>
+            // monochromatic generates 4 colors: primary + 3 shades to the most distant edge (dark, light)
+            // generate shades to dark or light
+            if _primary_lightness >= 50.0
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.25, 0.0))
+            else
+                float _inverse_range = 100.0 - _primary_lightness
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + _inverse_range * 0.25, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + _inverse_range * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + _inverse_range * 0.75, 0.0))
+        model(2) =>
+            // analog generates 2 adjacent base colors and 3 shades to the most distant edge (dark, light) for each
+            [_lower, _upper] = colex.analog(primary)
+            [_lower_hue, _lower_saturation, _lower_lightness] = colex.rgb_to_hsl(color.r(_lower), color.g(_lower), color.b(_lower))
+            [_upper_hue, _upper_saturation, _upper_lightness] = colex.rgb_to_hsl(color.r(_upper), color.g(_upper), color.b(_upper))
+            // generate shades to dark or light
+            if _primary_lightness >= 50.0
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.25, 0.0))
+            else
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.75, 0.0))
+        model(3) =>
+            // triadic generates 2 far spectrum base colors and 3 shades to the most distant edge (dark, light) for each
+            [_lower, _upper] = colex.triadic(primary)
+            [_lower_hue, _lower_saturation, _lower_lightness] = colex.rgb_to_hsl(color.r(_lower), color.g(_lower), color.b(_lower))
+            [_upper_hue, _upper_saturation, _upper_lightness] = colex.rgb_to_hsl(color.r(_upper), color.g(_upper), color.b(_upper))
+            // generate shades to dark or light
+            if _primary_lightness >= 50.0
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.25, 0.0))
+            else
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.75, 0.0))
+        model(4) =>
+            // tetradic generates 3 complement colors in a rectangular shape and 3 shades for each.
+            [_complement, _lower, _upper] = colex.tetradic(primary)
+            [_complement_hue, _complement_saturation, _complement_lightness] = colex.rgb_to_hsl(color.r(_complement), color.g(_complement), color.b(_complement))
+            [_lower_hue, _lower_saturation, _lower_lightness] = colex.rgb_to_hsl(color.r(_lower), color.g(_lower), color.b(_lower))
+            [_upper_hue, _upper_saturation, _upper_lightness] = colex.rgb_to_hsl(color.r(_upper), color.g(_upper), color.b(_upper))
+            // generate shades to dark or light
+            if _primary_lightness >= 50.0
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'complement 0', _complement)
+                add(key_registry, color_registry, 'complement 1', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'complement 2', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'complement 3', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness * 0.25, 0.0))
+            else
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'complement 0', _complement)
+                add(key_registry, color_registry, 'complement 1', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness + (100.0 - _complement_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'complement 2', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness + (100.0 - _complement_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'complement 3', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness + (100.0 - _complement_lightness) * 0.75, 0.0))
+        model(5) =>
+            // tetradic generates 3 complement colors in a rectangular shape and 3 shades for each.
+            [_complement, _lower, _upper] = colex.square(primary)
+            [_complement_hue, _complement_saturation, _complement_lightness] = colex.rgb_to_hsl(color.r(_complement), color.g(_complement), color.b(_complement))
+            [_lower_hue, _lower_saturation, _lower_lightness] = colex.rgb_to_hsl(color.r(_lower), color.g(_lower), color.b(_lower))
+            [_upper_hue, _upper_saturation, _upper_lightness] = colex.rgb_to_hsl(color.r(_upper), color.g(_upper), color.b(_upper))
+            // generate shades to dark or light
+            if _primary_lightness >= 50.0
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness * 0.25, 0.0))
+                add(key_registry, color_registry, 'complement 0', _complement)
+                add(key_registry, color_registry, 'complement 1', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness * 0.75, 0.0))
+                add(key_registry, color_registry, 'complement 2', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness * 0.50, 0.0))
+                add(key_registry, color_registry, 'complement 3', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness * 0.25, 0.0))
+            else
+                add(key_registry, color_registry, 'primary 1', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'primary 2', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'primary 3', colex.hsl(_primary_hue, _primary_saturation, _primary_lightness + (100.0 - _primary_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'lower 0', _lower)
+                add(key_registry, color_registry, 'lower 1', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'lower 2', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'lower 3', colex.hsl(_lower_hue, _lower_saturation, _lower_lightness + (100.0 - _lower_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'upper 0', _upper)
+                add(key_registry, color_registry, 'upper 1', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'upper 2', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'upper 3', colex.hsl(_upper_hue, _upper_saturation, _upper_lightness + (100.0 - _upper_lightness) * 0.75, 0.0))
+                add(key_registry, color_registry, 'complement 0', _complement)
+                add(key_registry, color_registry, 'complement 1', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness + (100.0 - _complement_lightness) * 0.25, 0.0))
+                add(key_registry, color_registry, 'complement 2', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness + (100.0 - _complement_lightness) * 0.50, 0.0))
+                add(key_registry, color_registry, 'complement 3', colex.hsl(_complement_hue, _complement_saturation, _complement_lightness + (100.0 - _complement_lightness) * 0.75, 0.0))
+//{ usage:
+//{ remarks:
+//}}}
+
+color primary = input.color(#e3f650)
+int imodel = input(1)
+[__K, __V] = init()
+if barstate.isfirst
+    generate_scheme(__K, __V, primary, model(imodel))
+    label.new(bar_index, 0.0, 'primary 0', color=get_color(__K, __V, 'primary 0'))
+    if imodel > 0
+        label.new(bar_index, 1.0, 'primary 1', color=get_color(__K, __V, 'primary 1'))
+        label.new(bar_index, 2.0, 'primary 2', color=get_color(__K, __V, 'primary 2'))
+        label.new(bar_index, 3.0, 'primary 3', color=get_color(__K, __V, 'primary 3'))
+    if imodel > 1
+        label.new(bar_index+10, 0.0, 'lower 0', color=get_color(__K, __V, 'lower 0'))
+        label.new(bar_index+10, 1.0, 'lower 1', color=get_color(__K, __V, 'lower 1'))
+        label.new(bar_index+10, 2.0, 'lower 2', color=get_color(__K, __V, 'lower 2'))
+        label.new(bar_index+10, 3.0, 'lower 3', color=get_color(__K, __V, 'lower 3'))
+        label.new(bar_index+20, 0.0, 'upper 0', color=get_color(__K, __V, 'upper 0'))
+        label.new(bar_index+20, 1.0, 'upper 1', color=get_color(__K, __V, 'upper 1'))
+        label.new(bar_index+20, 2.0, 'upper 2', color=get_color(__K, __V, 'upper 2'))
+        label.new(bar_index+20, 3.0, 'upper 3', color=get_color(__K, __V, 'upper 3'))
+    if imodel > 3
+        label.new(bar_index+30, 0.0, 'complement 0', color=get_color(__K, __V, 'complement 0'))
+        label.new(bar_index+30, 1.0, 'complement 1', color=get_color(__K, __V, 'complement 1'))
+        label.new(bar_index+30, 2.0, 'complement 2', color=get_color(__K, __V, 'complement 2'))
+        label.new(bar_index+30, 3.0, 'complement 3', color=get_color(__K, __V, 'complement 3'))
+

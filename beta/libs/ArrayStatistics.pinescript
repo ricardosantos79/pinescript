@@ -1,0 +1,119 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Statistic Functions using arrays.
+library(title="ArrayStatistics")
+
+import RicardoSantos/ArrayExtension/2 as ae
+import RicardoSantos/ArrayOperationsFloat/1 as aof
+
+// @function Root Mean Squared
+// @param sample float array, data sample points.
+// @returns float
+export rms(float[] sample) => //{
+    int _size = array.size(sample)
+    if _size > 0
+        float _sum2 = array.sum(aof.power(sample, array.from(2.0)))
+        math.sqrt(_sum2 / _size)
+//{ usage:
+// a = array.from(10, 4, 6, 8.0)//ae.sequence_float(1.0, 20.0, 1.0)
+// plot(rms(a))
+//{ reference:
+//      https://www.geeksforgeeks.org/program-to-calculate-root-mean-square/
+//      https://github.com/vjaunet/fortran_lib_ifort/blob/master/SOURCE/lib_stat.f90
+//}}
+
+// @function Pearson's 1st Coefficient of Skewness.
+// @param sample float array, data sample.
+// @returns float
+export skewness_pearson1 (float[] sample) => //{
+    (array.avg(sample) - array.mode(sample)) / array.stdev(sample)
+//{ usage:
+// plot(skewness_pearson1(array.from(10.0,3,4,5,8,3,5,2)))
+//{ reference:
+//      https://www.investopedia.com/terms/s/skewness.asp
+//      https://www.statisticshowto.com/pearsons-coefficient-of-skewness/
+//}}}
+
+// @function Pearson's 2nd Coefficient of Skewness.
+// @param sample float array, data sample.
+// @returns float
+export skewness_pearson2 (float[] sample) => //{
+    (3.0 * (array.avg(sample) - array.median(sample))) / array.stdev(sample)
+//{ usage:
+// plot(skewness_pearson2(array.from(10.0,3,4,5,8,3,5,2)))
+//{ reference:
+//      https://www.investopedia.com/terms/s/skewness.asp
+//      https://www.statisticshowto.com/pearsons-coefficient-of-skewness/
+//}}}
+
+// @function Kurtosis of distribution.
+// @param sample float array, data sample.
+// @returns float
+export kurtosis (float[] sample) => //{
+    int _size = array.size(sample)
+    float _mean = array.avg(sample)
+    if _size > 0
+        float _m2 = 0.0
+        float _m4 = 0.0
+        for _i = 0 to _size-1
+            float _e = array.get(sample, _i) - _mean
+            _m2 += math.pow(_e, 2)
+            _m4 += math.pow(_e, 4)
+        _m2 /= _size
+        _m4 /= _size
+        _m4 / math.pow(_m2, 2.0)
+//{ usage:
+// plot(kurtosis(array.from(42, 20, 38, 78, 54, 26))) // 2.35
+//{ reference:
+//      https://www.educba.com/kurtosis-formula/
+//}}}
+
+// @function Get range around median containing specified percentage of values.
+// @param values float array, Histogram array.
+// @param percent float, Values percentage around median.
+// @returns tuple with [int, int], Returns the range which containes specifies percentage of values.
+export range_int ( int[] sample, float percent ) => //{
+    int _size = array.size(sample)
+    if _size < 1
+        runtime.error('ArrayStatistics -> range_int(): Parameter "sample" needs to have 1 or more elements.')
+        [0, 0]
+    else
+        int _total = array.sum(sample)
+        int _h = int(_total * ( percent + ( 1 - percent ) / 2 ))
+        int _hits = _total
+        int _min = -1
+        int _max = _size
+        // get range min value
+        for _i = 0 to _size-1
+            _min += 1
+            _hits -= array.get(sample, _min)
+            if _hits < _h
+                break
+        // get range max value
+        _hits := _total
+        for _i = _size - 1 to 0
+            _max -= 1
+            _hits -= array.get(sample, _max)
+            if _hits < _h
+                break
+        [_min, _max]
+//{ usage:
+// create histogram array
+int[] histogram = array.from(1, 1, 2, 3, 6, 8, 11, 12, 7, 3)
+// 
+[min, max] = range_int(histogram, input.float(0.75)) // 75% range around median: ([4, 8])
+plot(min), plot(max)
+//{ remarks:
+//      The input array is treated as histogram, i.e. its indexes are
+//          treated as values of stochastic function, but array values
+//          are treated as "probabilities" (total amount of hits).
+//      The method calculates range of stochastic variable, which summary
+//          probability comprises the specified percentage of histogram's hits.
+//}}}
+
+
+
+

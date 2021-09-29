@@ -1,0 +1,184 @@
+//@version=5
+indicator(title='Function Markov Process', overlay=false)
+
+//  |-------------------------------------------------------------------------------------------------------------------|
+//  |   Extra Functions:                                                                                                |
+//  |-------------------------------------------------------------------------------------------------------------------|
+f_sum(_src, _length) =>
+    _fix_length = math.max(0, math.min(bar_index, _length))
+    _sum = 0.0
+    for _i = 0 to _fix_length by 1
+        _sum := _sum + _src[_i]
+        _sum
+    _sum
+
+//  |-------------------------------------------------------------------------------------------------------------------|
+//  |   Markov Process:                                                                                                 |
+//  |   Returns the probability that the market continues on a state or other states(Bull, Bear or Stagnant).           |
+//  |-------------------------------------------------------------------------------------------------------------------|
+//  |   Parameters:                                                                                                     |
+//  |       _state: source to recursively extrapolate weights, should be a series of integer values within (-1 0 1).    |
+//  |       _hist_length: window to recursively extrapolate weights.                                                    |
+//  |       _predict_length: window to perform probability.                                                             |
+//  |-------------------------------------------------------------------------------------------------------------------|
+f_markov_process(_state, _hist_length, _predict_length) =>
+    _error = 0.0
+
+    //  |   Recursevely adjusted:
+    //  |   Transition State Matrix 3x3:
+    //  |       • row's must sum 1
+    //  row A
+    //  Calculate number of occurence for row A transitions.
+    _row_a_state_sum_1 = f_sum(_state[1] == 1 and _state[0] == 1 ? 1 : 0, _hist_length)
+    _row_a_state_sum_2 = f_sum(_state[1] == 1 and _state[0] == -1 ? 1 : 0, _hist_length)
+    _row_a_state_sum_3 = f_sum(_state[1] == 1 and _state[0] == 0 ? 1 : 0, _hist_length)
+    //  Sum the total transitions for calculating transition weights.
+    _row_a_total = _row_a_state_sum_1 + _row_a_state_sum_2 + _row_a_state_sum_3
+    //  Calculate row A transition weights
+    _w1_to_w1 = _row_a_state_sum_1 / _row_a_total
+    _w1_to_w2 = _row_a_state_sum_2 / _row_a_total
+    _w1_to_w3 = _row_a_state_sum_3 / _row_a_total
+    _sum_a = _w1_to_w1 + _w1_to_w2 + _w1_to_w3
+    if _sum_a != 1
+        _error := _error + _sum_a
+        _error
+    //  row B
+    //  Calculate number of occurence for row B transitions.
+    _row_b_state_sum_1 = f_sum(_state[1] == -1 and _state[0] == -1 ? 1 : 0, _hist_length)
+    _row_b_state_sum_2 = f_sum(_state[1] == -1 and _state[0] == 0 ? 1 : 0, _hist_length)
+    _row_b_state_sum_3 = f_sum(_state[1] == -1 and _state[0] == 1 ? 1 : 0, _hist_length)
+    //  Sum the total transitions for calculating transition weights.
+    _row_b_total = _row_b_state_sum_1 + _row_b_state_sum_2 + _row_b_state_sum_3
+    //  Calculate row B transition weights
+    _w2_to_w2 = _row_b_state_sum_1 / _row_b_total  //(1 + min(n, _hist_length))
+    _w2_to_w3 = _row_b_state_sum_2 / _row_b_total  //(1 + min(n, _hist_length))
+    _w2_to_w1 = _row_b_state_sum_3 / _row_b_total  //(1 + min(n, _hist_length))
+    _sum_b = _w2_to_w1 + _w2_to_w2 + _w2_to_w3
+    if _sum_b != 1
+        _error := _error + _sum_b
+        _error
+    //  row C
+    //  Calculate number of occurence for row C transitions.
+    _row_c_state_sum_1 = f_sum(_state[1] == 0 and _state[0] == 0 ? 1 : 0, _hist_length)
+    _row_c_state_sum_2 = f_sum(_state[1] == 0 and _state[0] == 1 ? 1 : 0, _hist_length)
+    _row_c_state_sum_3 = f_sum(_state[1] == 0 and _state[0] == -1 ? 1 : 0, _hist_length)
+    //  Sum the total transitions for calculating transition weights.
+    _row_c_total = _row_c_state_sum_1 + _row_c_state_sum_2 + _row_c_state_sum_3
+    //  Calculate row C transition weights
+    _w3_to_w3 = _row_c_state_sum_1 / _row_c_total  //(1 + min(n, _hist_length))
+    _w3_to_w1 = _row_c_state_sum_2 / _row_c_total  //(1 + min(n, _hist_length))
+    _w3_to_w2 = _row_c_state_sum_3 / _row_c_total  //(1 + min(n, _hist_length))
+    _sum_c = _w3_to_w1 + _w3_to_w2 + _w3_to_w3
+    if _sum_c != 1
+        _error := _error + _sum_c
+        _error
+    if math.round(_sum_a + _sum_b + _sum_c) != 3
+        _error := _error + 0  //100 + (_sum_a + _sum_b + _sum_c)
+        _error
+
+    _prob = 1.0
+    _sequence = 0
+    _fwd_state = _state
+    _prev_state = _state
+
+    if na(_state[1])
+        _error := _error + 0
+        _error
+    else
+        for _i = 0 to _predict_length by 1
+            // Simulate random state
+            _fwd_state := 1 - math.round(math.random(2.0))
+            //  TODO:
+            //      Doesnt seem to work??
+            _sequence := _sequence + (_prev_state + 2) * math.round(math.pow(10, _predict_length - _i))
+            if _prev_state > 0
+                if _fwd_state > 0
+                    _prob := _prob * _w1_to_w1
+                    _prev_state := +1
+                    _prev_state
+                else
+                    if _fwd_state < 0
+                        _prob := _prob * _w1_to_w2
+                        _prev_state := -1
+                        _prev_state
+                    else
+                        _prob := _prob * _w1_to_w3
+                        _prev_state := 0
+                        _prev_state
+            else
+                if _prev_state < 0
+                    if _fwd_state > 0
+                        _prob := _prob * _w2_to_w1
+                        _prev_state := +1
+                        _prev_state
+                    else
+                        if _fwd_state < 0
+                            _prob := _prob * _w2_to_w2
+                            _prev_state := -1
+                            _prev_state
+                        else
+                            _prob := _prob * _w2_to_w3
+                            _prev_state := 0
+                            _prev_state
+                else
+                    if _fwd_state > 0
+                        _prob := _prob * _w3_to_w1
+                        _prev_state := +1
+                        _prev_state
+                    else
+                        if _fwd_state < 0
+                            _prob := _prob * _w3_to_w2
+                            _prev_state := -1
+                            _prev_state
+                        else
+                            _prob := _prob * _w3_to_w3
+                            _prev_state := 0
+                            _prev_state
+
+    //  Return current state weigths:
+    _r_a = 0.0
+    _r_b = 0.0
+    _r_c = 0.0
+
+    if _state > 0
+        _r_a := _w1_to_w1
+        _r_b := _w1_to_w2
+        _r_c := _w1_to_w3
+        _error := 0.01
+        _error
+    else
+        if _state < 0
+            _r_a := _w2_to_w1
+            _r_b := _w2_to_w2
+            _r_c := _w2_to_w3
+            _error := -0.01
+            _error
+        else
+            _r_a := _w3_to_w1
+            _r_b := _w3_to_w2
+            _r_c := _w3_to_w3
+            _error := 0.0
+            _error
+
+    [_error, _r_a, _r_b, _r_c, _prob, _sequence]
+
+ma_length = input(1)
+src = ta.ema(input(close), ma_length)
+nbars = input(1)
+range_1 = ta.atr(10) * input(0.01)
+change_1 = ta.change(src)
+state = ta.change(src) > range_1 ? +1 : change_1 < -range_1 ? -1 : 0
+[e, w1, w2, w3, prob, sequence] = f_markov_process(state, 100, nbars)
+
+plot(e, title='Error', color=color.new(color.black, 0))
+plot(state * 0.01, title='Current State', color=color.new(color.red, 0))
+plot(w1, title='P of transition From Current to A', color=color.new(color.green, 0))
+plot(w2, title='P of transition From Current to B', color=color.new(color.maroon, 0))
+plot(w3, title='P of transition From Current to C', color=color.new(color.blue, 0))
+plot(prob, title='P of transition From Current to X after N bars', color=color.new(color.black, 0))
+plot(sequence*0.1, title='Sequence', color=color.new(color.black, 0))
+
+hline(1.0)
+hline(0.0)
+
+

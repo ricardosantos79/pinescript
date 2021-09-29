@@ -1,0 +1,431 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description: a library of functions to deal with probabilities.
+library(title='Probability')
+
+// imports:
+import RicardoSantos/MathExtension/5 as me
+// me.log2()
+import RicardoSantos/ArrayExtension/3 as ae
+// ae.index_2d_to_1d()
+import RicardoSantos/ArrayGenerate/1 as agen
+// agen.sequence_float()
+
+//  Helper functions: {
+
+//  console functions: {
+int console_buffer_size = input(20), var string[] _console = array.new_string(console_buffer_size)
+var table T = table.new(position.top_left, 1, 1, color.white)
+f_array_q(_array, _element)=>array.pop(_array), array.unshift(_array, _element)
+f_update_console()=>table.clear(T, 0, 0), table.cell(T, 0, 0, array.join(_console, '\n'), text_color=color.black, text_halign=text.align_left)
+f_console_print(_error)=>f_array_q(_console, _error), f_update_console()
+// f_str_datestamp(_unix_time)=>str.format(' : {0, number, 00}-{1, number, 00}-{2, number, 00}, {3, number, 00}:{4, number, 00}:{5, number, 00}', year(_unix_time), month(_unix_time), dayofmonth(_unix_time), hour(_unix_time), minute(_unix_time), second(_unix_time))
+//}
+
+// @function multiply two matrices A and B
+// @param matrix_a float[], source matrices.
+// @param matrix_b float[], source matrices.
+// @param dimension_ax int, size of matrix A dimensions.
+// @param dimension_ay int, size of matrix A dimensions.
+// @param dimension_bx int, size of matrix B dimensions.
+// @param dimension_by int, size of matrix B dimensions.
+f_matrix_multiply_2d(float[] matrix_a, float[] matrix_b, int dimension_ax, int dimension_ay, int dimension_bx, int dimension_by)=>//{
+// reference: https://www.geeksforgeeks.org/finding-the-probability-of-a-state-at-a-given-time-in-a-markov-chain-set-2/
+    if dimension_ax != dimension_ay
+        // Columns in A must match the number of rows in B matrix!
+        array.new_float(size=0)
+    else
+        float[] _T = array.new_float(size=dimension_bx * dimension_by, initial_value=0.0)
+        for _i = 0 to dimension_bx - 1
+            for _j = 0 to dimension_bx - 1
+                _sum = 0.0
+                for _k = 0 to dimension_ay - 1
+                    float _Aik = array.get(id=matrix_a, index=ae.index_2d_to_1d(dimension_x=dimension_ax, dimension_y=dimension_ay, index_x=_i, index_y=_k))
+                    float _Bkj = array.get(id=matrix_b, index=ae.index_2d_to_1d(dimension_x=dimension_bx, dimension_y=dimension_by, index_x=_k, index_y=_j))
+                    _sum += _Aik * _Bkj
+                array.set(id=_T, index=ae.index_2d_to_1d(dimension_x=dimension_bx, dimension_y=dimension_by, index_x=_i, index_y=_j), value=_sum)
+        _T
+//}
+
+// @function calculate the power of a square matrix
+// @param matrix_a float[], matrix, must have equal dimensions.
+// @param power int, power to raise matrix by.
+// @param dimension int, size of the matrix.
+// @returns float[] matrix, raised matrix.
+f_matrix_power_2d(float[] matrix_a, int power, int dimension)=>//{
+// reference: https://www.geeksforgeeks.org/finding-the-probability-of-a-state-at-a-given-time-in-a-markov-chain-set-2/
+    float[] _A = array.new_float(size=dimension * dimension, initial_value=0.0)
+    float[] _C = array.copy(id=matrix_a)
+    // for _i = 1 to power
+    //     _C := f_matrix_multiply_2d(_C, matrix_a, dimension, dimension, dimension, dimension)
+    for _i = 0 to dimension - 1
+        array.set(id=_A, index=ae.index_2d_to_1d(dimension_x=dimension, dimension_y=dimension, index_x=_i, index_y=_i), value=1.0)
+    if array.size(id=matrix_a) < 0
+        //error
+        //array.new_float(0)
+        int(na)
+    else
+        int _p = power
+        for _i = 0 to 999999
+            if _p > 0
+                if (_p % 2) == 1
+                    _A := f_matrix_multiply_2d(matrix_a=_A, matrix_b=_C, dimension_ax=dimension, dimension_ay=dimension, dimension_bx=dimension, dimension_by=dimension)
+                _C := f_matrix_multiply_2d(matrix_a=_C, matrix_b=_C, dimension_ax=dimension, dimension_ay=dimension, dimension_bx=dimension, dimension_by=dimension)
+                _p /= 2
+                int(na)
+            else
+                break
+                int(na)
+        int(na)
+        
+    _A
+//}
+
+// @function replaces a labels text with the representation of a 2d matrix.
+// @param label_id label, label to update.
+// @param matrix_a float[], data source.
+// @param dimension_x size of data dimension x.
+// @param dimension_y size of data dimension y.
+// @returns Void.
+f_label_matrix_2d(label label_id, float[] matrix_a, int dimension_x, int dimension_y)=>//{
+    int _size = array.size(id=matrix_a)
+    if _size < 2
+        label.set_text(id=label_id, text='Matrix size < 2!')
+    else if _size != dimension_x * dimension_y
+        label.set_text(id=label_id, text='Dimensions does not match!')
+    else
+        string _text = '[\n'
+        for _x = 0 to dimension_x - 1
+            for _y = 0 to dimension_y - 1
+                if _x * _y >= _size - 2
+                    _text += str.tostring(array.get(id=matrix_a, index=ae.index_2d_to_1d(dimension_x=dimension_x, dimension_y=dimension_y, index_x=_x, index_y=_y)), '#.###')
+                else
+                    _text += str.tostring(array.get(id=matrix_a, index=ae.index_2d_to_1d(dimension_x=dimension_x, dimension_y=dimension_y, index_x=_x, index_y=_y)), '#.###') + ', '
+            _text += '\n'
+        _text += ']'
+        label.set_text(id=label_id, text=_text)
+//}
+
+//}
+
+
+
+// Probability UDF {
+//  
+// reference:
+//      https://gist.github.com/Daniel-Hug/f0fee168155f1af72c390030cc9be463
+//      https://support.minitab.com/en-us/minitab-express/1/help-and-how-to/basic-statistics/probability-distributions/how-to/cumulative-distribution-function-cdf/methods-and-formulas/methods-and-formulas/
+//      https://support.minitab.com/en-us/minitab-express/1/help-and-how-to/basic-statistics/probability-distributions/supporting-topics/basics/calculating-probabilities-for-different-distributions/
+
+// @function Complementary error function
+// @param value float, value to test.
+// @returns float
+export erf(float value)=>//{
+//  usage: .erf(0.95) = 0.820891
+//  reference:
+//      https://reference.wolfram.com/language/ref/Erf.html
+    _x = math.abs(value)
+    _t = 1.0 / (1.0 + 0.3275911 * _x)
+     // erf(-_x) = -erf(x)
+    math.sign(value) * (1.0 - (((((1.061405429 * _t + -1.453152027) * _t) + 1.421413741) * _t + -0.284496736) * _t + 0.254829592) * _t * math.exp(-_x * _x))
+//}
+
+// @function Computes the inverse error function using the Mc Giles method, sacrifices accuracy for speed.
+// @param value float, -1.0 >= _value >= 1.0 range, value to test.
+// @returns float
+export ierf_mcgiles(float value)=>//{
+// usage:
+//          .ierf_mcgiles(0.820891) = 0.72096 // correct = 0.95
+//          .ierf_mcgiles(0.6) = -0.17696 // correct = 0.595116
+// reference: 
+//      http://www.mimirgames.com/articles/programming/approximations-of-the-inverse-error-function/
+//      https://keisan.casio.com/exec/system/1180573448
+    float _p = 0.
+    float _w = -math.log((1.0 - value) * (1.0 + value))
+    if _w < 0.5
+        _w -= 2.5
+        _p += ((((((((2.81022636e-08 * _w) + 3.43273939e-07 * _w) + -3.5233877e-06 * _w) + -4.39150654e-06 * _w) + 0.00021858087 * _w) + -0.00125372503 * _w) + -0.00417768164 * _w) + 0.246640727 + _w) + 1.50140941
+    else
+        _w := math.sqrt(nz(_w)) - 3.0
+        _p += ((((((((-0.000200214257 * _w) + 0.000100950558 * _w) + 0.00134934322 * _w) + -0.00367342844 * _w) + 0.00573950773 * _w) + -0.0076224613 * _w) + 0.00943887047 * _w) + 1.00167406 * _w) + 2.83297682
+    _p * value
+//}
+
+// @function computes the inverse error function using the Newton method with double refinement.
+// @param value float, -1. > _value > 1. range, _value to test.
+// @returns float
+export ierf_double(float value)=>//{
+// reference: http://www.mimirgames.com/articles/programming/approximations-of-the-inverse-error-function/
+// usage:
+//      .ierf(0.820891) = na //https://reference.wolfram.com/language/ref/InverseErf.html
+//      .ierf_mcgiles(0.6) = na // correct = 0.595116 // https://keisan.casio.com/exec/system/1180573448
+    float _r = 0.
+    float _z = math.sign(value) * value
+ 
+    if _z <= 0.7
+        float _x2 = _z * _z
+        _r += _z * (((-0.140543331 * _x2 + 0.914624893) * _x2 - 1.645349621) * _x2 + 0.886226899)
+        _r /= (((0.012229801 * _x2 - 0.329097515) * _x2 + 1.442710462) * _x2 - 2.118377725) * _x2 + 1.
+    else
+        float _y = math.sqrt( -math.log((1 - _z) / 2))
+        _r += (((1.641345311 * _y + 3.429567803) * _y - 1.62490649) * _y - 1.970840454)
+        _r /= ((1.637067800 * _y + 3.543889200) * _y + 1.)
+    _r *= math.sign(value)
+    _z *= math.sign(value)
+    
+    _r -= (erf(value=_r) - _z) / (2 / math.sqrt(math.pi) * math.exp(-_r * _r))
+    _r -= (erf(value=_r) - _z) / (2 / math.sqrt(math.pi) * math.exp(-_r * _r)) //Comment out if you do not want single refinement
+//}
+
+// @function computes the inverse error function using the Newton method.
+// @param value float, -1. > _value > 1. range, _value to test.
+// @returns float
+export ierf(float value)=>//{
+// reference: http://www.mimirgames.com/articles/programming/approximations-of-the-inverse-error-function/
+// usage:
+//      .ierf(0.820891) =  0.95 //https://reference.wolfram.com/language/ref/InverseErf.html
+//      .ierf_mcgiles(0.6) = 0.59512 // correct = 0.595116 // https://keisan.casio.com/exec/system/1180573448
+    float _r = 0.
+    float _z = math.sign(value) * value
+ 
+    if _z <= 0.7
+        float _x2 = _z * _z
+        _r += _z * (((-0.140543331 * _x2 + 0.914624893) * _x2 - 1.645349621) * _x2 + 0.886226899)
+        _r /= (((0.012229801 * _x2 - 0.329097515) * _x2 + 1.442710462) * _x2 - 2.118377725) * _x2 + 1.
+    else
+        float _y = math.sqrt(-math.log((1 - _z) / 2))
+        _r += (((1.641345311 * _y + 3.429567803) * _y - 1.62490649) * _y - 1.970840454)
+        _r /= ((1.637067800 * _y + 3.543889200) * _y + 1.)
+    _r *= math.sign(value)
+    _z *= math.sign(value)
+    
+    _r -= (erf(_r) - _z) / (2 / math.sqrt(math.pi) * math.exp(-_r * _r))
+    // _r -= (erf(_r) - _z) / (2 / math.sqrt(math.pi) * math.exp(-_r * _r)) //Comment out if you do not want single refinement
+//}
+
+// @function probability that the event will not occur.
+// @param probability float, 0 >=_p >= 1, probability of event.
+// @returns float
+export complement(float probability)=>//{
+// usage:
+//      probability_complement(0.25) = 0.75
+//      probability_complement(0.67) = 0.23
+    1.0 - probability
+//}
+
+// @function Gini Inbalance or Gini index for a given probability.
+// @param probability float, 0>=x>=1, probability of event.
+// @returns float
+export entropy_gini_impurity_single(float probability)=>//{
+// reference:
+//      https://victorzhou.com/blog/gini-impurity/
+//      https://www.tradingview.com/script/IlAZiO7E-Function-Entropy-Gini-Index/
+    probability * complement(probability=probability)
+//}
+
+// @function Gini Inbalance or Gini index for a series of events.
+// @param events float[], 0>=x>=1, array with event probability's.
+// @returns float
+export entropy_gini_impurity(float[] events)=>//{
+//  reference:
+//      https://victorzhou.com/blog/gini-impurity/
+//      https://www.tradingview.com/script/IlAZiO7E-Function-Entropy-Gini-Index/
+    int _size = array.size(id=events)
+    float _sum = 0.
+    if _size > 0
+        for _i = 0 to _size - 1
+            _p = array.get(id=events, index=_i)
+    	    _sum += entropy_gini_impurity_single(probability=_p)
+	_sum
+//}
+
+// @function Entropy information value of the probability of a single event.
+// @param probability float, 0>=x>=1, probability value.
+// @returns float, value as bits of information.
+export entropy_shannon_single(float probability)=>//{
+// reference:
+//      https://machinelearningmastery.com/what-is-information-entropy/
+//      https://www.tradingview.com/script/JFXtLbSo-Function-Shannon-Entropy/
+    -me.log2(value=probability + 1.0e-15)
+//}
+
+// @function Entropy information value of a distribution of events.
+// @param events float[], 0>=x>=1, array with probability's.
+// @returns float
+export entropy_shannon(float[] events)=>//{
+// reference:
+//      https://machinelearningmastery.com/what-is-information-entropy/
+//      https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html
+//      https://www.tradingview.com/script/JFXtLbSo-Function-Shannon-Entropy/
+    int _size = array.size(id=events)
+    float _sum = 0.
+    if _size > 0
+        for _i = 0 to _size - 1
+            _p = array.get(id=events, index=_i)
+    	    _sum += _p * entropy_shannon_single(probability=_p)
+	_sum
+//}
+
+// @function Calculates Chebyshev Inequality.
+// @param n_stdeviations float, positive over or equal to 1.0
+// @returns float
+export inequality_chebyshev(float n_stdeviations=1.0)=>//{
+// reference:
+//      https://www.tradingview.com/script/ndG6Dffb-Function-Probability-Chebyshev-Inequality/
+    n_stdeviations < 1 ? 0 : 1. - 1. / math.pow(base=n_stdeviations, exponent=2.0)
+//}
+
+// @function Calculates Chebyshev Inequality.
+// @param mean float, mean of a distribution
+// @param std float, standard deviation of a distribution
+// @returns float
+export inequality_chebyshev_distribution(float mean, float std)=>//{
+// reference:
+//      https://www.tradingview.com/script/ndG6Dffb-Function-Probability-Chebyshev-Inequality/
+    inequality_chebyshev(n_stdeviations=mean / std)
+//}
+
+// @function Calculates Chebyshev Inequality for a array of values.
+// @param data_sample float[], array of numbers.
+// @returns float
+export inequality_chebyshev_sample(float[] data_sample)=>//{
+// reference:
+//      https://www.tradingview.com/script/ndG6Dffb-Function-Probability-Chebyshev-Inequality/
+    float _mean = array.avg(id=data_sample)
+    float _std = array.stdev(id=data_sample)
+    inequality_chebyshev(n_stdeviations=_mean / _std)
+//}
+
+// @function Probability that all arguments will happen when neither outcome
+//              is affected by the other (accepts 1 or more arguments)
+// @param events float[], 0 >= _p >= 1, list of event probabilities.
+// @returns float
+export intersection_of_independent_events(float[] events)=>//{
+// usage:
+//      .intersection_of_independent_events([0.25, 0.25]) = 0.0625
+//      .intersection_of_independent_events([0.3, 0.3, 0.3]) = 0.027
+    int _size = array.size(id=events)
+    if _size > 0
+        float _ret = array.get(id=events, index=0)
+        if _size > 1
+        	for _i = 1 to _size - 1
+        		_ret *= array.get(id=events, index=_i)
+    	_ret
+//}
+
+// @function Probability that either one of the arguments will happen when neither outcome
+//              is affected by the other (accepts 1 or more arguments)
+// @param events float[], 0 >= _p >= 1, list of event probabilities.
+// @returns float
+export union_of_independent_events(float[] events)=>//{
+// usage:
+//      .union_of_independent_events([0.25, 0.25]) = 0.4375
+//      .union_of_independent_events([0.3, 0.3, 0.3]) = 0.657
+    int _size = array.size(id=events)
+    if _size > 0
+        float _ret = array.get(id=events, index=0)
+        if _size > 1
+        	for _i = 1 to _size - 1
+        	    float _Ai = array.get(id=events, index=_i)
+        		_ret += _Ai - nz(_ret) * _Ai
+        		//arguments[i] - ret * arguments[i];
+    	_ret
+//}
+
+// @function Probabilities for each bin in the range of sample.
+// @param sample float[], samples to pool probabilities.
+// @param n_bins int, number of bins to split the range
+// @return float[]
+export mass_function(float[] sample, int n_bins)=>//{
+// usage:
+//      .mass_function([1, 2, 3, 4], 4) = [0.25, 0.25, 0.25, 0.25]
+    float[] _probabilities = array.new_float(size=n_bins, initial_value=0.0)
+    int _size = array.size(id=sample), float _fraction = 1.0 / _size
+    float _min = array.min(id=sample), float _max = array.max(id=sample), float _range = _max - _min
+    if _size > 0
+        for _i = 0 to _size - 1
+            int _expected_index = math.floor(((array.get(id=sample, index=_i) - _min) / _range) * (n_bins - 1))
+            array.set(id=_probabilities, index=_expected_index, value=array.get(id=_probabilities, index=_expected_index) + _fraction)
+    _probabilities
+//}
+
+// @function Use the CDF to determine the probability that a random observation 
+//              that is taken from the population will be less than or equal to a certain value.
+//              Or returns the area of probability for a known value in a normal distribution.
+// @param mean float, samples to pool probabilities.
+// @param stdev float, number of bins to split the range
+// @param value float, limit at which to stop.
+// @returns float
+export cumulative_distribution_function(float mean, float stdev, float value)=>//{
+// reference: 
+//      https://en.wikipedia.org/wiki/Cumulative_distribution_function
+//      https://stackoverflow.com/questions/5259421/cumulative-distribution-function-in-javascript
+//      https://www.wolframalpha.com/input/?i=CDF%28normal+distribution+with+mean%3D+5+and+sd+%3D+30%2C+25%29
+// usage:
+//      .cumulative_distribution_function(5, 30, 25) = 0.747507...
+//      .cumulative_distribution_function(30, 25, 1.4241) = 0.126512
+    _z = (value - mean) / math.sqrt(2 * stdev * stdev)
+    _t = 1.0 / (1.0 + 0.3275911 * math.abs(_z))
+    _erf = 1.0 - (((((1.061405429 * _t - 1.453152027) * _t) + 1.421413741) * _t - 0.284496736) * _t + 0.254829592) * _t * math.exp(-_z * _z)
+    _sign = _z < 0 ? -1. : 1.
+    0.5 * (1.0 + _sign * _erf)
+//}
+
+// @function Transition matrix for the suplied distribution.
+// @param distribution float[], array with probability distribution. ex:. [0.25, 0.50, 0.25]
+// @returns float[]
+export transition_matrix(float[] distribution)=>//{
+    int _size = array.size(id=distribution)
+    //int _msize = _size * _size
+    float[] _T = array.new_float(size=0)
+    if _size > 0
+        for _m = 0 to _size - 1
+            for _n = 0 to _size - 1
+                array.push(id=_T, value=array.get(id=distribution, index=_m) * array.get(id=distribution, index=_n))
+    _T
+//}
+
+// @function Probability of reaching target_state at target_step after starting from start_state
+// @param transition_matrix float[], "pseudo2d" probability transition matrix.
+// @param dimension int, size of the matrix dimension.
+// @param target_step number of steps to find probability.
+// @returns float[]
+export diffusion_matrix(float[] transition_matrix, int dimension, int target_step)=>//{
+// reference: https://www.geeksforgeeks.org/finding-the-probability-of-a-state-at-a-given-time-in-a-markov-chain-set-2/
+    f_matrix_power_2d(matrix_a=transition_matrix, power=target_step, dimension=dimension)
+//}
+
+// @function Probability of reaching target_state at target_step after starting from start_state
+// @param transition_matrix float[], "pseudo2d" probability transition matrix.
+// @param dimension int, size of the matrix dimension.
+// @param start_state state at which to start.
+// @param target_state state to find probability.
+// @param target_step number of steps to find probability.
+export state_at_time(float[] transition_matrix, int dimension, int start_state, int target_state, int target_step)=>//{
+// reference: https://www.geeksforgeeks.org/finding-the-probability-of-a-state-at-a-given-time-in-a-markov-chain-set-2/
+    float[] _T = f_matrix_power_2d(matrix_a=transition_matrix, power=target_step, dimension=dimension)
+    array.get(id=_T, index=ae.index_2d_to_1d(dimension_x=dimension, dimension_y=dimension, index_x=target_state - 1, index_y=start_state - 1))
+//}
+// < UDF } 
+
+
+
+
+
+
+var label test = label.new(bar_index, 0.0, '')
+if barstate.islast
+    t0 = erf(0.6)
+    t1 = ierf(0.6)
+    t2 = intersection_of_independent_events(array.new_float(3, 0.3))
+    t3 = union_of_independent_events(array.new_float(3, 0.3))
+    t4 = cumulative_distribution_function(30, 25, 1.4241)
+    label.set_xy(test, bar_index, 0.0)
+    //label.set_text(test, tostring(t4))
+    //f_label_matrix_2d(test, probability_transition_matrix(array.new_float(4, 0.25)), 4, 4)
+    //f_label_matrix_2d(test, f_matrix_multiply_2d(probability_transition_matrix(array.new_float(4, 0.25)), probability_transition_matrix(array.new_float(4, 0.25)), 4, 4, 4, 4), 4, 4)
+    f_label_matrix_2d(test, diffusion_matrix(transition_matrix(agen.sequence_float(0.0, 1.0, 0.25)), 4, 25), 4, 4)
+    //label.set_text(test, tostring(probability_state_at_time(probability_transition_matrix(agen.sequence_float(0.0, 1.0, 0.25)), 4, 2, 3, 25)))

@@ -1,0 +1,161 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Shortest Path Tree Search Methods using Dijkstra Algorithm.
+library("MathSearchDijkstra")
+
+// reference:
+//      https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+//      https://blog.quantinsti.com/dijkstra-algorithm/
+//      https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+//      possible future implementation? multiple point search: https://iopscience.iop.org/article/10.1088/1742-6596/1530/1/012040/pdf
+
+import RicardoSantos/ArrayExtension/6 as ae
+
+// @function Find the lowest cost/distance.
+// @param distances float array, data set with distance costs to start index.
+// @param flagged_vertices bool array, data set with visited vertices flags.
+// @returns int, lowest cost/distance index.
+export min_distance (int[] distances,  bool[] flagged_vertices) => //{
+    int _size_d = array.size(distances)
+    int _size_v = array.size(flagged_vertices)
+    if _size_d < 1
+        runtime.error('MathSearchDijkstra -> min_distance(): "distances" has the wrong size.')
+        int(na)
+    else if _size_d != _size_v
+        runtime.error('MathSearchDijkstra -> min_distance(): "distances" and "flagged_vertices" size does not match.')
+        int(na)
+    else
+        // int __MAXINT__ = 9223372036854776000 // props to @XelArjona!!
+        // Initialize min value
+        int _min = 9223372036854776000
+        int _min_index = -1
+        for _i = 0 to _size_d - 1
+            int _d = array.get(distances, _i)
+            if (not array.get(flagged_vertices, _i)) and _d <= _min
+                _min := _d
+                _min_index := _i
+        _min_index
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Dijkstra Algorithm, perform a greedy tree search to calculate the cost/distance to selected start node at each vertex.
+// @param matrix_graph int array, matrix holding the graph adjacency list and costs/distances.
+// @param dim_x int, x dimension of matrix_graph.
+// @param dim_y int, y dimension of matrix_graph.
+// @param start int, the vertex index to start search.
+// @returns int array, set with costs/distances to each vertex from start vertexs.
+export dijkstra (int[] matrix_graph, int dim_x, int dim_y, int start) => //{
+    // int __MAXINT__ = 9223372036854776000 // props to @XelArjona!!
+	int _size_m = array.size(matrix_graph)
+	if _size_m < 2
+	    runtime.error('MathSearchDijkstra -> search(): "matrix_graph" has the wrong size.')
+	    array.new_int(na)
+	if _size_m != (dim_x * dim_y)
+	    runtime.error('MathSearchDijkstra -> search(): dimensions and size does not match.')
+	    array.new_int(na)
+    else
+        int[] _distances = array.new_int(dim_x, 9223372036854776000)
+        bool[] _visited = array.new_bool(dim_x, false)
+        
+        array.set(_distances, start, 0)
+        for _i = 0 to dim_x-1
+            int _nearest_index = min_distance(_distances, _visited)
+            array.set(_visited, _nearest_index, true)
+            for _v = 0 to dim_x-1
+                bool _is_visited = array.get(_visited, _v)
+                if (not _is_visited)
+                    int _distance_between = array.get(matrix_graph, ae.index_2d_to_1d(dim_x, dim_y, _nearest_index, _v))
+                    if (_distance_between != 0)
+                        int _distance_to_nearest = array.get(_distances, _nearest_index)
+                        int _distance_to_current = array.get(_distances, _v)
+                        int _tentative_sum = _distance_to_nearest + _distance_between
+                        if (_distance_to_nearest != 9223372036854776000) and (_tentative_sum < _distance_to_current)
+                            array.set(_distances, _v, _tentative_sum)
+        _distances
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Retrieves the shortest path between 2 vertices in a graph using Dijkstra Algorithm.
+// @param start int, the vertex index to start search.
+// @param end int, the vertex index to end search.
+// @param matrix_graph int array, matrix holding the graph adjacency list and costs/distances.
+// @param dim_x int, x dimension of matrix_graph.
+// @param dim_y int, y dimension of matrix_graph.
+// @returns int array, set with vertex indices to the shortest path.
+export shortest_path (int start, int end, int[] matrix_graph, int dim_x, int dim_y) => //{
+    // start + end + array.size(matrix_graph) + dim_x + dim_y // just to use all param..
+	int _size_m = array.size(matrix_graph)
+	
+	int[] _distances = dijkstra (matrix_graph, dim_x, dim_y, start)
+	int[] _path = array.new_int(1, end)
+	// build path backwards with the least cost:
+	// 1: end vertex
+	// 2: check adjacent vertex sum + edge cost to current vertex,
+	// 3: if its smaller or equal add it to path, else skip
+	// 4: repeat.
+	_current_vertex = end
+	while _current_vertex != start
+    	for _i = 0 to dim_x - 1
+    	    _vi = array.get(matrix_graph, ae.index_2d_to_1d(dim_x, dim_y, _current_vertex, _i))
+    	    if _vi != 0
+    	        _di = array.get(_distances, _i)
+    	        if _di + _vi <= array.get(_distances, _current_vertex)
+    	            array.unshift(_path, _i)
+    	            _current_vertex := _i
+    _path
+//{ usage:
+//{ remarks:
+//}}}
+
+int n_vertices = 9
+// adjacency list matrix:
+var int[] graph = array.from( 0, 4, 0, 0, 0, 0, 0, 8, 0,
+                              4, 0, 8, 0, 0, 0, 0, 11, 0,
+                              0, 8, 0, 7, 0, 4, 0, 0, 2,
+                              0, 0, 7, 0, 9, 14, 0, 0, 0,
+                              0, 0, 0, 9, 0, 10, 0, 0, 0,
+                              0, 0, 4, 14, 10, 0, 2, 0, 0,
+                              0, 0, 0, 0, 0, 2, 0, 1, 6,
+                              8, 11, 0, 0, 0, 0, 1, 0, 7,
+                              0, 0, 2, 0, 0, 0, 6, 7, 0)
+
+int start = input.int(defval=0, minval=0, maxval=n_vertices)
+int end = input.int(defval=8, minval=0, maxval=n_vertices)
+
+var int[] dist = dijkstra(graph, n_vertices, n_vertices, start)
+var int[] path = shortest_path(start, end, graph, n_vertices, n_vertices)
+var int[] indices = array.from(0,1,2,3,4,5,6,7,8)
+var label legend = label.new(bar_index, 0.0, str.format('index:{0}\ncosts:{1}\npath :{2}', str.tostring(indices), str.tostring(dist), str.tostring(path)), style=label.style_label_center, textalign=text.align_left)
+
+if barstate.isfirst
+    // nodes x, y coordinates:
+    int[] _x = array.from(000, 010, 020, 030, 040, 050, 060, 070, 080)
+    int[] _y = array.from(180, 160, 000, 020, 020, 160, 020, 180, 000)
+    for _i = 0 to n_vertices-1
+        int _nodexi = array.get(_x, _i)
+        int _nodeyi = array.get(_y, _i)
+        bool _is_ipath = array.includes(path, _i)
+        color _col_ispath = _is_ipath ? color.yellow : color.blue
+        label.new(_nodexi, _nodeyi, '', color=_col_ispath, style=label.style_circle, size=size.large)
+        label.new(_nodexi, _nodeyi, str.tostring(_i), color=color.new(#000000, 100), style=label.style_label_center, size=size.large, tooltip=str.tostring(array.get(dist, _i)))
+        for _j = 0 to _i
+            int _gij = array.get(graph, ae.index_2d_to_1d(n_vertices, n_vertices, _i, _j))
+            if _gij > 0
+                int _nodexj = array.get(_x, _j)
+                int _nodeyj = array.get(_y, _j)
+                bool _is_jpath = array.includes(path, _j)
+                if _is_ipath and _is_jpath
+                    line.new(_nodexi, _nodeyi, _nodexj, _nodeyj, color=color.new(color.yellow, 30), width=3)
+                else
+                    line.new(_nodexi, _nodeyi, _nodexj, _nodeyj, color=color.new(color.gray, 50), width=1)
+                label.new(int((_nodexi+_nodexj)/2), (_nodeyi+_nodeyj)/2, str.tostring(_gij), color=color.gray, style=label.style_label_center, size=size.normal)
+
+
+
+
+//#

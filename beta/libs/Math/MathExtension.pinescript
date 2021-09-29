@@ -1,0 +1,192 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Math Extension.
+library("MathExtension")
+// reference:
+//      https://github.com/python/cpython/blob/4a42cebf6dd769e2fa4e234a9e91093b3ad1cb63/Modules/mathmodule.c
+
+// @function calculate log base 2
+// @param _value float, number.
+// @returns float, base 2 logarithm of value.
+export log2(float value)=>//{
+    math.log(value) / 0.693147180559945//math.log(2) aproximation
+//}
+
+// @function float remainder of x divided by y.
+// @param numerator float, division numerator.
+// @param denominator float, division denuminator.
+// @returns float
+export fmod (float numerator, float denominator) => //{
+    numerator - (denominator * math.floor(numerator / denominator))
+//{ usage:
+// float a = 20.156, float b = 0.5
+// float c = fmod(numerator=a, denominator=b)
+// plot(c)
+//}}
+
+// @function computes the fractional part of the argument value.
+// @param value float, value to compute.
+// @returns float, fractional part.
+export fractional (float value) => //{<<
+    value - math.floor(value)
+//}
+
+// @function Find the integral of value.
+// @param value float, value.
+// @returns float.
+export integral(float value) => //{
+    float _new_value = math.abs(value)
+    while _new_value - math.floor(_new_value) != 0
+        _new_value := _new_value * 10
+    _new_value
+//{ usage:
+// float input_value = input.float(1.2345), plot(integral(input_value))
+//}}
+
+// @function Approximation to atan2 calculation, arc tangent of y/ x in the range (-pi,pi) radians.
+// @param value_x float, value x.
+// @param value_y float, value y.
+// @returns float, value with angle in radians. (negative if quadrante 3 or 4)
+export atan2 (float value_x, float value_y) => //{<<
+    float _one_qtr_pi = 0.25 * math.pi
+    float _three_qtr_pi = 3.0 * _one_qtr_pi
+    float _abs_y = math.abs(value_y) + 1e-12 // kludge to void zero division
+    float _r = 0.0, float _angle = 0.0
+	if value_x < 0.0
+		_r := (value_x + _abs_y) / (_abs_y - value_x)
+		_angle := _three_qtr_pi
+	else
+		_r := (value_x - _abs_y) / (value_x + _abs_y)
+		_angle := _one_qtr_pi
+	_angle := _angle + (0.1963 * _r * _r - 0.9817) * _r
+	math.sign(value_y) * _angle
+//}
+
+// @function Multidimensional euclidean distance from the origin to a point.
+// @param value_x float, value x.
+// @param value_y float, value y.
+// @returns float
+export hypotenuse (float value_x, float value_y) => //{
+    math.sqrt(value_x * value_x + value_y * value_y)
+// usage: 
+//      the hypotenuse of a right triangle (3:4:5)
+//      hypot(value_x=3.0, value_y=4.0) // 5.0
+// reference: 
+//      https://github.com/python/cpython/blob/4a42cebf6dd769e2fa4e234a9e91093b3ad1cb63/Modules/mathmodule.c
+//}
+
+// @function Determine whether two floating point numbers are near in value.
+// @param value_a float, value to compare with.
+// @param value_b float, value to be compared against.
+// @param relative_tolerance float, default (1.0e-09).
+// @param absolute_tolerance float, default (0.0).
+// @returns bool
+export near_equal (float value_a, float value_b, float relative_tolerance=1.0e-09, float absolute_tolerance=0.0) => //{
+    if relative_tolerance < 0 or absolute_tolerance < 0
+        bool(na)
+    else if value_a == value_b
+        true
+    else
+        float _diff = math.abs(value_b - value_a)
+        _diff <= math.abs(relative_tolerance * value_b) or _diff <= math.abs(relative_tolerance * value_a) or _diff <= absolute_tolerance
+// usage: 
+//      plot(is_close(value_a=1.0, value_b=1.0 + 1.0e-10) ? 1 : 0)
+// reference: 
+//      https://github.com/python/cpython/blob/4a42cebf6dd769e2fa4e234a9e91093b3ad1cb63/Modules/mathmodule.c
+//}
+
+// @function Factorize a number.
+// @param value int, positive number.
+// @returns int
+export factorize (int value) => //{
+    if value == 0 or value == 1
+        1
+    else if value < 0 or na(value)
+        int(na)
+    else
+        int _value = 1
+        for _i = 2 to value
+            _value *= _i
+        int(_value)
+// usage:
+//      plot(factorize(int(na))) // na
+//      plot(factorize(-3)) // na
+//      plot(factorize(0)) // 1
+//      plot(factorize(1)) // 1
+//      plot(factorize(2)) // 2
+//      plot(factorize(3)) // 6
+//      plot(factorize(5)) // 120
+//      plot(factorize(10)) // 3628800
+//      plot(factorize(20)) // 2432902008176640000
+//
+// reference:
+//      https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
+//}
+
+// @function Number of ways to choose k items from n items without repetition and with order.
+// @param options_size int, number of items to pool from
+// @param combo_size int, number of items to be chosen
+// @returns int
+export permutations (int options_size, int combo_size) => //{
+    if na(combo_size)
+        factorize(value=options_size)
+    else if na(options_size)
+        int(na) // must have items to select from
+    else if options_size < 0 or combo_size < 0
+        int(na) // must be positive
+    else if options_size < combo_size
+        0
+    else
+        _factor = options_size
+        _result = options_size
+        for _i = combo_size to 2
+            _factor -= 1
+            _result *= _factor
+        _result
+// usage:
+//      plot(permutations(52, 5)) // 311875200
+//      plot(permutations(10, 2)) // 90
+//      plot(permutations(5, 3)) // 60
+//      plot(permutations(3, 5)) // 0 // k > n
+//      plot(permutations(5, int(na))) // 120
+//}
+
+// @function Find the total number of possibilities to choose k things from n items
+// @param options_size int, number of items to pool from
+// @param combo_size int, number of items to be chosen
+// @returns int
+export combinations (int options_size, int combo_size) => //{
+    if na(combo_size)
+        int(na)
+    else if na(options_size)
+        int(na) // must have items to select from
+    else if options_size < 0 or combo_size < 0
+        int(na) // must be positive
+    else 
+        int _temp = options_size - combo_size
+        if _temp < 0
+            0
+        else if combo_size == 1
+            1
+        else
+            int _k = math.min(combo_size, options_size - combo_size)
+            
+            _factor = options_size
+            _result = options_size
+            for _i = _k to 2
+                _factor -= 1
+                _result *= _factor
+                _result := math.floor(_result / _i + 1)
+            _result - 1
+// usage:
+//      plot(combinations(7, 5)) // 21
+//      plot(combinations(10, 2)) // 45
+//      plot(combinations(5, 3)) // 10
+//      plot(combinations(3, 5)) // 0
+//      plot(combinations(5, int(na))) // n/a
+//}
+
+

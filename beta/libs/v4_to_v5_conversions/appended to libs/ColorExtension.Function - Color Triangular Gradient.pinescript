@@ -1,0 +1,27 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Color Triangular Gradient')
+
+f_color_triangle_gradient(_value, _min, _mid, _max, _min_color, _mid_color, _max_color) =>  //{
+//  @function: finds the color output of a triangular gradient
+    color _col = na
+    if _value <= _mid
+        _col := color.from_gradient(_value, _min, _mid, _min_color, _mid_color)
+        _col
+    else
+        _col := color.from_gradient(_value, _mid, _max, _mid_color, _max_color)
+        _col
+    _col
+//}
+
+r1 = ta.rsi(close, 3)
+c1 = f_color_triangle_gradient(r1, 0, 20, 100, color.red, color.yellow, color.lime)
+c2 = f_color_triangle_gradient(r1, 0, 50, 100, color.red, color.yellow, color.lime)
+c3 = f_color_triangle_gradient(r1, 0, 80, 100, color.red, color.yellow, color.lime)
+plot(r1, color=c1, linewidth=15)
+plot(r1, color=c2, linewidth=10)
+plot(r1, color=c3, linewidth=5)
+
+

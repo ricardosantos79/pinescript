@@ -1,0 +1,18 @@
+//@version=5
+indicator(title='Function - Number of Digits in integer', shorttitle='N', overlay=false)
+
+f_ndigit(_value) =>
+    _abs = math.abs(_value)
+    _count = 0
+    while _abs > 0
+        _abs := math.floor(_abs / 10)
+        _count += 1
+        _count
+    _count
+
+float value = math.pow(10, input(1))
+
+plot(series=value, title='Test Value', color=color.new(color.black, 0))
+plot(series=f_ndigit(value), title='Nº of Digits in test value', color=color.new(color.blue, 0))
+
+

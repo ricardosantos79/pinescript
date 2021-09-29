@@ -1,0 +1,187 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Methods for test functions.
+library(title='MathSpecialFunctionsTestFunctions')
+
+// reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/SpecialFunctions/TestFunctions.cs
+
+// imports:
+import RicardoSantos/DebugConsole/2 as console
+[__T, __C] = console.init(25)
+import RicardoSantos/MathConstants/1 as constants
+// constants.Pi2() -> ackley()
+
+// @function Valley-shaped Rosenbrock function for 2 dimensions: (x,y) -> (1-x)^2 + 100*(y-x^2)^2.
+// @param input_x float, common range within (-5.0, 10.0) or (-2.048, 2.048).
+// @param input_y float, common range within (-5.0, 10.0) or (-2.048, 2.048).
+// @returns float
+export rosenbrock (float input_x, float input_y) => //{
+    float _a = 1.0 - input_x
+    float _b = input_y - math.pow(input_x, 2.0)
+    math.pow(_a, 2.0) + 100 * math.pow(_b, 2.0)
+//{ usage:
+console.queue_one(__C, str.format('rosenbrock(2, 1): {0}', rosenbrock(2.0, 1.0)))
+//{ remarks:
+//      This function has a global minimum at (1,1) with f(1,1) = 0.
+//      Common range: [-5,10] or [-2.048,2.048].
+//      https://en.wikipedia.org/wiki/Rosenbrock_function
+//      http://www.sfu.ca/~ssurjano/rosen.html
+//      test: https://www.wolframalpha.com/input/?i=rosenbrock+function+%282%2C1%29
+//}}}
+
+// @function Valley-shaped Rosenbrock function for 2 or more dimensions.
+// @param samples float array, common range within (-5.0, 10.0) or (-2.048, 2.048).
+// @returns float
+export rosenbrock_mdim (float[] samples) => //{
+    int _size = array.size(samples)
+    if _size < 2
+        runtime.error('MathSpecialFunctionsTestFunctions -> ackley(): "samples" has wrong size.')
+        float(na)
+    else
+        float _sum = 0.0
+        for _i = 1 to _size-1
+            float _xi = array.get(samples, _i)
+            _sum += rosenbrock(array.get(samples, _i - 1), array.get(samples, _i))
+        _sum
+//{ usage:
+console.queue_one(__C, str.format('rosenbrock_mdim([2, 1, ,-1, -2]): {0}', rosenbrock_mdim(array.from(2.0, 1.0, -1.0, -2.0))))
+//{ remarks:
+//      This function have a global minimum of all ones and, for 8 > N > 3, a local minimum at (-1,1,...,1).
+//      https://en.wikipedia.org/wiki/Rosenbrock_function
+//      http://www.sfu.ca/~ssurjano/rosen.html
+//}}}
+
+// @function Himmelblau, a multi-modal function: (x,y) -> (x^2+y-11)^2 + (x+y^2-7)^2
+// @param input_x float, common range within (-6.0, 6.0 ).
+// @param input_y float, common range within (-6.0, 6.0 ).
+// @returns float
+export himmelblau (float input_x, float input_y) => //{
+    float _a = math.pow(input_x, 2.0) + input_y - 11.0
+    float _b = input_x + math.pow(input_y, 2.0) - 7.0
+    math.pow(_a, 2.0) + math.pow(_b, 2.0)
+//{ usage:
+console.queue_one(__C, str.format('himmelblau(2, 1): {0}', himmelblau(2.0, 1.0)))
+//{ remarks:
+//      This function has 4 global minima with f(x,y) = 0.
+//      Common range: [-6,6].
+//      Named after David Mautner Himmelblau
+//      https://en.wikipedia.org/wiki/Himmelblau%27s_function
+//}}}
+
+// @function Rastrigin, a highly multi-modal function with many local minima.
+// @param samples float array, common range within (-5.12, 5.12 ).
+// @returns float
+export rastrigin (float[] samples) => //{
+    int _size = array.size(samples)
+    if _size < 1
+        runtime.error('MathSpecialFunctionsTestFunctions -> ackley(): "samples" has wrong size.')
+        float(na)
+    else
+        float _pi2 = constants.Pi2()
+        float _sx2 = 0.0
+        for _i = 0 to _size-1
+            float _xi = array.get(samples, _i)
+            _sx2 += math.pow(_xi, 2.0) - 10.0 * math.cos(_pi2 * _xi)
+        _sx2 += 10.0 * _size
+//{ usage:
+console.queue_one(__C, str.format('rastrigin([2, 1, ,-1, -2]): {0}', rastrigin(array.from(2.0, 1.0, -1.0, -2.0))))
+//{ remarks:
+//      Global minimum of all zeros with f(0) = 0.
+//      Common range: [-5.12,5.12].
+//      https://en.wikipedia.org/wiki/Rastrigin_function
+//      http://www.sfu.ca/~ssurjano/rastr.html
+//}}}
+
+// @function Drop-Wave, a multi-modal and highly complex function with many local minima.
+// @param input_x float, common range within (-5.12, 5.12 ).
+// @param input_y float, common range within (-5.12, 5.12 ).
+// @returns float
+export drop_wave (float input_x, float input_y) => //{
+    float _t = math.pow(input_x, 2.0) + math.pow(input_y, 2.0)
+    -(1.0 + math.cos(12.0 * math.sqrt(_t))) / (0.5 * _t + 2.0)
+//{ usage:
+console.queue_one(__C, str.format('drop_wave(2, 1): {0}', drop_wave(2.0, 1.0)))
+//{ remarks:
+//      Global minimum of all zeros with f(0) = -1.
+//      Common range: [-5.12,5.12].
+//      http://www.sfu.ca/~ssurjano/drop.html
+//}}}
+
+// @function Ackley, a function with many local minima. It is nearly flat in outer regions but has a large hole at the center.
+// @param input_x float array, common range within (-32.768, 32.768 ).
+// @returns float
+export ackley (float[] samples) => //{
+    int _size = array.size(samples)
+    if _size < 1
+        runtime.error('MathSpecialFunctionsTestFunctions -> ackley(): "samples" has wrong size.')
+        float(na)
+    else
+        float _pi2 = constants.Pi2()
+        float _u = 0.0
+        float _v = 0.0
+        for _i = 0 to _size-1
+            float _xi = array.get(samples, _i)
+            _u += math.pow(_xi, 2.0)
+            _v += math.cos(_pi2 * _xi)
+        _u /= _size
+        _v /= _size
+        -20.0 * math.exp(-0.2 * math.sqrt(_u)) - math.exp(_v) + 20.0 + math.e
+//{ usage:
+console.queue_one(__C, str.format('ackley([2, 1, ,-1, -2]): {0}', ackley(array.from(2.0, 1.0, -1.0, -2.0))))
+//{ remarks:
+//      Global minimum of all zeros with f(0) = 0.
+//      Common range: [-32.768, 32.768].
+//      http://www.sfu.ca/~ssurjano/ackley.html
+//}}}
+
+// @function Bowl-shaped first Bohachevsky function.
+// @param input_x float, common range within (-100.0, 100.0 ).
+// @param input_y float, common range within (-100.0, 100.0 ).
+// @returns float
+export bohachevsky1 (float input_x, float input_y) => //{
+    math.pow(input_x, 2.0) + 2.0 * math.pow(input_y, 2.0) - 0.3 * math.cos(3.0 * math.pi * input_x) - 0.4 * math.cos(4.0 * math.pi * input_y)
+//{ usage:
+console.queue_one(__C, str.format('bohachevsky1(2, 1): {0}', bohachevsky1(2.0, 1.0)))
+//{ remarks:
+//      Global minimum of all zeros with f(0,0) = 0.
+//      Common range: [-100, 100]
+//      http://www.sfu.ca/~ssurjano/boha.html
+//}}}
+
+// @function Plate-shaped Matyas function.
+// @param input_x float, common range within (-10.0, 10.0 ).
+// @param input_y float, common range within (-10.0, 10.0 ).
+// @returns float
+export matyas (float input_x, float input_y) => //{
+    0.26 * (math.pow(input_x, 2.0) + math.pow(input_y, 2.0)) - 0.48 * input_x * input_y
+//{ usage:
+console.queue_one(__C, str.format('matyas(2, 1): {0}', matyas(2.0, 1.0)))
+//{ remarks:
+//      Global minimum of all zeros with f(0,0) = 0.
+//      Common range: [-10, 10].
+//      http://www.sfu.ca/~ssurjano/matya.html
+//}}}
+
+
+// @function Valley-shaped six-hump camel back function.
+// @param input_x float, common range within (-3.0, 3.0 ).
+// @param input_y float, common range within (-2.0, 2.0 ).
+// @returns float
+export six_hump_camel (float input_x, float input_y) => //{
+    float _x2 = math.pow(input_x, 2)
+    float _y2 = math.pow(input_y, 2)
+    (4.0 - 2.1 * _x2 + math.pow(_x2, 2.0) / 3.0) * _x2 + input_x * input_y + (-4.0 + 4.0 * _y2) * _y2
+//{ usage:
+console.queue_one(__C, str.format('six_hump_camel(2, 1): {0}', six_hump_camel(2.0, 1.0)))
+//{ remarks:
+//      Two global minima and four local minima. Global minima with f(x) ) -1.0316 at (0.0898,-0.7126) and (-0.0898,0.7126).
+//      Common range: x in [-3,3], y in [-2,2].
+//      http://www.sfu.ca/~ssurjano/camel6.html
+//}}}
+
+//##############################################################################
+console.update(__T, __C)

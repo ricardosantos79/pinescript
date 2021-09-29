@@ -1,0 +1,96 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description FHT, implementation of the Fast Discrete Hartley Transform(DHT).
+library(title='MathTransformsHartley')
+
+// reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/IntegralTransforms/
+
+import RicardoSantos/DebugConsole/2 as console
+[__T, __C] = console.init(20)
+
+import RicardoSantos/MathConstants/1 as constants
+
+// @function Generic naive transform for the (DHT).
+// @param samples float array, 1d data.
+// @returns float array.
+export naive(float[] samples) => //{
+    int _size = array.size(samples)
+    if _size < 1
+        runtime.error('MathTransformHartley -> naive(): "samples" size does not match.')
+        array.new_float()
+    else
+        float _w0 = constants.Pi2() / _size
+        float[] _spectrum = array.new_float(_size)
+        float _sqrt2 = constants.Sqrt2()
+        float _pi_over4 = constants.PiOver4()
+        for _i = 0 to _size-1
+            //
+            float _wk = _w0 * _i
+            float _sum = 0.0
+            for _n = 0 to _size - 1
+                float _w = _n * _wk
+                _sum += array.get(samples, _n) * _sqrt2 * math.cos(_w - _pi_over4)
+            array.set(_spectrum, _i, _sum)
+        _spectrum
+//{ usage:
+A = array.from(0.25,0.3,0.7,1,5,3,5,9,5)
+B = naive(A)
+console.queue_one(__C, str.format('ori: {0}', str.tostring(A, '#.##')))
+console.queue_one(__C, str.format('nai: {0}', str.tostring(B, '#.##')))
+//{ remarks:
+//}}}
+
+// @function Fast Discrete Hartley Transform (DHT).
+// @param samples float array, data samples.
+// @returns float array.
+export fdht (float[] samples) => //{
+    int _size = array.size(samples)
+    if _size < 1
+        runtime.error('MathTransformHartley -> fdht(): "samples" size does not match.')
+        array.new_float()
+    else
+        float[] _frequencyspace = naive(samples)
+        float _scaling_factor = math.sqrt(1.0 / _size)
+
+        for _i = 0 to _size-1
+            float _yi = array.get(_frequencyspace, _i)
+            array.set(_frequencyspace, _i, _yi * _scaling_factor)
+        _frequencyspace
+//{ usage:
+C = fdht(A)
+console.queue_one(__C, str.format('fst: {0}', str.tostring(C, '#.##')))
+//{ remarks:
+//}}}
+
+// @function Inverse Discrete Hartley Transform (DHT).
+// @param samples float array, data samples.
+// @param asymmetric_scaling bool, default=true, scaling option.
+// @returns float array.
+export idht (float[] frequencies, bool asymmetric_scaling=true) => //{
+    int _size = array.size(frequencies)
+    if _size < 1
+        runtime.error('MathTransformHartley -> idht(): "frequencies" size does not match.')
+        array.new_float()
+    else
+        float[] _timespace = naive(frequencies)
+        float _scaling_factor = 1.0 / _size
+        if asymmetric_scaling
+            _scaling_factor := math.sqrt(nz(_scaling_factor))
+        for _i = 0 to _size-1
+            float _yi = array.get(_timespace, _i)
+            array.set(_timespace, _i, _yi * _scaling_factor)
+        _timespace
+//{ usage:
+D = idht(C, true)
+console.queue_one(__C, str.format('inv: {0}', str.tostring(D, '#.##')))
+//{ remarks:
+//}}}
+
+
+
+//#########################
+console.update(__T, __C)//#

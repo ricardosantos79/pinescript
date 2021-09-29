@@ -1,0 +1,53 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Mathematical Constants
+library(title='MathConstantsElectromagnetic')
+
+//  reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/master/src/Numerics/Constants.cs
+
+
+// A collection of frequently used mathematical constants.
+    
+// ELECTROMAGNETIC CONSTANTS {
+
+// @function Elementary Electron Charge: e = 1.602176487e-19 [C = A s] (2007 CODATA)
+export ElementaryCharge () => //{
+    1.602176487e-19
+//}
+
+// @function Magnetic Flux Quantum: theta_0 = h/(2*e) [Wb = m^2 kg s^-2 A^-1] (2007 CODATA)
+export MagneticFluxQuantum () => //{
+    2.067833668e-15
+//}
+
+// @function Conductance Quantum: G_0 = 2*e^2/h [S = m^-2 kg^-1 s^3 A^2] (2007 CODATA)
+export ConductanceQuantum () => //{
+    7.7480917005e-5
+//}
+
+// @function Josephson Constant: K_J = 2*e/h [Hz V^-1] (2007 CODATA)
+export JosephsonConstant () => //{
+    483597.891e9
+//}
+
+// @function Von Klitzing Constant: R_K = h/e^2 [Ohm = m^2 kg s^-3 A^-2] (2007 CODATA)
+export VonKlitzingConstant () => //{
+    25812.807557
+//}
+
+// @function Bohr Magneton: mu_B = e*h_bar/2*m_e [J T^-1] (2007 CODATA)
+export BohrMagneton () => //{
+    927.400915e-26
+//}
+
+// @function Nuclear Magneton: mu_N = e*h_bar/2*m_p [J T^-1] (2007 CODATA)
+export NuclearMagneton () => //{
+    5.05078324e-27
+//}
+
+//}
+

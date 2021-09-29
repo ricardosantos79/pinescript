@@ -1,0 +1,58 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - HSL color')
+
+f_color_rgb_to_hsl(_r, _g, _b) =>  //{
+//  @reference: https://gmigdos.wordpress.com/2011/01/13/javascript-convert-rgb-values-to-hsl/
+    float _r1 = _r / 255.
+    float _g1 = _g / 255.
+    float _b1 = _b / 255.
+    float _max_color = math.max(_r1, _g1, _b1)
+    float _min_color = math.min(_r1, _g1, _b1)
+    float _L = (_max_color + _min_color) / 2.
+    float _S = 0.
+    float _H = 0.
+    if _max_color != _min_color
+        if _L < 0.5
+            _S := (_max_color - _min_color) / (_max_color + _min_color)
+            _S
+        else
+            _S := (_max_color - _min_color) / (2.0 - _max_color - _min_color)
+            _S
+
+        if _r1 == _max_color
+            _H := (_g1 - _b1) / (_max_color - _min_color)
+            _H
+        else if _g1 == _max_color
+            _H := 2.0 + (_b1 - _r1) / (_max_color - _min_color)
+            _H
+        else
+            _H := 4.0 + (_r1 - _g1) / (_max_color - _min_color)
+            _H
+    [_H, _S, _L]
+//}
+
+f_color_hsl(_hue, _saturation, _lightness, _transparency) =>  //{
+//  @function: returns HSL color.
+//  @reference: https://stackoverflow.com/questions/36721830/convert-hsl-to-rgb-and-hex
+    float _l1 = _lightness / 100.
+    float _a = _saturation * math.min(_l1, 1. - _l1) / 100.
+    float _rk = (0 + _hue / 30) % 12
+    float _r = 255 * (_l1 - _a * math.max(math.min(_rk - 3, 9 - _rk, 1), -1))
+    float _gk = (8 + _hue / 30) % 12
+    float _g = 255 * (_l1 - _a * math.max(math.min(_gk - 3, 9 - _gk, 1), -1))
+    float _bk = (4 + _hue / 30) % 12
+    float _b = 255 * (_l1 - _a * math.max(math.min(_bk - 3, 9 - _bk, 1), -1))
+    color.rgb(_r, _g, _b, _transparency)
+//}
+
+h = input.int(defval=127, minval=0, maxval=255)
+s = input.int(defval=50, minval=0, maxval=100)
+l = input.int(defval=50, minval=0, maxval=100)
+t = input.int(defval=0, minval=0, maxval=100)
+if barstate.islast
+    line.new(bar_index, 0., bar_index[1], 0., extend=extend.both, color=f_color_hsl(h, s, l, t), width=20)
+
+

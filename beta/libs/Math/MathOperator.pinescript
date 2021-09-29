@@ -1,0 +1,120 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Methods to handle operators.
+library(title='MathOperator')
+
+// TODO: maybe add array versions of the functions.. add(float[] values)..
+
+// arithmetic:
+
+// @function Add value a to b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns float.
+export add (float value_a, float value_b) => //{
+    value_a + value_b
+//}
+
+// @function subtract value b from a.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns float.
+export subtract (float value_a, float value_b) => //{
+    value_a - value_b
+//}
+
+// @function multiply value a with b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns float.
+export multiply (float value_a, float value_b) => //{
+    value_a * value_b
+//}
+
+// @function divide value a with b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns float.
+export divide (float value_a, float value_b) => //{
+    value_a / value_b
+//}
+
+// @function remainder of a with b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns float.
+export remainder (float value_a, float value_b) => //{
+    value_a % value_b
+//}
+
+// comparison:
+
+// @function equality of value a with b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns bool.
+export equal (float value_a, float value_b) => //{
+    value_a == value_b
+//}
+
+// @function inequality of value a with b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns bool.
+export not_equal (float value_a, float value_b) => //{
+    value_a != value_b
+//}
+
+// @function value a is over b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns bool.
+export over (float value_a, float value_b) => //{
+    value_a > value_b
+//}
+
+// @function value a is under b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns bool.
+export under (float value_a, float value_b) => //{
+    value_a < value_b
+//}
+
+// @function value a is over equal b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns bool.
+export over_equal (float value_a, float value_b) => //{
+    value_a >= value_b
+//}
+
+// @function value a is under equal b.
+// @param value_a float, value a.
+// @param value_b float, value b.
+// @returns bool.
+export under_equal (float value_a, float value_b) => //{
+    value_a <= value_b
+//}
+
+// unity:
+
+// @function logical and of a with b
+// @param value_a bool, value a.
+// @param value_b bool, value b.
+// @returns bool.
+export and_ (bool value_a, bool value_b) => //{
+    value_a and value_b
+//}
+
+// @function logical or of a with b.
+// @param value_a bool, value a.
+// @param value_b bool, value b.
+// @returns bool.
+export or_ (bool value_a, bool value_b) => //{
+    value_a or value_b
+//}
+

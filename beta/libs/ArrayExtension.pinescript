@@ -1,0 +1,731 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Functions to extend Arrays.
+library(title='ArrayExtension')
+
+// imports:
+import RicardoSantos/ArrayGenerate/2 as gen
+// gen.sequence_int()
+
+// @function returns the flatened one dimension index of a two dimension array.
+// @param dimension_x int, dimension of X.
+// @param dimension_y int, dimension of Y.
+// @param index_x int, index of X.
+// @param index_y int, index of Y.
+// @returns int, index in 1 dimension
+export index_2d_to_1d (int dimension_x, int dimension_y, int index_x, int index_y) => //{
+    int _i = index_x * dimension_y + index_y
+    if _i >= 0 and _i < (dimension_x * dimension_y)
+        _i
+    else
+        runtime.error('ArrayExtension -> index_2d_to_1d(): index out of bounds.')
+        int(na)
+//}
+
+// @function returns the flatened one dimension index of a three dimension array.
+// @param dimension_x int, dimension of X.
+// @param dimension_y int, dimension of Y.
+// @param dimension_z int, dimension of Z.
+// @param index_x int, index of X.
+// @param index_y int, index of Y.
+// @param index_z int, index of Z.
+// @returns int, index in 1 dimension
+export index_3d_to_1d (int dimension_x, int dimension_y, int dimension_z, int index_x, int index_y, int index_z) => //{
+    _i = index_x * dimension_y + index_y * dimension_z + index_z
+    if _i >= 0 and _i < (dimension_x * dimension_y * dimension_z)
+        _i
+    else
+        runtime.error('ArrayExtension -> index_3d_to_1d(): index out of bounds.')
+        int(na)
+//}
+
+// @function Down samples a array to a specified size.
+// @param sample float array, array with source data.
+// @param new_size new size of down sampled array.
+// @returns float array with down sampled data.
+export down_sample (float[] sample, int new_size) => //{
+    int _size_old = array.size(id=sample)
+    if new_size < 2 or new_size >= _size_old
+        runtime.error('ArrayExtension -> down_sample(): "new_size" is out of bounds.')
+        float[] _R = na
+    else if _size_old < 1
+        runtime.error('ArrayExtension -> down_sample(): "sample" is empty')
+        float[] _R = na
+    else
+        float[] _R = array.new_float(size=new_size, initial_value=array.get(id=sample, index=0))
+        int _step = math.floor(_size_old / new_size)
+        for _i = 1 to new_size-2
+            _index_from = _i * _step
+            _index_to = (_i + 1) * _step
+            if _i < new_size-2
+                _s = array.slice(id=sample, index_from=_index_from, index_to=_index_to)
+                _t = array.sum(id=_s)/array.size(id=_s)
+                array.set(id=_R, index=_i, value=_t)
+            else
+                _s = array.slice(id=sample, index_from=_index_from, index_to=_size_old-2)
+                _t = array.sum(id=_s)/array.size(id=_s)
+                array.set(id=_R, index=_i, value=_t)
+        array.set(id=_R, index=new_size-1, value=array.get(id=sample, index=_size_old-1))
+        _R
+// usage:
+// old_length = input(20)
+// new_length = input(10)
+
+// float[] price = array.new_float(0)
+
+// for _i = 0 to old_length-1
+//     array.push(id=price, value=_i)
+
+// float[] test = downsampling(price, new_length)
+
+// if barstate.ishistory[1] and (barstate.isrealtime or barstate.islast)
+//     label.new(bar_index, 0.0, str.format('{0}: {1}\n{2}: {3}', array.size(price), price, array.size(test), test))
+//}
+
+// @function Sorts array and returns a extra array with sorting indices.
+// @param sample float array with values to be sorted.
+// @param order string, default='forward', options='forward', 'backward'.
+// @returns
+//      _indices int array with indices.
+//      _ordered float array with ordered values.
+export sort_indices_float (float[] sample, string order='forward') => //{
+    int _size = array.size(id=sample)
+    if _size < 1
+        runtime.error('ArrayExtension -> sort_indices_float(): "sample" is empty')
+        int[] _A = na, float[] _B = na
+        [_A, _B]
+    else
+        float[] _ordered = array.copy(id=sample)
+        int[] _indices = gen.sequence_int(start=0, end=_size-1)
+
+        float _tempv = float(na), int _tempi = int(na)
+        for _i = 0 to _size - 2
+            float _ai = array.get(_ordered, _i), int _iai = array.get(_indices, _i)
+            for _j = _i + 1 to _size - 1
+                float _aj = array.get(_ordered, _j), int _iaj = array.get(_indices, _j)
+                if _aj < _ai
+                    _tempv := _aj, _tempi := _iaj
+                    array.set(_ordered, _j, _ai), array.set(_indices, _j, _iai)
+                    array.set(_ordered, _i, _tempv), array.set(_indices, _i, _tempi)
+                    _ai := _tempv, _iai := _tempi
+
+        if order == 'backward'
+            array.reverse(id=_indices), array.reverse(id=_ordered)
+        [_indices, _ordered]
+// usage:                
+// float[] values = array.from(55.0, 66, 44, 77, 80, 90, 1)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_float(values, 'backward')
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}', values, sorted, indices))
+//}
+
+// @function Sorts array and returns a extra array with sorting indices.
+// @param sample int array with values to be sorted.
+// @param order string, default='forward', options='forward', 'backward'.
+// @returns
+//      _indices int array with indices.
+//      _ordered float array with ordered values.
+export sort_indices_int (int[] sample, string order='forward') => //{
+    int _size = array.size(id=sample)
+    if _size < 1
+        runtime.error('ArrayExtension -> sort_indices_int(): "sample" is empty')
+        int[] _A = na, int[] _B = na
+        [_A, _B]
+    else
+        int[] _ordered = array.copy(id=sample)
+        int[] _indices = gen.sequence_int(start=0, end=_size-1)
+
+        int _tempv = int(na), int _tempi = int(na)
+        for _i = 0 to _size - 2
+            int _ai = array.get(_ordered, _i), int _iai = array.get(_indices, _i)
+            for _j = _i + 1 to _size - 1
+                int  _aj = array.get(_ordered, _j), int _iaj = array.get(_indices, _j)
+                if _aj < _ai
+                    _tempv := _aj, _tempi := _iaj
+                    array.set(_ordered, _j, _ai), array.set(_indices, _j, _iai)
+                    array.set(_ordered, _i, _tempv), array.set(_indices, _i, _tempi)
+                    _ai := _tempv, _iai := _tempi
+
+        if order == 'backward'
+            array.reverse(id=_indices), array.reverse(id=_ordered)
+        [_indices, _ordered]
+// usage:                
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}', values, sorted, indices))
+//}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample bool array with data sample to be sorted.
+// @returns bool array
+export sort_bool_from_indices (int[] indices, bool[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_bool_from_indices(): "indices" or "sample" is empty.')
+        bool[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_bool_from_indices(): "indices" and "sample" size not match.')
+        bool[] _A = na
+    else
+        bool[] _ordered = array.new_bool(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// bool[] reorder = array.from(false, false, false, true, true, true, false)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_bool_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample box array with data sample to be sorted.
+// @returns box array
+export sort_box_from_indices (int[] indices, box[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_box_from_indices(): "indices" or "sample" is empty.')
+        box[] _A = array.new_box(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_box_from_indices(): "indices" and "sample" size not match.')
+        box[] _A = array.new_box(0)
+    else
+        box[] _ordered = array.new_box(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// fbox(_a)=>box.new(bar_index+_a-5, _a-5, bar_index+_a+5, _a-5)
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     box[] reorder = array.from(fbox(50), fbox(40), fbox(60), fbox(30), fbox(20), fbox(10), fbox(70))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_box_from_indices(indices, reorder)
+//     box.delete(array.remove(reorder, remove_index))
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample color array with data sample to be sorted.
+// @returns color array
+export sort_color_from_indices (int[] indices, color[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_color_from_indices(): "indices" or "sample" is empty.')
+        color[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_color_from_indices(): "indices" and "sample" size not match.')
+        color[] _A = na
+    else
+        color[] _ordered = array.new_color(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// color[] reorder = array.from(#555555, #444444, #666666, #333333, #222222, #111111, #777777)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_color_from_indices(indices, reorder)
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+// plot(0, color=array.get(reorder, 0), linewidth=4)
+// plot(1, color=array.get(reorder, 1), linewidth=4)
+// plot(2, color=array.get(reorder, 2), linewidth=4)
+// plot(3, color=array.get(reorder, 3), linewidth=4)
+// plot(4, color=array.get(reorder, 4), linewidth=4)
+// plot(5, color=array.get(reorder, 5), linewidth=4)
+// plot(6, color=array.get(reorder, 6), linewidth=4)
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample float array with data sample to be sorted.
+// @returns float array
+export sort_float_from_indices (int[] indices, float[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_float_from_indices(): "indices" or "sample" is empty.')
+        float[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_float_from_indices(): "indices" and "sample" size not match.')
+        float[] _A = na
+    else
+        float[] _ordered = array.new_float(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// float[] reorder = array.from(5, 4, 6, 3, 2, 1, 7.0)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_float_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample int array with data sample to be sorted.
+// @returns int array
+export sort_int_from_indices (int[] indices, int[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_int_from_indices(): "indices" or "sample" is empty.')
+        int[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_int_from_indices(): "indices" and "sample" size not match.')
+        int[] _A = na
+    else
+        int[] _ordered = array.new_int(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// int[] reorder = array.from(5, 4, 6, 3, 2, 1, 7)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_float_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample label array with data sample to be sorted.
+// @returns label array
+export sort_label_from_indices (int[] indices, label[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_label_from_indices(): "indices" or "sample" is empty.')
+        label[] _A = array.new_label(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_label_from_indices(): "indices" and "sample" size not match.')
+        label[] _A = array.new_label(0)
+    else
+        label[] _ordered = array.new_label(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// flabel(_a)=>label.new(bar_index+_a, _a, '.')
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     label[] reorder = array.from(flabel(50), flabel(40), flabel(60), flabel(30), flabel(20), flabel(10), flabel(70))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_label_from_indices(indices, reorder)
+//     label.delete(array.remove(reorder, remove_index))
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample line array with data sample to be sorted.
+// @returns line array
+export sort_line_from_indices (int[] indices, line[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_line_from_indices(): "indices" or "sample" is empty.')
+        line[] _A = array.new_line(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_line_from_indices(): "indices" and "sample" size not match.')
+        line[] _A = array.new_line(0)
+    else
+        line[] _ordered = array.new_line(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// fline(_a)=>line.new(bar_index+_a-5, _a-5, bar_index+_a+5, _a-5, width=10)
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     line[] reorder = array.from(fline(50), fline(40), fline(60), fline(30), fline(20), fline(10), fline(70))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_line_from_indices(indices, reorder)
+//     line.delete(array.remove(reorder, remove_index))
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample string array with data sample to be sorted.
+// @returns string array
+export sort_string_from_indices (int[] indices, string[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_string_from_indices(): "indices" or "sample" is empty.')
+        string[] _A = array.new_string(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_string_from_indices(): "indices" and "sample" size not match.')
+        string[] _A = array.new_string(0)
+    else
+        string[] _ordered = array.new_string(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// string[] reorder = array.from('5', '4', '6', '3', '2', '1', '7')
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_string_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, str.tostring(reorder)))
+//}}
+
+// @function Sorts sample array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample table array with data sample to be sorted.
+// @returns table array
+export sort_table_from_indices (int[] indices, table[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_table_from_indices(): "indices" or "sample" is empty.')
+        table[] _A = array.new_table(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_table_from_indices(): "indices" and "sample" size not match.')
+        table[] _A = array.new_table(0)
+    else
+        table[] _ordered = array.new_table(size=_size_i)
+        for _i = 0 to _size_i - 1
+            array.set(id=_ordered, index=_i, value=array.get(id=sample, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// ftable(_a)=>pos=(_a==1?position.top_right:(_a==2?position.top_left:(_a==3?position.middle_right:(_a==4?position.top_center:(_a==5?position.top_left:(_a==6?position.bottom_right:(_a==6?position.bottom_left:position.bottom_center))))))), t=table.new(pos, 1, 1, bgcolor=#555555), table.cell(t, 0, 0, '.'),t
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     table[] reorder = array.from(ftable(5), ftable(4), ftable(6), ftable(3), ftable(2), ftable(1), ftable(7))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_table_from_indices(indices, reorder)
+//     table.delete(array.remove(reorder, remove_index))
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample bool array with data sample to be sorted.
+// @returns void updates sample array.
+export sort_bool_inplace_from_indices (int[] indices, bool[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_bool_inplace_from_indices(): "indices" or "sample" is empty.')
+        bool[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_bool_inplace_from_indices(): "indices" and "sample" size not match.')
+        bool[] _A = na
+    else
+        bool[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage: 
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// bool[] reorder = array.from(false, false, false, true, true, true, false)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     sort_bool_inplace_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample box array with data sample to be sorted.
+// @returns void updates sample
+export sort_box_inplace_from_indices (int[] indices, box[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_box_inplace_from_indices(): "indices" or "sample" is empty.')
+        box[] _A = array.new_box(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_box_inplace_from_indices(): "indices" and "sample" size not match.')
+        box[] _A = array.new_box(0)
+    else
+        box[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// fbox(_a)=>box.new(bar_index+_a-5, _a-5, bar_index+_a+5, _a+5)
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islastconfirmedhistory
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     box[] reorder = array.from(fbox(50), fbox(40), fbox(60), fbox(30), fbox(20), fbox(10), fbox(70))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     sort_box_inplace_from_indices(indices, reorder)
+//     box.delete(array.remove(reorder, remove_index))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample color array with data sample to be sorted.
+// @returns void updates sample
+export sort_color_inplace_from_indices (int[] indices, color[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_color_inplace_from_indices(): "indices" or "sample" is empty.')
+        color[] _A = array.new_color(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_color_inplace_from_indices(): "indices" and "sample" size not match.')
+        color[] _A = array.new_color(0)
+    else
+        color[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// color[] reorder = array.from(#555555, #444444, #666666, #333333, #222222, #111111, #777777)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     sort_color_inplace_from_indices(indices, reorder)
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+// plot(0, color=array.get(reorder, 0), linewidth=4)
+// plot(1, color=array.get(reorder, 1), linewidth=4)
+// plot(2, color=array.get(reorder, 2), linewidth=4)
+// plot(3, color=array.get(reorder, 3), linewidth=4)
+// plot(4, color=array.get(reorder, 4), linewidth=4)
+// plot(5, color=array.get(reorder, 5), linewidth=4)
+// plot(6, color=array.get(reorder, 6), linewidth=4)
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample float array with data sample to be sorted.
+// @returns void updates sample
+export sort_float_inplace_from_indices (int[] indices, float[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_float_inplace_from_indices(): "indices" or "sample" is empty.')
+        float[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_float_inplace_from_indices(): "indices" and "sample" size not match.')
+        float[] _A = na
+    else
+        float[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// float[] reorder = array.from(5, 4, 6, 3, 2, 1, 7.0)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_float_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample int array with data sample to be sorted.
+// @returns void updates sample
+export sort_int_inplace_from_indices (int[] indices, int[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_int_inplace_from_indices(): "indices" or "sample" is empty.')
+        int[] _A = na
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_int_inplace_from_indices(): "indices" and "sample" size not match.')
+        int[] _A = na
+    else
+        int[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// int[] reorder = array.from(5, 4, 6, 3, 2, 1, 7)
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_float_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample label array with data sample to be sorted.
+// @returns void updates sample
+export sort_label_inplace_from_indices (int[] indices, label[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_label_inplace_from_indices(): "indices" or "sample" is empty.')
+        label[] _A = array.new_label(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_label_inplace_from_indices(): "indices" and "sample" size not match.')
+        label[] _A = array.new_label(0)
+    else
+        label[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// flabel(_a)=>label.new(bar_index+_a, _a, '.')
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     label[] reorder = array.from(flabel(50), flabel(40), flabel(60), flabel(30), flabel(20), flabel(10), flabel(70))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_label_from_indices(indices, reorder)
+//     label.delete(array.remove(reorder, remove_index))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample line array with data sample to be sorted.
+// @returns void updates sample
+export sort_line_inplace_from_indices (int[] indices, line[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_line_inplace_from_indices(): "indices" or "sample" is empty.')
+        line[] _A = array.new_line(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_line_inplace_from_indices(): "indices" and "sample" size not match.')
+        line[] _A = array.new_line(0)
+    else
+        line[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// fline(_a)=>line.new(bar_index+_a-5, _a-5, bar_index+_a+5, _a+5, width=10)
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     line[] reorder = array.from(fline(50), fline(40), fline(60), fline(30), fline(20), fline(10), fline(70))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_line_from_indices(indices, reorder)
+//     line.delete(array.remove(reorder, remove_index))
+//}}
+
+// @function Sorts sample inplace array using a array with indices.
+// @param indices int array with positional indices.
+// @param sample string array with data sample to be sorted.
+// @returns void updates sample
+export sort_string_inplace_from_indices (int[] indices, string[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_string_inplace_from_indices(): "indices" or "sample" is empty.')
+        string[] _A = array.new_string(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_string_inplace_from_indices(): "indices" and "sample" size not match.')
+        string[] _A = array.new_string(0)
+    else
+        string[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// string[] reorder = array.from('5', '4', '6', '3', '2', '1', '7')
+// if barstate.islast
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_string_from_indices(indices, reorder)
+//     label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, str.tostring(reorder)))
+//}}
+
+// @function Sorts sample array inplace using a array with indices.
+// @param indices int array with positional indices.
+// @param sample table array with data sample to be sorted.
+// @returns void updates sample
+export sort_table_inplace_from_indices (int[] indices, table[] sample) => //{
+    int _size_i = array.size(id=indices)
+    int _size_s = array.size(id=sample)
+    if _size_i < 1  or _size_s < 1
+        runtime.error('ArrayExtension -> sort_table_inplace_from_indices(): "indices" or "sample" is empty.')
+        table[] _A = array.new_table(0)
+    else if _size_i != _size_s 
+        runtime.error('ArrayExtension -> sort_table_inplace_from_indices(): "indices" and "sample" size not match.')
+        table[] _A = array.new_table(0)
+    else
+        table[] _ordered = array.copy(id=sample)
+        for _i = 0 to _size_i - 1
+            array.set(id=sample, index=_i, value=array.get(id=_ordered, index=array.get(id=indices, index=_i)))
+        _ordered
+//{ usage:
+// ftable(_a)=>pos=(_a==1?position.top_right:(_a==2?position.top_left:(_a==3?position.middle_right:(_a==4?position.top_center:(_a==5?position.top_left:(_a==6?position.bottom_right:(_a==6?position.bottom_left:position.bottom_center))))))), t=table.new(pos, 1, 1, bgcolor=#555555), table.cell(t, 0, 0, '.'),t
+// int remove_index = input.int(defval=0, minval=0, maxval=6)
+// if barstate.islast
+//     int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+//     table[] reorder = array.from(ftable(5), ftable(4), ftable(6), ftable(3), ftable(2), ftable(1), ftable(7))
+//     [indices, sorted] = sort_indices_int(values, 'backward')
+//     reorder := sort_table_from_indices(indices, reorder)
+//     table.delete(array.remove(reorder, remove_index))
+//     // label.new(bar_index, 0., str.format('Original: {0}\nSorted: {1}\nIndices: {2}\nreorder: {3}', values, sorted, indices, reorder))
+//}}
+
+// @function Transform a integer array into a float array
+// @param sample int array, sample data to transform.
+// @returns float array
+export to_float(int[] sample) => //{
+    int _size = array.size(id=sample)
+    if _size < 1
+        runtime.error('ArrayExtension -> to_float(): "sample" is empty.')
+        float[] _new = na
+    else
+        float[] _new = array.new_float(size=_size)
+        for _i=0 to _size-1
+            array.set(id=_new, index=_i, value=float(array.get(id=sample, index=_i)))
+        _new
+//{ usage:
+// int[] values = array.from(55, 66, 44, 77, 80, 90, 1)
+// if barstate.islast
+//     float[] floated = to_float(sample=values)
+//     label.new(bar_index, 0., str.format('Original: {0}\nfloat: {1}', values, floated))
+//}}
+
+// @function Transform a float array into a int array
+// @param sample float array, sample data to transform.
+// @param method string, default="round", options=["round", "floor", "ceil"], aproximation method.
+// @returns int array
+export to_int(float[] sample, string method='round') => //{
+    int _size = array.size(id=sample)
+    if _size < 1
+        runtime.error('ArrayExtension -> to_int(): "sample" is empty.')
+        int[] _new = na
+    else
+        int[] _new = array.new_int(size=_size)
+        if method == 'floor'
+            for _i=0 to _size-1
+                array.set(id=_new, index=_i, value=math.floor(array.get(id=sample, index=_i)))
+        else if method == 'ceil'
+            for _i=0 to _size-1
+                array.set(id=_new, index=_i, value=math.ceil(array.get(id=sample, index=_i)))
+        else
+            for _i=0 to _size-1
+                array.set(id=_new, index=_i, value=math.round(array.get(id=sample, index=_i)))
+        _new
+//{ usage:
+// float[] values = array.from(55.50, 66.49, 44.51, 77.509, 80.99, 90.01, 1.55)
+// string method = input.string(defval="round", options=["round", "floor", "ceil"])
+// if barstate.islast
+//     int[] floated = to_int(sample=values, method=method)
+//     label.new(bar_index, 0., str.format('Original: {0}\nfloat: {1}', values, floated))
+//}}
+

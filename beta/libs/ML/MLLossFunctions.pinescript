@@ -1,0 +1,53 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Methods for Loss functions.
+library("MLLossFunctions")
+
+// reference:
+//      https://kobiso.github.io/research/research-loss-functions/
+//      https://machinelearningmastery.com/loss-and-loss-functions-for-training-deep-learning-neural-networks/
+
+// @function Mean Squared Error (MSE) " MSE = 1/N * sum[i=1:N]((y - y')^2) ".
+// @param expects float array, expected values.
+// @param predicts float array, prediction values.
+// @returns float
+export mse (float[] expects, float[] predicts) => //{
+    int _size_e = array.size(expects)
+    int _size_p = array.size(predicts)
+    
+    switch
+        (_size_e < 1)        => runtime.error('MLLossFunctions -> mse(): "expects" has wrong size.')
+        (_size_e != _size_p) => runtime.error('MLLossFunctions -> mse(): "expects" and "predicts" size does not match.')
+    
+    float _sum = 0.0
+    for _i = 0 to _size_e - 1
+        _sum += math.pow(array.get(expects, _i) - array.get(predicts, _i), 2.0)
+	_sum / _size_e
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Binary Cross-Entropy Loss (log).
+// @param expects float array, expected values.
+// @param predicts float array, prediction values.
+// @returns float
+export binary_cross_entropy (float[] expects, float[] predicts) => //{
+    int _size_e = array.size(expects)
+    int _size_p = array.size(predicts)
+    
+    switch
+        (_size_e < 1)        => runtime.error('MLLossFunctions -> binary_cross_entropy(): "expects" has wrong size.')
+        (_size_e != _size_p) => runtime.error('MLLossFunctions -> binary_cross_entropy(): "expects" and "predicts" size does not match.')
+    
+    float _sum = 0.0
+    for _i = 0 to _size_e - 1
+        _sum += array.get(expects, _i) * math.log(1.0e-15 + array.get(predicts, _i))
+	-(1.0 / _size_e * _sum)
+//{ usage:
+//{ remarks:
+//}}}
+
+

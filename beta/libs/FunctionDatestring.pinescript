@@ -1,0 +1,49 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+library(title='FunctionDatestring')
+
+import RicardoSantos/DebugConsole/2 as console
+[__T, __C] = console.init(20)
+
+// @function check if string has 1 digits and prefixes a "0" if true.
+prefixdigit (string str) => (str.length(str) == 1 ? '0' : '') + str
+
+// @function a stringified date stamp at specified unix time.
+export datetime (int unixtime=timenow) => //{
+    _year = str.tostring(year(unixtime))
+    _month = prefixdigit(str.tostring(month(unixtime)))
+    _day = prefixdigit(str.tostring(dayofmonth(unixtime)))
+    _hour = prefixdigit(str.tostring(hour(unixtime)))
+    _min = prefixdigit(str.tostring(minute(unixtime)))
+    _sec = prefixdigit(str.tostring(second(unixtime)))
+    str.format('{0}, {1}, {2} - {3}:{4}:{5}', _year, _month, _day, _hour, _min, _sec)
+//}
+
+// @function a stringified date stamp at specified unix time.
+export date_ (int unixtime=timenow) => //{
+    _year = str.tostring(year(unixtime))
+    _month = prefixdigit(str.tostring(month(unixtime)))
+    _day = prefixdigit(str.tostring(dayofmonth(unixtime)))
+    str.format('{0}, {1}, {2}', _year, _month, _day)
+//}
+
+// @function a stringified date stamp at specified unix time.
+export time_ (int unixtime=timenow) => //{
+    _hour = prefixdigit(str.tostring(hour(unixtime)))
+    _min = prefixdigit(str.tostring(minute(unixtime)))
+    _sec = prefixdigit(str.tostring(second(unixtime)))
+    str.format('{0}:{1}:{2}', _hour, _min, _sec)
+//}
+
+
+if barstate.isnew
+    console.queue(__C, str.format('{0} :::: {1}', datetime(time), '@'))
+if barstate.islastconfirmedhistory
+    console.queue(__C, str.format('{0} :::: {1}', datetime(), 'current datetime!'))
+    console.queue(__C, str.format('{0} :::: {1}', date_(), 'current date!'))
+    console.queue(__C, str.format('{0} :::: {1}', time_(), 'current time!'))
+
+
+console.update(__T, __C)

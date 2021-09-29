@@ -1,0 +1,136 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Kernel Density Estimation (KDE)', max_lines_count=300)
+//| reference: 
+//|     https://www.highcharts.com/blog/tutorials/data-science-and-highcharts-kernel-density-estimation/
+//|     https://mathisonian.github.io/kde/
+//|     https://en.wikipedia.org/wiki/Kernel_density_estimation
+//|     https://bookdown.org/egarpor/NP-UC3M/kde-i-kde.html
+//|     https://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/AV0405/MISHRA/kde.html
+//|     https://en.wikipedia.org/wiki/Kernel_(statistics)
+//|     https://aakinshin.net/posts/kde-discrete/
+//| description:
+//|     "In statistics, kernel density estimation (KDE) is a non-parametric way to estimate the probability density function of a random variable." from wikipedia.com
+var float[] observations = array.new_float(0)
+if barstate.isfirst
+    array.push(observations, 93)
+    array.push(observations, 93)
+    array.push(observations, 96)
+    array.push(observations, 100)
+    array.push(observations, 101)
+    array.push(observations, 102)
+    array.push(observations, 102)
+
+f_kernel_uniform(_distance, _bandwidth) =>
+    1 / (2 * _bandwidth) * (math.abs(_distance) <= _bandwidth ? 1 : 0)
+f_kernel_triangular(_distance, _bandwidth) =>
+    math.abs(1 - _distance * _bandwidth) * (math.abs(_distance) < _bandwidth ? 1 : 0)
+f_kernel_epanechnikov(_distance, _bandwidth) =>
+    3 / (4 * _bandwidth) * (1 - math.pow(_distance / _bandwidth, 2)) * (math.abs(_distance) <= _bandwidth ? 1 : 0)
+f_kernel_quartic(_distance, _bandwidth) =>
+    15 / (16 * _bandwidth) * (1 - math.pow(math.pow(_distance / _bandwidth, 2), 2)) * (math.abs(_distance) <= _bandwidth ? 1 : 0)
+f_kernel_triweight(_distance, _bandwidth) =>
+    35 / (32 * _bandwidth) * (1 - math.pow(math.pow(_distance / _bandwidth, 2), 3)) * (math.abs(_distance) <= _bandwidth ? 1 : 0)
+f_kernel_gaussian(_distance, _bandwidth) =>
+    1 / math.sqrt(2 * math.pi) * math.exp(math.pow(_distance / _bandwidth, 2) / -2)
+f_kernel_cosine(_distance, _bandwidth) =>
+    math.pi / 4 * math.cos(math.pi / 2 * (_distance / _bandwidth)) * (math.abs(_distance) <= _bandwidth ? 1 : 0)
+f_kernel_logistic(_distance, _bandwidth) =>
+    _d = _distance / _bandwidth
+    1 / (math.pow(math.e, _d) + 2 + math.pow(math.e, -_d))
+f_kernel_sigmoid(_distance, _bandwidth) =>
+    _d = _distance / _bandwidth
+    2 / math.pi * (1 / (math.pow(math.e, _d) + math.pow(math.e, -_d)))
+
+f_select_kernel(_kernel, _distance, _bandwidth) =>
+    if _kernel == 'uniform'
+        f_kernel_uniform(_distance, _bandwidth)
+    else if _kernel == 'triangle'
+        f_kernel_triangular(_distance, _bandwidth)
+    else if _kernel == 'epanechnikov'
+        f_kernel_epanechnikov(_distance, _bandwidth)
+    else if _kernel == 'quartic'  //{
+//| @function: Kernel Distribution Estimate using a Gaussian kernel.
+//| @param:
+//|     _observations: integer[] or float[], data to analise. 
+//|     _bandwidth: float, smoothness off the output signal.
+//|     _nsteps: integer, number of bins to divide range.
+        f_kernel_quartic(_distance, _bandwidth)
+    else if _kernel == 'triweight'
+        f_kernel_triweight(_distance, _bandwidth)
+    else if _kernel == 'gaussian'
+    //
+        f_kernel_gaussian(_distance, _bandwidth)
+    else if _kernel == 'cosine'
+
+        f_kernel_cosine(_distance, _bandwidth)
+    else if _kernel == 'logistic'
+
+        f_kernel_logistic(_distance, _bandwidth)
+    else if _kernel == 'sigmoid'
+        f_kernel_sigmoid(_distance, _bandwidth)
+    else
+        float(na)
+f_kde(_observations, _kernel, _bandwidth, _nsteps) =>
+    float _range = array.range(_observations)
+    float _min = array.min(_observations) - _range / 2
+    float _step = _range / _nsteps
+//}
+
+    float[] _density_range_fill = array.new_float(0)
+    for _i = 0 to _nsteps * 2 by 1
+        array.push(_density_range_fill, _min + _i * _step)
+    float[] _x = array.new_float(0)
+
+    float[] _y = array.new_float(0)
+
+    _osize = array.size(_observations)
+    for _i = 0 to array.size(_density_range_fill) - 1 by 1
+        float _temp = 0.
+        for _j = 0 to _osize - 1 by 1  //round(array.get(_X, 0))
+            _temp := _temp + f_select_kernel(_kernel, array.get(_density_range_fill, _i) - array.get(_observations, _j), _bandwidth)
+            _temp
+        array.push(_x, array.get(_density_range_fill, _i))
+        array.push(_y, 1 / _osize * _temp)
+    [_x, _y]  //round(array.get(_X, _i))
+string g_config = 'Configuration:'
+string i_kernel = input.string(title='Kernel:', defval='gaussian', options=['uniform', 'triangle', 'epanechnikov', 'quartic', 'triweight', 'gaussian', 'cosine', 'logistic', 'sigmoid'], tooltip='Kernel used in kde function.', group=g_config)
+float i_bandwidth = input.float(title='Bandwidth:', defval=0.618, tooltip='Bandwidth smoothness aplied to kernel.', group=g_config)
+int i_nstep = input.int(title='Nº Bins:', defval=20, tooltip='Number of Bins to split range.', group=g_config)
+[x, y] = f_kde(observations, i_kernel, i_bandwidth, i_nstep)
+f_draw_kde(_X, _Y) =>
+    int _sizex = array.size(_X)
+    int _sizey = array.size(_Y)
+    int _previousx = 0
+    float _previousy = array.get(_Y, 0)
+    if _sizex == _sizey and _sizex > 1
+        int _nearest0_index = 0
+        for _i = 1 to _sizex - 1 by 1
+            _px = _i
+            _py = array.get(_Y, _i)
+            bool _xiscloserto0 = math.abs(array.get(_X, _i)) < math.abs(array.get(_X, _nearest0_index))
+            if _xiscloserto0
+                _nearest0_index := _i
+                _nearest0_index
+            line.new(bar_index - _previousx, _previousy, bar_index - _px, _py)
+
+            _previousx := _px
+            _previousy := _py
+
+            _previousy
+        int _top_index = array.indexof(_Y, array.max(_Y))
+        float _top_value = array.get(_Y, _top_index)
+        float _std = array.stdev(_Y)
+        label.new(bar_index, 0.0, str.tostring(array.get(_X, 0)), style=label.style_label_up)
+        label.new(bar_index - _sizex, 0.0, str.tostring(array.get(_X, _sizex - 1)), style=label.style_label_up)
+        line.new(bar_index - _nearest0_index, 0.0 - _std, bar_index - _nearest0_index, _top_value + _std, extend=extend.none, color=color.gray, style=line.style_dotted, width=2)
+        label.new(bar_index - _top_index, 0.0, str.tostring(array.get(_X, _top_index)), style=label.style_label_up, tooltip='Highest value')
+        line.new(bar_index - _top_index, 0.0, bar_index - _top_index, _top_value, extend=extend.none, style=line.style_dashed)
+        label.new(bar_index, _top_value, str.format('Top probability: {0, number, #.###}\nSumY:{1, number, #.###}', nz(_top_value, 0.), array.sum(_Y)), style=label.style_label_left, textalign=text.align_left, tooltip=str.tostring(_X) + '\n' + str.tostring(_Y))
+        line.new(bar_index, _std, bar_index - _sizex, _std, color=color.navy, style=line.style_dashed)
+        label.new(bar_index, _std, str.format('Y std: {0, number, #.###}', _std), style=label.style_label_left, textalign=text.align_left, tooltip='Standard deviation')
+if barstate.islast
+    f_draw_kde(x, y)
+

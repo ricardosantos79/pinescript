@@ -1,0 +1,40 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description TODO: add library description here
+library(title='FunctionBestFitFrequency')
+
+import RicardoSantos/FunctionArrayMovingAverage/1 as ma
+import RicardoSantos/ArrayExtension/2 as ae
+
+// @function Search a frequency range for the fairest moving average frequency.
+// @param sample float array, sample data to based the moving averages.
+// @param start int lowest frequency.
+// @param end int highest frequency.
+// @returns tuple with (int frequency, float percentage)
+export best_fit_frequency (float[] sample, int start, int end) => //{
+    int _size = array.size(id=sample)
+    if _size > 0 and end < _size and start > 0 and start <= end
+        int _best = 0
+        float _percent = -999
+        for _freq = start to end
+            float[] _avg = ma.array_moving_average(sample=sample, length=_freq, ommit_initial=false, fillna='avg')
+            float _esum = 0.0
+            for _i = 0 to _size-1
+                float _erri = array.get(id=sample, index=_i) - array.get(id=_avg, index=_i)
+                if _erri >= 0 
+                    _esum += 1
+            float _tentative = -0.5 + (_esum / (_size-1))
+            if math.abs(_tentative) < math.abs(_percent)
+                _best := _freq
+                _percent := _tentative
+        [_best, _percent]
+//{ usage:
+float[] sample = ae.sequence_from_series(src=close, length=input(100), shift=0, direction_forward=true)
+[best, percent] = best_fit_frequency(sample, input(2), input(20))
+plot(best)
+plot(percent)
+//}}
+

@@ -1,0 +1,51 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Array Average Weighted')
+
+array_average_weighted(_samples, _weights) =>  //{
+//  @function: Computes a weighted average (the mean, where each value is weighted by its relative importance).
+//  @parameters:
+//      _samples: sample values to average.
+//      _weights: weight values.
+//  @reference:
+//      https://help.smartsheet.com/function/avgw
+    int _size_s = array.size(id=_samples)
+    int _size_w = array.size(id=_weights)
+    float _avg = 0.
+    if _size_s != _size_w
+        0
+    else if _size_s < 1
+        0
+    else
+        float _count = array.sum(id=_weights)
+        for _i = 0 to _size_s - 1 by 1
+            _avg := _avg + array.get(id=_samples, index=_i) * array.get(id=_weights, index=_i)
+            _avg
+        _avg := _avg / _count
+        0
+    _avg
+//}
+t0 = array_average_weighted(array.from(1, 2, 3, 0, 1, 2, 3), array.from(1, 1, 2, 1, 1, 2, 1))
+t1 = array_average_weighted(array.from(.1, 0.2, .3, .0, .1, .2, .3), array.from(1, 1, 2, 1, 1, 2, 1))
+
+c(_i) =>
+    close[_i]
+h = ta.highest(7)
+l = ta.lowest(7)
+r = h - l
+w(_i) =>
+    (c(_i) - l) / r
+t2y = array.from(c(0), c(1), c(2), c(3), c(4), c(5), c(6))
+t2w = array.from(w(0), w(1), w(2), w(3), w(4), w(5), w(6))
+t2 = array_average_weighted(t2y, t2w)  // more weight to higher values
+
+
+plot(series=t0)
+plot(series=t1)
+plot(series=t2)
+plot(series=close, color=color.new(color.yellow, 0))
+plot(series=ta.sma(close, 7), color=color.new(color.orange, 0))
+
+

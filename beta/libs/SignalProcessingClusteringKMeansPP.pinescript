@@ -1,0 +1,191 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description K-Means Clustering Method.
+library(title='SignalProcessingClusteringKMeans')
+
+// reference:
+//      C version : http://rosettacode.org/wiki/K-means%2B%2B_clustering
+
+// @function The Euclidean distance between 2 points.
+//  specialized parameter signature to accomodate for processing.
+distance2 (float a_x, float a_y, float b_x, float b_y) => //{
+    math.pow(a_x - b_x, 2.0) + math.pow(a_y - b_y, 2.0)
+//}
+
+// @function finds the nearest center to a point and returns its distance and center index.
+// @param point_x float, x coordinate of point.
+// @param point_y float, y coordinate of point.
+// @param centers_x float array, x coordinates of cluster centers.
+// @param centers_y float array, y coordinates of cluster centers.
+// @ returns tuple of int, float.
+export nearest (float point_x, float point_y, float[] centers_x, float[] centers_y) => //{
+    int _size_x = array.size(centers_x)
+    int _size_y = array.size(centers_y)
+    int _idx = na, float _dist = 1.0e308
+    if _size_x < 1 
+        runtime.error('SignalProcessingClusteringKMeans -> nearest(): "centers" have the wrong size.')
+        [_idx, _dist]
+    else if _size_x != _size_y
+        runtime.error('SignalProcessingClusteringKMeans -> nearest(): "centers" x != y.')
+        [_idx, _dist]
+    else
+    	for _i = 0 to _size_x-1
+    	    float _cx = array.get(centers_x, _i)
+    	    float _cy = array.get(centers_y, _i)
+    		float _d = distance2(_cx, _cy, point_x, point_y)
+    		if _d < _dist
+    			_dist := _d
+    			_idx := _i
+    	[_idx, _dist]
+//}
+
+// @function Bissection Search
+// @param samples float array, weights to compare.
+// @param value float array, weights to compare.
+// @returns int.
+export bisection_search (float[] samples, float value) => //{
+    int _size_x = array.size(samples)
+    if _size_x < 1
+        0
+    else
+        float _x0 = array.get(samples, 0)
+        float _xn = array.get(samples, _size_x-1)
+    	// If value is less than samples(0) or greater than samples(n-1)
+        if value < _x0
+            0
+        else if value > _xn
+            _size_x - 1
+        else
+        	// bisection search
+        	int _il = 0
+        	int _ir = _size_x - 1
+         
+        	_i = (_il + _ir) / 2
+        	while _i != _il
+        		if array.get(samples, _i) <= value
+        			_il := _i
+        		else
+        			_ir := _i
+        		_i := (_il + _ir) / 2
+        	if array.get(samples, _i) <= value
+        		_i := _ir
+        	_i
+    
+// @function labels each point index with cluster index and distance.
+// @param points_x float array, x coordinates of points.
+// @param points_y float array, y coordinates of points.
+// @param centers_x float array, x coordinates of points.
+// @param centers_y float array, y coordinates of points.
+// @returns tuple with int array, float array.
+export label_points (float[] points_x, float[] points_y, float[] centers_x, float[] centers_y) => //{
+    int _size_px = array.size(points_x)
+    int _size_py = array.size(points_y)
+    int _size_cx = array.size(centers_x)
+    int _size_cy = array.size(centers_y)
+    if _size_px < 1 
+        runtime.error('SignalProcessingClusteringKMeans -> label_cluster_index(): "points" have the wrong size.')
+        [array.new_int(na), array.new_float(na)]
+    else if _size_px != _size_py
+        runtime.error('SignalProcessingClusteringKMeans -> label_cluster_index(): "points" x != y.')
+        [array.new_int(na), array.new_float(na)]
+    else if _size_cx < 1
+        runtime.error('SignalProcessingClusteringKMeans -> label_cluster_index(): "centers" have the wrong size.')
+        [array.new_int(na), array.new_float(na)]
+    else if _size_cx != _size_cy
+        runtime.error('SignalProcessingClusteringKMeans -> label_cluster_index(): "centers" x != y.')
+        [array.new_int(na), array.new_float(na)]
+    else
+        int[] _group = array.new_int(_size_px)
+        float[] _distance = array.new_float(_size_px)
+        // assign each point the index of its nearest cluster center
+        for _j = 0 to _size_px - 1
+            [_idx, _d] = nearest(array.get(points_x, _j), array.get(points_y, _j), centers_x, centers_y)
+            array.set(_group, _j, _idx)
+            array.set(_distance, _j, _d)
+        [_group, _distance]
+//}
+
+// @function K-Means++ Clustering adapted from Andy Allinger.
+// @param points_x float array, x coordinates of the points.
+// @param points_y float array, y coordinates of the points.
+// @param n_clusters int, number of clusters.
+// @returns tuple with 2 arrays, float array, int array.
+export kpp (float[] points_x, float[] points_y, int n_clusters=3) => //{
+    int _size_x = array.size(points_x)
+    int _size_y = array.size(points_y)
+    if _size_x < 1 
+        runtime.error('SignalProcessingClusteringKMeans -> kpp_allinger(): "centers" have the wrong size.')
+        [array.new_float(na), array.new_float(na)]
+    else if _size_x != _size_y
+        runtime.error('SignalProcessingClusteringKMeans -> kpp_allinger(): "centers" x != y.')
+        [array.new_float(na), array.new_float(na)]
+    else if n_clusters < 2
+        runtime.error('SignalProcessingClusteringKMeans -> kpp_allinger(): "n_clusters" must be a positive number > 1.')
+        [array.new_float(na), array.new_float(na)]
+    else
+        float[] _shortest_distances = array.new_float(_size_x, 1.0e307)
+        float[] _cumulative_distances = array.new_float(_size_x, 0.0)
+        float[] _centers_x = array.new_float(n_clusters, 0.0)
+        float[] _centers_y = array.new_float(n_clusters, 0.0)
+        // pick the first centroid at random:
+        int _selected_index = int(math.random() * (_size_x - 1))
+        array.set(_centers_x, 0, array.get(points_x, _selected_index))
+        array.set(_centers_y, 0, array.get(points_y, _selected_index))
+        // select centroid index
+        for _cluster = 1 to n_clusters - 1
+            // for each point, find the its closest distance to any of the previous centers
+            for _j = 0 to _size_x - 1
+                float _d = distance2(array.get(points_x, _j), array.get(points_y, _j), array.get(_centers_x, _cluster - 1), array.get(_centers_y, _cluster - 1))
+                float _sd = array.get(_shortest_distances, _j)
+                if _d < _sd
+                    array.set(_shortest_distances, _j, _d)
+            // create a array of cumulative distances
+            float _sum = 0.0
+            for _j = 0 to _size_x - 1
+                float _sd = array.get(_shortest_distances, _j)
+                _sum += _sd
+                array.set(_cumulative_distances, _j, _sum)
+            // select point as random, those with greater distances have higher probability of being selected
+            int _rng = int(math.random() * (_size_x - 1))
+            _selected_index := bisection_search(_cumulative_distances, _rng)
+            // assign selected point as center
+            array.set(_centers_x, _cluster, array.get(points_x, _selected_index))
+            array.set(_centers_y, _cluster, array.get(points_y, _selected_index))
+        [_centers_x, _centers_y]
+//}
+
+
+size = input(20)
+data_x = array.new_float(size)
+data_y = array.new_float(size)
+for _i = 0 to size-1
+    array.set(data_x, _i, math.floor(math.random() * 500))
+    array.set(data_y, _i, math.random() * 500)
+
+flabel(_x, _y, _t='', _col=color.blue, _size=size.tiny)=>label.new(bar_index+int(_x), 0.0+_y, _t, color=color.new(_col, 20), style=label.style_circle, size=_size)
+fline(_x1, _y1, _x2, _y2, _col=color.blue)=>
+    line.new(bar_index+int(_x1), 0.0+_y1, bar_index+int(_x2), 0.0+_y2, extend=extend.right, color=_col, style=line.style_dashed, width=2)
+    line.new(bar_index+int(_x1), 0.0+_y1, bar_index+int(_x2), 0.0+_y2, extend=extend.none, color=_col, style=line.style_arrow_right, width=1)
+clusters = input(3)
+[kx, ky] = kpp(data_x, data_y, clusters)
+[kg, kd] = label_points(data_x, data_y, kx, ky)
+float centerx = array.avg(kx)
+float centery = array.avg(ky)
+
+f_c(_i)=>_a = _i*(255/clusters), color.rgb(255-_a, _a, _a * math.pi % 255, 0)
+
+if barstate.islastconfirmedhistory
+    // data points
+    for _i = 0 to size-1
+        flabel(array.get(data_x, _i), array.get(data_y, _i), _col=f_c(array.get(kg, _i)))
+    // cluster centers
+    for _k = 0 to clusters-1
+        float _kx = array.get(kx, _k)
+        float _ky = array.get(ky, _k)
+        color _c = f_c(_k)
+        flabel(_kx, _ky, str.tostring(_k), _col=_c, _size=size.huge)
+
+

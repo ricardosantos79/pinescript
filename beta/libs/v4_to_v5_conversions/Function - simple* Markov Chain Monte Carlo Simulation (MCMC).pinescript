@@ -1,0 +1,59 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - simple* Markov Chain Monte Carlo Simulation (MCMC)')
+
+f_markov_chain(_T, _position, _base, _dev) =>  //{
+//  @function: a basic implementation of the markov chain algorithm
+//  @parameters:
+//      _T: float[], target path array.
+//      _base: base value to increment.
+//      _dev: expected deviation.
+//  @returns: void, updates target array
+    float _distance = math.random() * _dev
+    float _p = math.random()  // hit value
+    if _p < 0.3  // 30% chance of up movement
+        array.set(_T, _position, _base + _distance)
+    else if _p < 0.6
+        // 30% chance of down movement
+        array.set(_T, _position, _base - _distance)
+    else
+        // 40% of remaining at value
+        array.set(_T, _position, _base)
+//}
+
+f_mcmc(_n_iterations, _start_value, _deviation_ammount) =>  //{
+//  @function: uses a monte carlo algorithm to simulate a markov chain at each step.
+//  @parameters:
+//      _n_iterations: integer, number of iterations to run.
+//      _start_value: float, base value to start simulation.
+//      _deviation_ammount: float maximum deviation allowed.
+//  @references:
+//      https://stephens999.github.io/fiveMinuteStats/MH-examples1.html
+//      https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
+//  @returns: float[], array with path.
+    float[] _T = array.new_float(_n_iterations, 0.0)
+    array.set(_T, 0, _start_value)
+    for _i = 1 to _n_iterations - 1 by 1
+        float _current = array.get(_T, _i - 1)
+        f_markov_chain(_T, _i, _current, _deviation_ammount)
+    _T
+//}
+
+i_iterations = input(100)
+i_start = input(500.)
+i_deviation = input(25.)
+
+var float[] M = array.new_float(0)
+if barstate.isfirst
+    M := f_mcmc(i_iterations, i_start, i_deviation)
+    M
+
+float output = na
+if bar_index < i_iterations
+    output := array.get(M, bar_index)
+    output
+plot(output)
+
+

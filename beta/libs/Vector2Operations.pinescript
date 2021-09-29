@@ -1,0 +1,880 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description functions to handle vector2 operations.
+library(title='Vector2Operations')
+//  references:
+//      https://docs.unity3d.com/ScriptReference/Vector2.html
+//      https://gist.github.com/winduptoy/a1aa09c3499e09edbd33
+//      https://github.com/dogancoruh/Javascript-Vector2/blob/master/js/vector2.js
+//      https://gist.github.com/Dalimil/3daf2a0c531d7d030deb37a7bfeff454
+//      https://gist.github.com/jeantimex/7fa22744e0c45e5df770b532f696af2d
+//      https://gist.github.com/volkansalma/2972237
+
+// Helper Methods:{-----------------------------------------------------------||
+
+// @function computes the fractional part of the argument value.
+// @param _value float, value to compute.
+// @returns float, fractional part.
+export math_fractional (float _value) => //{<<
+    _value - math.floor(_value)
+//}
+
+// @function Approximation to atan2 calculation, arc tangent of y/ x in the range [-pi,pi] radians.
+// @param _a vector2 in the form of a array [x, y].
+// @returns float, value with angle in radians. (negative if quadrante 3 or 4)
+export atan2 (float[] _a) => //{<<
+    float _x = array.get(id=_a, index=0), float _y = array.get(id=_a, index=1)
+    float _one_qtr_pi = math.pi / 4.0
+    float _three_qtr_pi = 3.0 * _one_qtr_pi
+    float _abs_y = math.abs(_y) + 1e-12 // kludge to void zero division
+    float _r = 0.0, float _angle = 0.0
+	if _x < 0.0
+		_r := (_x + _abs_y) / (_abs_y - _x)
+		_angle := _three_qtr_pi
+	else
+		_r := (_x - _abs_y) / (_x + _abs_y)
+		_angle := _one_qtr_pi
+	_angle := _angle + (0.1963 * _r * _r - 0.9817) * _r
+	_y < 0.0 ? -_angle : _angle
+//}
+//|--------------------}-------------------------------------------------------||
+
+//| Properties:{---------------------------------------------------------------||
+
+// @function Set the x value of vector _a.
+// @param _a vector2 in the form of a array [x, y].
+// @param _value value to replace x value of _a.
+// @returns void Modifies vector _a.
+export set_x (float[] _a, float _value) => //{<<
+    array.set(id=_a, index=0, value=_value)
+//}
+
+// @function Set the y value of vector _a.
+// @param _a vector in the form of a array [x, y].
+// @param _value value to replace y value of _a.
+// @returns void Modifies vector _a.
+export set_y (float[] _a, float _value)=>//{<<
+    array.set(id=_a, index=1, value=_value)
+//}
+
+// @function Get the x value of vector _a.
+// @param _a vector in the form of a array [x, y].
+// @returns float, x value of the vector _a.
+export get_x (float[] _a) => //{<<
+    array.get(id=_a, index=0)
+//}
+
+// @function Get the y value of vector _a.
+// @param _a vector in the form of a array [x, y].
+// @returns float, y value of the vector _a.
+export get_y(float[] _a)=>//{<<
+    array.get(id=_a, index=1)
+//}
+
+// @function Return the tuple of vector _a in the form [x, y]
+// @param _a vector2 in the form of a array [x, y].
+// @returns [float, float]
+export get_xy(float[] _a)=>//{<<
+    [get_x(_a), get_y(_a)]
+//}
+
+// @function Length of vector _a in the form. [pow(_a, 2)], for comparing vectors this is computationaly lighter.
+// @param _a vector in the form of a array [x, y].
+// @returns float, squared length of vector.
+export length_squared(float[] _a)=>//{<<
+    float _x = get_x(_a)
+    float _y = get_y(_a)
+    (_x * _x) + (_y * _y)
+//}
+
+// @function Magnitude of vector _a in the form. [sqrt(pow(_a, 2))]
+// @param _a vector in the form of a array [x, y].
+// @returns float, Squared length of vector.
+export length(float[] _a)=>//{<<
+    math.sqrt(length_squared(_a))
+//}
+
+// @function Lowest element of vector.
+// @param _a vector in the form of a array [x, y].
+// @returns float
+export vmin(float[] _a)=>//{<<
+	math.min(get_x(_a), get_y(_a))
+//}
+
+// @function Highest element of vector.
+// @param _a vector in the form of a array [x, y].
+// @returns float
+export vmax(float[] _a)=>//{<<
+	math.max(get_x(_a), get_y(_a))
+//}
+
+// //|----------------}-----------------------------------------------------------||
+
+// //| Constructor {-------------------------------------------------------------||
+
+// @function Assigns value to a new vector x,y elements.
+// @param _value x and y value of the vector. optional.
+// @returns float[x, y] vector.
+export from(float _value = 0.0)=>//{<<
+    array.new_float(size=2, initial_value=_value)
+//}
+
+// @function Creates a prototype array to handle vectors.
+// @param _x float, x value of the vector. optional.
+// @param _y float, y number of the vector. optional.
+// @returns float[x, y] vector.
+export new(float _x = 0.0, float _y=0.0)=>//{<<
+    float[] _vector = array.new_float(size=2, initial_value=0.0)
+    set_x(_vector, _x)
+    set_y(_vector, _y)
+    _vector
+//}
+
+// @function Vector in the form [0, -1].
+// @returns float[x, y] vector.
+export down()=>//{<<
+    new(0.0, -1.0)
+//}
+
+// @function Vector in the form [-1, 0].
+// @returns float[x, y] vector.
+export left()=>//{<<
+    new(-1.0, 0.0)
+//}
+
+// @function Vector in the form [1, 1].
+// @returns float[x, y] vector.
+export one()=>//{<<
+    from(1.0)
+//}
+
+// @function Vector in the form [1, 0].
+// @returns float[x, y] vector
+export right()=>//{<<
+    new(1.0, 0.0)
+//}
+
+// @function Vector in the form [0, 1].
+// @returns float[x, y] vector
+export up()=>//{<<
+    new(0.0, 1.0)
+//}
+
+// @function Vector in the form [0, 0].
+// @returns float[x, y] vector
+export zero()=>//{<<
+    from(0.0)
+//}
+
+//|------------------}---------------------------------------------------------||
+
+// //| Operator Methods {--------------------------------------------------------||
+
+// @function Adds vector _b to _a, in the form
+//          [_a.x + _b.x, _a.y + _b.y].
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns
+export add(float[] _a, float[] _b)=>//{<<
+	new(get_x(_a) + get_x(_b), get_y(_a) + get_y(_b))
+//}
+
+// @function Subtract vector _b from _a, in the form 
+//          [_a.x - _b.x, _a.y - _b.y].
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns
+export subtract(float[] _a, float[] _b)=>//{<<
+	new(get_x(_a) - get_x(_b), get_y(_a) - get_y(_b))
+//}
+
+// @function Multiply vector _a with _b, in the form 
+//          [(_a.x * _b.x), (_a.y * _b.y)]
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns
+export multiply(float[] _a, float[] _b)=>//{<<
+	new(get_x(_a) * get_x(_b), get_y(_a) * get_y(_b))
+//}
+
+// @function Divide vector _a with _b, in the form 
+//          [(_a.x / _b.x), (_a.y / _b.y)]
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns
+export divide(float[] _a, float[] _b)=>//{<<
+	new(get_x(_a) / get_x(_b), get_y(_a) / get_y(_b))
+//}
+
+// @function Negative of vector _a, in the form [-_a.x, -_a.y]
+// @param _a vector in the form of a array [x, y].
+// @returns
+export negate(float[] _a)=>//{<<
+	subtract(zero(), _a)
+//}
+
+// @function Perpendicular Vector of _a.
+// @param _a vector in the form of a array [x, y].
+// @returns
+export perp(float[] _a)=>//{<<
+	new(get_y(_a), -get_x(_a))
+//}
+
+// @function Compute the floor of argument vector _a.
+// @param _a vector in the form of a array [x, y].
+// @returns
+export vfloor(float[] _a)=>//{<<
+	new(math.floor(get_x(_a)), math.floor(get_y(_a)))
+//}
+
+// @function Compute the fractional part of the elements from vector _a.
+// @param _a vector in the form of a array [x, y].
+// @returns
+export fractional(float[] _a)=>//{<<
+	new(math_fractional(get_x(_a)), math_fractional(get_y(_a)))
+//}
+
+// @function Compute the sine of argument vector _a.
+// @param _a vector in the form of a array [x, y].
+// @returns
+export vsin(float[] _a)=>//{<<
+	new(math.sin(get_x(_a)), math.sin(get_y(_a)))
+//}
+
+// @function Compares two vectors 
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns boolean value representing the equality.
+export equals(float[] _a, float[] _b)=>//{<<
+    get_x(_a) == get_x(_b) and get_y(_a) == get_y(_b)
+//}
+
+// @function Dot product of 2 vectors, in the form [_a.x * _b.x + _a.y * _b.y]
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float
+export dot(float[] _a, float[] _b)=>//{<<
+	(get_x(_a) * get_x(_b)) + (get_y(_a) * get_y(_b))
+//}
+
+// @function cross product of 2 vectors, in the form [_a.x * _b.y - _a.y * _b.x]
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float
+export cross_product(float[] _a, float[] _b)=>//{<<
+	(get_x(_a) * get_y(_b)) - (get_y(_a) * get_x(_b))
+//}
+
+// @function Multiply a vector by a scalar.
+// @param _a vector in the form of a array [x, y].
+// @param _scalar value to multiply vector elements by.
+// @returns float[x, y] vector
+export scale(float[] _a, float _scalar)=>//{<<
+	new(get_x(_a) * _scalar, get_y(_a) * _scalar)
+//}
+
+//|-----------------------}----------------------------------------------------||
+
+// //| Methods {-----------------------------------------------------------------||
+
+// @function Vector _a normalized with a magnitude of 1, in the form. [_a / length(_a)]
+// @param _a vector in the form of a array [x, y].
+// @returns float[x, y] vector
+export normalize(float[] _a)=>//{<<
+    float _length = length(_a)
+	divide(_a, from(_length))
+//}
+
+// @function Rescale a vector to a new Magnitude.
+// @param _a vector in the form of a array [x, y].
+// @returns
+export rescale(float[] _a, float _length)=>//{<<
+    float _scalar = _length / length(_a)
+	scale(_a, _scalar)
+//}
+
+// @function Rotates vector _a by angle value
+// @param _a vector in the form of a array [x, y].
+// @param _radians Angle value.
+// @returns
+export rotate(float[] _a, float _radians)=>//{<<
+    [_x, _y] = get_xy(_a)
+    float _cos = math.cos(_radians)
+    float _sin = math.sin(_radians)
+	new((_x * _cos) - (_y * _sin), (_x * _sin) + (_y * _cos))
+//}
+
+// @function Rotates vector _a by angle value
+// @param _a vector in the form of a array [x, y].
+// @param _degree Angle value.
+// @returns
+export rotate_degree(float[] _a, float _degree)=>//{<<
+	rotate(_a, math.toradians(_degree))
+//}
+
+// @function Rotates vector _target around _origin by angle value
+// @param _center vector in the form of a array [x, y].
+// @param _target vector in the form of a array [x, y].
+// @param _degree Angle value.
+// @returns
+export rotate_around(float[] _center, float[] _target, float _degree)=>//{<<
+	add(_center, rotate(subtract(_target, _center), math.toradians(_degree)))
+//}
+
+// @function Ceils vector _a  
+// @param _a vector in the form of a array [x, y].
+// @param _digits digits to use as ceiling.
+// @returns
+export vceil(float[] _a, int _digits)=>//{<<
+    float _places = math.pow(10, _digits)
+	new(math.ceil(get_x(_a) * _places) / _places, math.ceil(get_y(_a) * _places) / _places)
+//}
+
+// @function Raise both vector elements by a exponent.
+// @param _a vector in the form of a array [x, y].
+// @returns
+export vpow(float[] _a, float _exponent)=>//{<<
+    new(math.pow(get_x(_a), _exponent), math.pow(get_y(_a), _exponent))
+//}
+
+// @function vector distance between 2 vectors.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float, distance.
+export distance(float[] _a, float[] _b)=>//{<<
+	length(subtract(_a, _b))
+//}
+
+// @function Project a vector onto another.
+// @param _a vector in the form of a array [x, y].
+// @param _axis float[x, y] vector2
+// @returns float[x, y] vector
+export project(float[] _a, float[] _axis)=>//{<<
+    float _t = dot(_a, _axis) / length_squared(_axis)
+    multiply(new(_t, _t), _axis)
+//}
+
+// @function Project a vector onto a vector of unit length.
+// @param _a vector in the form of a array [x, y].
+// @param _axis vector in the form of a array [x, y].
+// @returns float[x, y] vector
+export projectN(float[] _a, float[] _axis)=>//{<<
+    float _t = dot(_a, _axis)
+    multiply(new(_t, _t), _axis)
+//}
+
+// @function Reflect a vector on another.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float[x, y] vector
+export reflect(float[] _a, float[] _axis)=>//{<<
+    subtract(multiply(project(_a, _axis), new(2.0, 2.0)), _a)
+//}
+
+// @function Reflect a vector to a arbitrary axis.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float[x, y] vector
+export reflectN(float[] _a, float[] _axis)=>//{<<
+    subtract(multiply(projectN(_a, _axis), new(2.0, 2.0)), _a)
+//}
+
+// @function Angle in radians of a vector.
+// @param _a vector in the form of a array [x, y].
+// @returns float
+export angle(float[] _a)=>//{<<
+	-atan2(new(-get_y(_a), get_x(_a)))
+//}
+
+// @function unsigned degree angle between 0 and +180 by given two vectors.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float
+export angle_unsigned(float[] _a, float[] _b)=>//{<<
+	math.todegrees(math.acos(dot(normalize(_a), normalize(_b))))
+//}
+
+// @function Signed degree angle between -180 and +180 by given two vectors.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float
+export angle_signed(float[] _a, float[] _b)=>//{<<
+    float[] _na = normalize(_a)
+    float[] _nb = normalize(_b)
+	math.todegrees(math.acos(dot(_na, _nb))) * (cross_product(_na, _nb) >= 0 ? 1.0 : -1.0)
+//}
+
+// @function Degree angle between 0 and 360 by given two vectors
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @returns float
+export angle_360(float[] _a, float[] _b)=>//{<<
+    float[] _na = normalize(_a)
+    float[] _nb = normalize(_b)
+    float _degree = math.todegrees(math.acos(dot(_na, _nb)))
+	cross_product(_na, _nb) > 0.0 ? _degree : 360.0 - _degree
+//}
+
+// @function Restricts a vector between a min and max value.
+// @param _a vector in the form of a array [x, y].
+// @param _vmin vector in the form of a array [x, y].
+// @param _vmax vector in the form of a array [x, y].
+// @returns float[x, y] vector
+export clamp(float[] _a, float[] _vmin, float[] _vmax)=>//{<<
+    float _x = math.max(math.min(get_x(_a), get_x(_vmax)), get_x(_vmin))
+    float _y = math.max(math.min(get_y(_a), get_y(_vmax)), get_y(_vmin))
+    new(_x, _y)
+//}
+
+// @function Linearly interpolates between vectors a and b by _rate_of_move.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @param _rate_of_move float value between (a:-infinity -> b:1.0), negative values will move away from b.
+// @returns vector in the form of a array [x, y]
+export lerp(float[] _a, float[] _b, float _rate_of_move)=>//{<<
+    float _t = math.min(_rate_of_move, 1.0)
+	add(_a, scale(subtract(_b, _a), _t))
+//}
+
+// @function Hermite curve interpolation between vectors a and b by _rate_of_move.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @param _rate_of_move float value between (a-infinity -> b1.0), negative values will move away from b.
+// @returns vector in the form of a array [x, y]
+export herp(float[] _a, float[] _b, float[] _rate_of_move)=>//{<<
+    _t = clamp(divide(subtract(_rate_of_move, _a), subtract(_b, _a)), zero(), one())
+	multiply(multiply(_t, _t), subtract(from(3.0), multiply(from(2.0), _t)))
+//}
+
+// @function Find the area in a triangle of vectors.
+// @param _a vector in the form of a array [x, y].
+// @param _b vector in the form of a array [x, y].
+// @param _c vector in the form of a array [x, y].
+// @returns float
+export area_triangle(float[] _a, float[] _b, float[] _c)=>//{<<
+    math.abs(0.5 * ((get_x(_a) - get_x(_c)) * (get_y(_b) - get_y(_a)) - (get_x(_a) - get_x(_b)) * (get_y(_c) - get_y(_a))))
+//}
+
+// @function Converts vector _a to a string format, in the form "(x, y)" 
+// @param _a vector in the form of a array [x, y].
+// @returns string in "(x, y)" format
+export to_string(float[] _a)=>//{<<
+    '(' + str.tostring(get_x(_a)) + ', ' + str.tostring(get_y(_a)) + ')'
+//}
+
+// @function 2D random value
+// @param _max float[x, y] vector, vector upper bound
+// @returns vector in the form of a array [x, y]
+export vrandom(float[] _max)=>//{<<
+    new(math.random(0.0, get_x(_max)), math.random(0.0, get_y(_max)))
+//}
+
+// @function 2D Noise based on Morgan McGuire @morgan3d
+//     https://thebookofshaders.com/11/
+//     https://www.shadertoy.com/view/4dS3Wd
+// @param _a vector in the form of a array [x, y].
+// @returns vector in the form of a array [x, y]
+export noise(float[] _v)=>//{<<
+    _i = vfloor(_v)
+    _f = fractional(_v)
+    // compute the 4 cornes of a tile in 2D
+    _a = vrandom(_i)
+    _b = vrandom(add(_i, right()))
+    _c = vrandom(add(_i, up()))
+    _d = vrandom(add(_i, one()))
+
+    // Smooth Interpolation
+    // Cubic Hermine Curve.  Same as SmoothStep() or vector2_herp()
+    // _u = multiply(multiply(_f, _f), subtract(from(3.0), multiply(from(2.0), _f)))
+    _u = herp(zero(), one(), _f)
+    
+    // Mix 4 coorners percentages
+    // mix() same as vector2_lerp()
+    //mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y
+    _ux = get_x(_u)
+    _uy = get_y(_u)
+    _mix0 = lerp(_a, _b, _ux)
+    _mix1 = multiply(multiply(subtract(_c, _a), from(_uy)), subtract(one(), from(_ux)))
+    _mix2 = multiply(subtract(_d, _b), _u)//multiply(from(_ux), from(_uy)))
+    add(add(_mix0, _mix1), _mix2)
+//}
+
+//|----------}-----------------------------------------------------------------||
+
+//| Array Methods: {-----------------------------------------------------------||
+
+// @function Prototype to initialize a array of vectors.
+// @param _size size of the array.
+// @param _initial_vector vector to be used as default value, in the form of array [x, y].
+// @returns _vector_array complex Array in the form of a array [0:x, 1:y, 2:x, 3:y,...]
+export array_new(int _size = 0, float[] _initial_vector) => //{<<
+	[_init_x, _init_y] = get_xy(_initial_vector)
+
+    float[] _vector_array = array.new_float(0)
+    if _size > 0
+        for _i = 0 to _size-1
+            array.push(id=_vector_array, value=_init_x)
+            array.push(id=_vector_array, value=_init_y)
+    _vector_array
+//}
+
+// @function number of [x, y] vector elements in array.
+// @param _id ID of the array.
+// @returns int
+export array_size(float[] _id)=>//{<<
+    math.round(array.size(_id) / 2)
+//}
+
+// @function Get the vector in a array, in the form of a array [x, y]
+// @param _id ID of the array.
+// @param _index Index of the vector.
+// @returns vector in the form of a array [x, y]
+export array_get(float[] _id, int _index)=>//{<<
+    float[] _vector = array.new_float(size=2, initial_value=0.0)
+    int _size = array_size(_id)
+    int _index2 = _index * 2
+    if _index > -1 and _index < _size
+        set_x(_vector, array.get(id=_id, index=_index2))
+        set_y(_vector, array.get(id=_id, index=_index2 + 1))
+    _vector
+//}
+
+// @function Sets the values vector in a array.
+// @param _id ID of the array.
+// @param _index Index of the vector.
+// @param _a vector, in the form [x, y].
+// @returns Void, updates array _id.
+export array_set(float[] _id, int _index, float[] _a)=>//{<<
+	float _a_x = get_x(_a)
+	float _a_y = get_y(_a)
+    int _size = array.size(id=_id)-1
+    int _index2 = _index * 2
+    if _index > -1 and _index2 < _size
+        array.set(id=_id, index=_index2, value=_a_x)
+        array.set(id=_id, index=_index2 + 1, value=_a_y)
+//}
+
+// @function inserts the vector at the end of array.
+// @param _id ID of the array.
+// @param _a vector, in the form [x, y].
+// @returns Void, updates array _id.
+export array_push(float[] _id, float[] _a)=>//{<<
+    array.push(id=_id, value=get_x(_a))
+    array.push(id=_id, value=get_y(_a))
+//}
+
+// @function inserts the vector at the begining of array.
+// @param _id ID of the array.
+// @param _a vector, in the form [x, y].
+// @returns Void, updates array _id.
+export array_unshift(float[] _id, float[] _a)=>//{<<
+    array.unshift(id=_id, value=get_x(_a))
+    array.unshift(id=_id, value=get_y(_a))
+//}
+
+// @function removes the last vector of array and returns it.
+// @param _id ID of the array.
+// @param _a vector, in the form [x, y].
+// @returns vector2, updates array _id.
+export array_pop(float[] _id)=>//{<<
+    float _y = array.pop(id=_id)
+    float _x = array.pop(id=_id)
+    new(_x, _y)
+//}
+
+// @function removes the first vector of array and returns it.
+// @param _id ID of the array.
+// @param _a vector, in the form [x, y].
+// @returns vector2, updates array _id.
+export array_shift(float[] _id)=>//{<<
+    float _x = array.shift(id=_id)
+    float _y = array.shift(id=_id)
+    new(_x, _y)
+//}
+
+// @function Total sum of all vectors.
+// @param _id ID of the array.
+// @returns vector in the form of a array [x, y]
+export array_sum(float[] _id)=>//{<<
+    float[] _vector = zero()
+    int _size = array_size(_id)
+    if _size > 0
+        for _i = 0 to _size-1
+            _vector := add(_vector, array_get(_id, _i))
+    _vector
+//}
+
+// @function Finds the vector center of the array.
+// @param _id ID of the array.
+// @returns vector in the form of a array [x, y]
+export array_center(float[] _id)=>//{<<
+    int _size = array_size(_id)
+    divide(array_sum(_id), from(_size))
+//}
+
+// @function Rotate Array vectors around origin vector by a angle.
+// @param _id ID of the array.
+// @returns rotated points array.
+export array_rotate_points(float[] _id, float[] _center, float _degree)=>//{<<
+    float[] _vectors = array_new(0, from(0.0))
+    int _size = array_size(_id)
+    for _i = 0 to _size-1
+        array_push(_vectors, rotate_around(_center, array_get(_id, _i), _degree))
+    _vectors
+//}
+
+// @function Scale Array vectors based on a origin vector perspective.
+// @param _id ID of the array.
+// @returns rotated points array.
+export array_scale_points(float[] _id, float[] _center, float _rate)=>//{<<
+    float[] _vectors = array_new(0, from(0.0))
+    int _size = array_size(_id)
+    for _i = 0 to _size-1
+        float[] _oldvector = array_get(_id, _i)
+        float[] _newvector = add(_center, scale(subtract(_oldvector, _center), 1+_rate))
+        array_push(_vectors, _newvector)
+    _vectors
+//}
+
+// @function Reads a array of vectors into a string, of the form "[ (x, y), ... ]""
+// @param _id ID of the array.
+// @param _separator string separator for cell splitting.
+// @returns string Translated complex array into string.
+export array_tostring(float[] _id, string _separator = '')=>//{<<
+    int _size = array_size(_id)
+    string _str = '[ '
+    if _size > 0
+        for _i = 0 to _size-1
+            _str := _str + to_string(array_get(_id, _i))
+            if _i >= _size-1
+                _str := _str + ' ]'
+            else
+                _str := _str + (na(_separator) ? ', ' : _separator)
+    _str
+//}
+//|----------------}-----------------------------------------------------------||
+
+//| Line Methods {-----------------------------------------------------------------||
+
+// @function 2 vector line in the form. [a.x, a.y, b.x, b.y]
+// @param _a vector, in the form [x, y].
+// @param _b vector, in the form [x, y].
+// @returns
+export line_new(float[] _a, float[] _b)=>//{<<
+    float[] _line = array.new_float(size=0)
+    array.push(id=_line, value=get_x(_a))
+    array.push(id=_line, value=get_y(_a))
+    array.push(id=_line, value=get_x(_b))
+    array.push(id=_line, value=get_y(_b))
+    _line
+//}
+
+// @function Start vector of a line.
+// @param _line vector4, in the form [a.x, a.y, b.x, b.y].
+// @returns float[x, y] vector2
+export line_get_a(float[] _line)=>//{<<
+    float[] _vector = array.new_float(size=0)
+    array.push(id=_vector, value=array.get(id=_line, index=0))
+    array.push(id=_vector, value=array.get(id=_line, index=1))
+    _vector
+//}
+
+// @function End vector of a line.
+// @param _line vector4, in the form [a.x, a.y, b.x, b.y].
+// @returns float[x, y] vector2
+export line_get_b(float[] _line)=>//{<<
+    float[] _vector = array.new_float(size=0)
+    array.push(id=_vector, value=array.get(id=_line, index=2))
+    array.push(id=_vector, value=array.get(id=_line, index=3))
+    _vector
+//}
+
+// @function Find the intersection vector of 2 lines.
+// @param _line1 line of 2 vectors in the form of a array [ax, ay, bx, by].
+// @param _line2 line of 2 vectors in the form of a array [ax, ay, bx, by].
+// @returns vector in the form of a array [x, y].
+export line_intersect(float[] _line1, float[] _line2)=>//{<<
+    float[] _l1a = line_get_a(_line1)
+    float[] _l1b = line_get_b(_line1)
+    float[] _l2a = line_get_a(_line2)
+    float[] _l2b = line_get_b(_line2)
+    float _l1ax = get_x(_l1a)
+    float _l1ay = get_y(_l1a)
+    float _l1bx = get_x(_l1b)
+    float _l1by = get_y(_l1b)
+    float _l2ax = get_x(_l2a)
+    float _l2ay = get_y(_l2a)
+    float _l2bx = get_x(_l2b)
+    float _l2by = get_y(_l2b)
+    float _a1 = _l1by - _l1ay
+    float _b1 = _l1ax - _l1bx
+    float _c1 = _a1 * _l1ax + _b1 * _l1ay
+    float _a2 = _l2by - _l2ay
+    float _b2 = _l2ax - _l2bx
+    float _c2 = _a2 * _l2ax + _b2 * _l2ay
+    float _delta = _a1 * _b2 - _a2 * _b1
+    new((_b2 * _c1 - _b1 * _c2) / _delta, (_a1 * _c2 - _a2 * _c1) / _delta)
+//}
+
+// @function Draws a line using line prototype.
+// @param _line vector4, in the form [a.x, a.y, b.x, b.y].
+// @param _xloc string
+// @param _extend string
+// @param _color color
+// @param _style string
+// @param _width int
+// @returns draw line object
+export draw_line(float[] _line, string _xloc = 'bi', string _extend = 'n', color _color = #2196f3, string _style = 'sol', int _width = 1) => //{<<
+    float[] _a = line_get_a(_line)
+    float[] _b = line_get_b(_line)
+    line.new(x1=int(get_x(_a)), y1=get_y(_a), x2=int(get_x(_b)), y2=get_y(_b), xloc=_xloc, extend=_extend, color=_color, style=_style, width=_width)
+//}
+
+// @function Draws a triangle using line prototype.
+// @param _v1 vector4, in the form [a.x, a.y, b.x, b.y].
+// @param _v2 vector4, in the form [a.x, a.y, b.x, b.y].
+// @param _v3 vector4, in the form [a.x, a.y, b.x, b.y].
+// @param _xloc string
+// @param _color color
+// @param _style string
+// @param _width int
+// @returns tuple with 3 line objects. [line, line, line]
+export draw_triangle(float[] _v1, float[] _v2, float[] _v3, string _xloc = 'bi', color _color = #2196f3, string _style = 'sol', int _width = 1)=>//{<<
+    float[] _a = line_new(_v1, _v2)
+    float[] _b = line_new(_v2, _v3)
+    float[] _c = line_new(_v3, _v1)
+    [draw_line(_a, _xloc, extend.none, _color, _style, _width), draw_line(_b, _xloc, extend.none, _color, _style, _width), draw_line(_c, _xloc, extend.none, _color, _style, _width)]
+//}
+
+// @function Draws a square using vector2 line prototype.
+// @param _v1 vector4, in the form [a.x, a.y, b.x, b.y].
+// @param _size float[x, y]
+// @param _angle float 
+// @param _xloc string
+// @param _color color
+// @param _style string
+// @param _width int
+// @returns tuple with 3 line objects. [line, line, line]
+export draw_rect(float[] _v1, float[] _size, float _angle, string _xloc = 'bi', color _color = #2196f3, string _style = 'sol', int _width = 1)=>//{<<
+    float _x = get_x(_v1)
+    float _y = get_y(_v1)
+    float _w = get_x(_size)
+    float _h = get_y(_size)
+    float[] _vectors = array_new(1, _v1)
+    array_push(_vectors, new(_x, _y + _h))
+    array_push(_vectors, new(_x + _w, _y + _h))
+    array_push(_vectors, new(_x + _w, _y))
+    if _angle != 0.0
+        _vectors := array_rotate_points(_vectors, _v1, _angle)
+    float[] _a = line_new(array_get(_vectors, 0), array_get(_vectors, 1))
+    float[] _b = line_new(array_get(_vectors, 1), array_get(_vectors, 2))
+    float[] _c = line_new(array_get(_vectors, 2), array_get(_vectors, 3))
+    float[] _d = line_new(array_get(_vectors, 3), array_get(_vectors, 0))
+    [draw_line(_a, _xloc, extend.none, _color, _style, _width), draw_line(_b, _xloc, extend.none, _color, _style, _width), draw_line(_c, _xloc, extend.none, _color, _style, _width), draw_line(_d, _xloc, extend.none, _color, _style, _width)]
+//}
+
+//|----------}-----------------------------------------------------------------||
+
+
+
+
+
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+//|----------------------------------------------------------------------------||
+
+
+
+rotation = input(0)
+origin = input(0.0)
+triangle_scale = input(0.0)
+if barstate.ishistory[1] and (barstate.isrealtime or barstate.islast)
+    float[] a = new(0.10, -0.25)
+    float[] b = new(0.66, float(na))
+    float[] c = add(a, b)
+    float[] d = subtract(c, b)
+
+    float[] L = array_new(4, new(0, 0))
+    array_set(L, 0, a)
+    array_set(L, 1, b)
+    array_set(L, 2, c)
+    array_set(L, 3, d)
+
+    _text = ''
+    _text := _text + 'Helper Methods:\n'
+    _text := _text + 'atan2(a):' + str.tostring(atan2(a)) + '\n'
+    _text := _text + '\n'
+    _text := _text + 'Properties:\n'
+    _text := _text + 'down:' + to_string(down()) + ', left:' + to_string(left()) + ', one:' + to_string(one()) + ', right:' + to_string(right()) + ', up:' + to_string(up()) + ', zero:' + to_string(zero()) + '\n'
+    set_x(a, 0.25)
+    set_y(a, 0.5)
+    _text := _text + 'set a.x = 0.25, ' + 'set a.y = 0.5 ' + 'a:' + to_string(a) + '\n'
+    _text := _text + 'a:' + to_string(a) + ', a.x:' + str.tostring(get_x(a)) + ', a.y:' + str.tostring(get_y(a)) + '\n'
+    _text := _text + 'length(' + 'a:' + to_string(a) + ') = ' + str.tostring(length(a)) + '\n'
+    _text := _text + 'length squared(' + 'a:' + to_string(a) + ') = ' + str.tostring(length_squared(a)) + '\n'
+    _text := _text + 'normalize(' + 'a:' + to_string(a) + ') = ' + to_string(normalize(a)) + '\n'
+    _text := _text + 'rescale(' + 'a:' + to_string(a) + ', 2) = ' + to_string(rescale(a, 2.0)) + '\n'
+    _text := _text + 'vmin(' + 'a: ' + str.tostring(vmin(a)) + '), vmax(a: ' + str.tostring(vmax(a)) + ')\n'
+    _text := _text + '\n'
+    _text := _text + 'Operator Methods:\n'
+    _text := _text + 'add a:' + to_string(a) + ' + b:' + to_string(b) + ' = ' + to_string(add(a, b)) + '\n'
+    _text := _text + 'subtract a:' + to_string(a) + ' - b:' + to_string(b) + ' = ' + to_string(subtract(a, b)) + '\n'
+    _text := _text + 'multiply a:' + to_string(a) + ' * b:' + to_string(b) + ' = ' + to_string(multiply(a, b)) + '\n'
+    _text := _text + 'divide a:' + to_string(a) + ' / b:' + to_string(b) + ' = ' + to_string(divide(a, b)) + '\n'
+    _text := _text + 'negate -a:' + to_string(a) + ' = ' + to_string(negate(a)) + '\n'
+    _text := _text + 'perpendicular a:' + to_string(a) + ' = ' + to_string(perp(a)) + '\n'
+    _text := _text + 'equals a:' + to_string(a) + ' == b:' + to_string(b) + ' = ' + (equals(a, b)?'true':'false') + '\n'
+    _text := _text + 'dot product a:' + to_string(a) + ' º b:' + to_string(b) + ' = ' + str.tostring(dot(a, b)) + '\n'
+    _text := _text + 'cross_product product a:' + to_string(a) + ' x b:' + to_string(b) + ' = ' + str.tostring(cross_product(a, b)) + '\n'
+    _text := _text + 'scale a by 2.0:' + str.tostring(scale(a, 2.0)) + '\n'
+    _text := _text + '\n'
+    _text := _text + 'Methods:\n'
+    _text := _text + 'rotate by angle(radian) a:' + to_string(a) + ' ∡:' + str.tostring(1.618) + ' = ' + to_string(rotate(a, 1.618)) + '\n'
+    _text := _text + 'rotate by angle(degree) a:' + to_string(a) + ' ∡:' + str.tostring(30) + ' = ' + to_string(rotate_degree(a, 30.0)) + '\n'
+    _text := _text + 'ceil (0.1111, 0.11111):' + to_string(vceil(new(0.1111, 0.11111), 2)) + '\n'
+    _text := _text + 'pow a:' + to_string(a) + ' = ' + to_string(vpow(a, 2)) + '\n'
+    _text := _text + 'distance a -> b:' + str.tostring(distance(a, b)) + '\n'
+    _text := _text + 'project a <- b:' + to_string(project(a, b)) + '\n'
+    _text := _text + 'projectN a <- b:' + to_string(projectN(a, b)) + '\n'
+    _text := _text + 'reflect a <- b:' + to_string(reflect(a, b)) + '\n'
+    _text := _text + 'reflectN a <- b:' + to_string(reflectN(a, b)) + '\n'
+    _text := _text + 'angle a:' + str.tostring(angle(a)) + '\n'
+    _text := _text + 'angle unsigned a-b:' + str.tostring(angle_unsigned(a, b)) + '\n'
+    _text := _text + 'angle signed a-b:' + str.tostring(angle_signed(a, b)) + '\n'
+    _text := _text + 'angle 360 a-b:' + str.tostring(angle_360(a, b)) + '\n'
+    _text := _text + 'Move a to b by 25%:' + to_string(lerp(a, b, 0.25)) + '\n'
+    _text := _text + 'Restrict a to (0.1, 0.1), (0.4, 0.4) :' + to_string(clamp(a, from(0.1), from(0.4))) + '\n'
+    _text := _text + 'Area of triangle: (0.1, 0.1), (0.4, 0.4), (0.4, 0.1) :' + str.tostring(area_triangle(from(0.1), from(0.4), new(0.4, 0.1))) + '\n'
+    _text := _text + '\n'
+    _text := _text + 'Line Methods:\n'
+    _text := _text + 'Intersect(((4,0),(6,10)), ((0,3),(10,7))):' + to_string(line_intersect(line_new(new(4.0, 0.0), new(6.0, 10.0)), line_new(new(0.0, 3.0), new(10.0, 7.0)))) + '\n'
+    _text := _text + '\n'
+    _text := _text + 'Array Methods:\n'
+    _text := _text + 'array L: ' + array_tostring(L, string(na)) + '\n'
+    _text := _text + 'center of L: ' + to_string(array_center(L)) + '\n'
+    array_unshift(L, from(1.111))
+    array_push(L, from(2.222))
+    _text := _text + 'Sum of L: ' + to_string(array_sum(L)) + '\n'
+    _text := _text + 'Top of L: ' + to_string(array_pop(L)) + '\n'
+    _text := _text + 'Bottom of L: ' + to_string(array_shift(L)) + '\n'
+
+    float[] _triangle = array_new(3, from(0.0))
+    array_set(_triangle, 1, from(bar_index/2))
+    array_set(_triangle, 2, new(bar_index/2, 0.0))
+    float[] _new_triangle = array_scale_points(_triangle, from(origin), triangle_scale)
+    draw_triangle(array_get(_triangle, 0), array_get(_triangle, 1), array_get(_triangle, 2), xloc.bar_index, color.red, line.style_solid, 1)
+    draw_triangle(array_get(_new_triangle, 0), array_get(_new_triangle, 1), array_get(_new_triangle, 2), xloc.bar_index, color.lime, line.style_dashed, 1)
+
+    label.new(x=bar_index, y=0.0, text=_text, style=label.style_label_left, textalign=text.align_left)
+
+    
+    draw_line(line_new(from(0.0), from(bar_index)), xloc.bar_index, extend.none, color.aqua, line.style_dashed, 3)
+    draw_rect(from(bar_index/3), from(bar_index/4), rotation, xloc.bar_index, color.red, line.style_solid, 1)
+    
+    draw_line(line_new(from(bar_index/2), rotate_around(from(bar_index/2), from(bar_index/3), rotation)), xloc.bar_index, extend.none, color.navy, line.style_arrow_right, 2)
+
+
+

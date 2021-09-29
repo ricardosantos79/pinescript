@@ -1,0 +1,31 @@
+//@version=5
+indicator(title='Function - Standardization (zScore)')
+//  ||  Standardization/zscore Function
+//  ||      https://www.statisticshowto.datasciencecentral.com/standardized-values-examples/
+f_zscore(_src, _length, _smooth) =>
+    _mean = ta.sma(_src, _length)
+    _std = ta.stdev(_src - _mean, _length)
+    _value = (_src - _mean) / _std
+    _dema = ta.ema(ta.ema(_value, _smooth), _smooth)
+    [_value, _dema]
+
+smooth = input(3)
+[z0, d0] = f_zscore(close, input(6), smooth)
+[z1, d1] = f_zscore(close, input(14), smooth)
+[z2, d2] = f_zscore(close, input(26), smooth)
+[z3, d3] = f_zscore(close, input(100), smooth)
+
+plot(series=z0, title='0', color=color.new(color.green, 40), style=plot.style_area)
+plot(series=z1, title='1', color=color.new(color.lime, 50), style=plot.style_area)
+plot(series=z2, title='2', color=color.new(color.red, 60), style=plot.style_area)
+plot(series=z3, title='3', color=color.new(color.maroon, 70), style=plot.style_area)
+plot(series=d3, title='3', color=color.new(color.maroon, 0), style=plot.style_line)
+
+// hline(+5.0)
+// hline(+2.5)
+hline(+0.0)
+// hline(-2.5)
+// hline(-5.0)
+
+
+

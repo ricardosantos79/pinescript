@@ -1,0 +1,239 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Functions to generate arrays.
+library(title='ArrayGenerate')
+
+// reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Generate.cs
+
+// imports:
+import RicardoSantos/MathConstants/1 as mc
+// mc.Pi2()
+
+// @function returns a sequence of int numbers.
+// @param start int, begining of sequence range.
+// @param end int, end of sequence range.
+// @param step int, step, default=1 .
+// @returns int[], array.
+export sequence_int(int start, int end, int step=1)=>//{
+// usage: array_sequence_int(4, 10, 2) = [4, 6, 8, 10]
+    int[] _output = array.new_int(size=0)
+    for _i = start to end by step
+        array.push(id=_output, value=_i)
+    _output
+//}
+
+// @function returns a sequence of float numbers.
+// @param start float, begining of sequence range.
+// @param end float, end of sequence range.
+// @param step float, step, default=1.0 .
+// @returns float[], array.
+export sequence_float(float start, float end, float step=1.0)=>//{
+// usage: array_sequence_float(0.4, 1.0, 0.2) = [0.4, 0.6, 0.8, 1.0]
+    float[] _output = array.new_float(size=0)
+    for _i = start to end by step
+        array.push(id=_output, value=_i)
+    _output
+//}
+
+// @function Creates a array from a series sample range.
+// @param src series, any kind.
+// @param length int, window period in bars to sample series.
+// @param shift int, window period in bars to shift backwards the data sample, default=0.
+// @param direction_forward bool, sample from start to end or end to start order, default=true.
+// @returns float array
+export sequence_from_series (float src, int length, int shift=0, bool direction_forward=true) => //{
+    _start = direction_forward ? length + shift : 0 + shift
+    _end = direction_forward ? 0 + shift : length + shift
+    _data = array.from(src) //defines type
+    if length < 1
+        array.clear(_data)
+    else if length > 1
+        array.clear(_data)
+        if bar_index > (length + shift)
+            for _i = _start to _end
+                array.push(_data, src[_i])
+    _data
+
+// usage:
+// src = input(close)
+// window = input(3)
+// shift = input(0)
+// forward = sequence_from_series(src, window, shift, true)
+// backward = sequence_from_series(src, window, shift, false)
+
+// if barstate.islast
+//     label.new(bar_index, 0.0, str.format('{0}\n{1}', forward, backward))
+//}
+
+// @function Generate normal distribution random sample.
+// @param size int, size of array
+// @param mean float, mean of the sample, (default=0.0).
+// @param dev float, deviation of the sample from the mean, (default=1.0).
+// @returns float array.
+export normal_distribution (int size, float mean=0.0, float dev=1.0) => //{
+    if size < 1
+        runtime.error('ArrayGenerate -> normal_distribution() -> Parameter "size": must be a positive value > 0.')
+        float[] _A = na
+    else if dev <= 0.0
+        runtime.error('ArrayGenerate -> normal_distribution() -> Parameter "dev": must be a positive value > 0.0.')
+        float[] _A = na
+    else
+        float[] _A = array.new_float(size)
+        for _i = 0 to size-1
+            float _rng = math.random(-dev, +dev)
+            array.set(_A, _i, mean + _rng)
+        _A
+//{ usage:
+// int size = input.int(100), float mean = input.float(25.0), float dev = input.float(10.0)
+// var float[] A = normal_distribution(size, mean, dev)
+// plot(array.get(A, bar_index % array.size(A)))
+//{ remarks:
+//}}}
+
+// @function Generate a base 10 logarithmically spaced sample sequence.
+// @param length int, length of the sequence.
+// @param start_exp float, start exponent.
+// @param stop_exp float, stop exponent.
+// @returns float array.
+export log_spaced (int length, float start_exp, float stop_exp) => //{
+    if length < 1
+        runtime.error('ArrayGenerate -> log_spaced() -> Parameter "length": must be a positive value > 0.')
+        float[] _A = na
+    else if length == 1
+        array.new_float(1, math.pow(10.0, stop_exp))
+    else
+        float _step = (stop_exp - start_exp) / (length - 1)
+        var _A = array.new_float(length)
+        for _i = 0 to length-2
+            array.set(_A, _i, math.pow(10.0, start_exp + _i * _step))
+        array.set(_A, length-1, math.pow(10.0, stop_exp))
+        _A
+//{ usage:
+// int length = input.int(100)
+// float start_exp = input.float(0.1)
+// float stop_exp = input.float(1.0)
+// var float[] A = log_spaced(length, start_exp, stop_exp)
+// plot(array.get(A, bar_index % length))
+//{ remarks:
+// Equivalent to MATLAB logspace but with the length as first instead of last argument.
+//}}}
+
+// @function Generate a linearly spaced sample vector within the inclusive interval (start, stop) and step 1.
+// @param stop float, stop value.
+// @param start float, start value, (default=0.0).
+// @returns float array.
+export linear_range(float stop, float start=0.0) => //{
+    if start == stop 
+        array.new_float(1, start)
+    else if start < stop
+        float[] _A = array.new_float(int(stop - start + 1))
+        for _i = 0 to array.size(_A)-1
+            array.set(_A, _i, start + _i)
+        _A
+    else
+        float[] _A = array.new_float(int(start - stop + 1))
+        for _i = 0 to array.size(_A)-1
+            array.set(_A, _i, start - _i)
+        _A
+//{ usage:
+// var float[] A = linear_range(100)
+// var float[] B = linear_range(0, 100)
+// plot(array.get(A, bar_index % array.size(A)))
+// plot(array.get(B, bar_index % array.size(A)))
+//{ remarks:
+/// Equivalent to MATLAB colon operator (:).
+//}}}
+
+// @function Create a periodic wave.
+// @param length int, the number of samples to generate.
+// @param sampling_rate float, samples per time unit (Hz). Must be larger than twice the frequency to satisfy the Nyquist criterion.
+// @param frequency float, frequency in periods per time unit (Hz).
+// @param amplitude float, the length of the period when sampled at one sample per time unit. This is the interval of the periodic domain, a typical value is 1.0, or 2*Pi for angular functions.
+// @param phase float, optional phase offset.
+// @param delay int, optional delay, relative to the phase.
+// @returns float array.
+export periodic_wave (int length, float sampling_rate, float frequency, float amplitude = 1.0, float phase = 0.0, int delay = 0) => //{
+    if length < 1
+        runtime.error('ArrayGenerate -> periodic_wave() -> Parameter "length": must be a positive value > 0.')
+        float[] _A = na
+    else
+        float _step = (frequency / sampling_rate * amplitude)
+        float _phase = (((phase - delay * _step) % amplitude) + amplitude) % amplitude
+        // _phase: https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Euclid.cs#L59
+        
+        float[] _A = array.new_float(length)
+        int _k = 0
+        for _i = 0 to length-1
+            float _x = _phase + _k * _step
+            if _x >= amplitude
+                _x %= amplitude
+                _phase := _x
+                _k := 0
+            array.set(_A, _i, _x)
+            _k += 1
+        _A
+//{ usage:
+// int length = input.int(100), float sampling_rate = input.float(0.55), float frequency = input.float(0.65), float amplitude = input.float(1.0), float phase = input.float(0.0), int delay = input.int(0)
+// var float[] A = periodic_wave (length, sampling_rate, frequency, amplitude, phase, delay)
+// plot(array.get(A, bar_index%length))
+//{ remarks:
+//}}}
+
+// @function Create a Sine wave.
+// @param length int, The number of samples to generate.
+// @param sampling_rate float, Samples per time unit (Hz). Must be larger than twice the frequency to satisfy the Nyquist criterion.
+// @param frequency float, Frequency in periods per time unit (Hz).
+// @param amplitude float, The maximal reached peak.
+// @param mean float, The mean, or DC part, of the signal.
+// @param phase float, Optional phase offset.
+// @param delay int, Optional delay, relative to the phase.
+// @returns float array.
+export sinusoidal (int length, float sampling_rate, float frequency, float amplitude, float mean = 0.0, float phase = 0.0, int delay = 0) => //{
+    if length < 1
+        runtime.error('ArrayGenerate -> sinusoidal() -> Parameter "length": must be a positive value > 0.')
+        float[] _A = na
+    else
+        float _pi2 = mc.Pi2()
+        float _step = frequency / sampling_rate * _pi2
+        float _phase = (phase - delay * _step) % _pi2
+        float[] _A = array.new_float(length)
+        for _i = 0 to length-1
+            array.set(_A, _i, mean + amplitude * math.sin(_phase + _i * _step))
+        _A
+//{ usage:
+// int length = input.int(100), float sampling_rate = input.float(0.55), float frequency = input.float(0.65), float amplitude = input.float(1.0), float mean = input.float(0.0), float phase = input.float(0.0), int delay = input.int(0)
+// var float[] A = sinusoidal (length, sampling_rate, frequency, amplitude, mean, phase, delay)
+// plot(array.get(A, bar_index%length))
+//{ remarks:
+//}}}
+
+// @function Create a periodic Kronecker Delta impulse sample array.
+// @param length int, The number of samples to generate.
+// @param period int, impulse sequence period.
+// @param amplitude float, The maximal reached peak.
+// @param delay int, Offset to the time axis. Zero or positive.
+// @returns float array.
+export periodic_impulse (int length, int period, float amplitude, int delay) => //{
+    if length < 1
+        runtime.error('ArrayGenerate -> periodic_impulse() -> Parameter "length": must be a positive value > 0.')
+        float[] _A = na
+    else
+        float[] _A = array.new_float(length, 0.0)
+        int _delay = ((delay % period) + period) % period
+        // see: https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Euclid.cs#L48
+        while _delay < length
+            array.set(_A, _delay, amplitude)
+            _delay += period
+        _A
+//{ usage:
+// int length = input.int(100), int period = input.int(5), float amplitude = input.float(1.0), int delay = input.int(0)
+// float[] A = periodic_impulse(length, period, amplitude, delay)
+// plot(array.get(A, bar_index%length))
+//{ remarks:
+//}}}
+
+

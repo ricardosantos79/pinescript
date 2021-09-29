@@ -1,0 +1,112 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Implements multiple gauss methods.
+library(title='MathGaussFunction')
+
+// reference:
+//      https://github.com/andrewkirillov/AForge.NET/blob/master/Sources/Math/Gaussian.cs
+
+// imports:
+import RicardoSantos/ArrayExtension/3 as ae
+// ArrayExtension.index_2d_to_1d()
+
+// @function 1-D Gaussian function.
+// @param point_x float, x value.
+// @param sigma float, sigma value, default=1.0.
+// @returns float, function's value at point_x.
+export f_1d (float point_x, float sigma=1.0 ) => //{
+    float _sigma2 = math.pow(sigma, 2)
+    float _x2 = point_x * point_x
+    math.exp(_x2 / (-2 * _sigma2)) / (math.sqrt(2 * math.pi ) * sigma)
+//{ usage:
+// s = input.float(0.5)
+// plot(gauss_1d(1.0/(bar_index%1000), s))
+//{ remarks:
+//      The function calculates 1-D Gaussian function:
+//      f(x) = exp( x * x / ( -2 * s * s ) ) / ( s * sqrt( 2 * PI ) )
+//}}}
+
+// @function 2-D Gaussian function.
+// @param point_x float, x value.
+// @param point_y float, y value.
+// @param sigma float, sigma value, default=1.0.
+// @returns float, function's value at (point_x, point_y).
+export f_2d (float point_x, float point_y, float sigma=1.0 ) => //{
+    float _sigma2 = math.pow(sigma, 2)
+    float _x2 = point_x * point_x
+    float _y2 = point_y * point_y
+    math.exp((_x2 + _y2) / (-2 * _sigma2)) / (2 * math.pi * _sigma2)
+//{ usage:
+// s = input.float(0.5)
+// plot(f_2d(1.0/(bar_index%1000), 1.0/(bar_index%500), s))
+//{ remarks:
+//      The function calculates 2-D Gaussian function:
+//      f(x, y) = exp( x * x + y * y / ( -2 * s * s ) ) / ( s * s * 2 * PI )
+//}}}
+
+// @function 1-D Gaussian kernel.
+// @param size int, Kernel size (should be odd), [3, 101].
+// @param sigma float, sigma value, default=1.0.
+// @returns float array, Returns 1-D Gaussian kernel of the specified size.
+export kernel_1d (int size, float sigma=1.0) => //{
+    // check for even size and for out of range
+    if (((size % 2) == 0) or (size < 3) or (size > 101))
+        error('MathGaussFunction -> kernel_1d(): wrong kernal size, should be positive, odd and < 100.')
+        float[] _K = na
+    else
+        // radius
+        int _r = size / 2
+        // kernel
+        float[] _K = array.new_float(size)
+        // compute kernel
+        for _i = 0 to size-1
+            int _x = -_r + _i
+            array.set(_K, _i, f_1d(_x, sigma))
+        _K
+//{ usage:
+// int size = input.int(99)
+// float sigma = input.float(1.0)
+// float[] K = kernel_1d(size, sigma)
+// plot(array.get(K, bar_index%size))
+//{ remarks: 
+//      The function calculates 1-D Gaussian kernel, which is array
+//      of Gaussian function's values in the [-r, r] range of x value, where:
+//      r = floor(size / 2)
+//}}}
+
+// @function 2-D Gaussian kernel.
+// @param size int, Kernel size (should be odd), [3, 101].
+// @param sigma float, sigma value, default=1.0.
+// @returns float array, Returns 2-D Gaussian kernel of the specified size.
+export kernel_2d( int size, float sigma=1.0) => //{
+    // check for even size and for out of range
+    if (((size % 2) == 0) or (size < 3) or (size > 101))
+        error('MathGaussFunction -> kernel_2d(): wrong kernal size, should be positive, odd and < 100.')
+        float[] _K = na
+    else
+        // radius
+        int _r = size / 2
+        // kernel
+        float[] _K = array.new_float(size*size)
+        // compute kernel
+        for _i = 0 to size-1
+            int _y = _r + _i
+            for _j = 0 to size-1
+                int _x = -_r + _j
+                array.set(_K, ae.index_2d_to_1d(size, size, _i, _j), f_2d(_x, _y, sigma))
+        _K
+
+//{ usage:
+// int size = input.int(11)
+// float sigma = input.float(3.1416)
+// float[] K = kernel_2d(size, sigma)
+// plot(array.get(K, bar_index%(size*size)))
+//{ remarks: 
+//      The function calculates 2-D Gaussian kernel, which is array
+//      of Gaussian function's values in the [-r, r] range of x value, where:
+//      r = floor(size / 2)
+//}}}
+

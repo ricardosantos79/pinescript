@@ -1,0 +1,308 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Color Extension methods.
+library(title='ColorExtension3')
+
+// reference:
+//      https://tallys.github.io/color-theory/
+//      https://www.canva.com/colors/color-wheel/
+//      https://webdesign.tutsplus.com/tutorials/creating-color-schemes-with-less-color-functions--cms-23668
+
+// @function HSL color transform.
+// @param hue float, hue color component, hue is a degree on the color wheel from 0 to 360. 0 is red, 120 is green, 240 is blue.
+// @param saturation float, saturation color component, saturation is a percentage value, 0 means a shade of gray and 100 is the full color.
+// @param lightness float, lightness color component, Lightness is also a percentage; 0 is black, 100 is white.
+// @param transparency float, transparency color component, transparency is also a percentage; 0 is opaque, 100 is transparent.
+// @returns color
+export hsl (float hue=0.0, float saturation=0.0, float lightness=0.0, float transparency=0.0) =>  //{
+    switch
+        hue < 0.0 or hue > 360.0 => runtime.error(str.format('ColorExtension -> hsl(): "hue" parameter is out of range, expecting 0-360, received: {0}', hue))
+        saturation < 0.0 or saturation > 100.0 => runtime.error(str.format('ColorExtension -> hsl(): "saturation" parameter is out of range, expecting 0-100, received: {0}', saturation))
+        lightness < 0.0 or lightness > 100.0 => runtime.error(str.format('ColorExtension -> hsl(): "lightness" parameter is out of range, expecting 0-100, received: {0}', lightness))
+        transparency < 0.0 or transparency > 100.0 => runtime.error(str.format('ColorExtension -> hsl(): "transparency" parameter is out of range, expecting 0-100, received: {0}', transparency))
+    float _h_30 = hue / 30.0
+    float _l1 = lightness * 0.01
+    float _a = saturation * math.min(_l1, 1.0 - _l1) * 0.01
+    float _rk = _h_30 % 12.0
+    float _r = 255.0 * (_l1 - _a * math.max(math.min(_rk - 3.0, 9.0 - _rk, 1.0), -1.0))
+    float _gk = (8.0 + _h_30) % 12.0
+    float _g = 255.0 * (_l1 - _a * math.max(math.min(_gk - 3.0, 9.0 - _gk, 1.0), -1.0))
+    float _bk = (4.0 + _h_30) % 12.0
+    float _b = 255.0 * (_l1 - _a * math.max(math.min(_bk - 3.0, 9.0 - _bk, 1.0), -1.0))
+    color.rgb(_r, _g, _b, transparency)
+//{ usage:
+// h = input.int(defval=127)//, minval=0, maxval=360)
+// s = input.int(defval=50)//, minval=0, maxval=100)
+// l = input.int(defval=50)//, minval=0, maxval=100)
+// t = input.int(defval=0)//, minval=0, maxval=100)
+// if barstate.islast
+//     line.new(bar_index, 0., bar_index[1], 0., extend=extend.both, color=hsl(h, s, l, t), width=20)
+//{ remarks:
+//      https://stackoverflow.com/questions/36721830/convert-hsl-to-rgb-and-hex
+//      Thanks to someguy for code review.
+//}}}
+
+// @function Convert RGB to HSL color values
+// @param red float, red color component.
+// @param green float, green color component.
+// @param blue float, blue color component.
+// @returns tuple with 3 float values, hue, saturation and lightness.
+export rgb_to_hsl (float red=0.0, float green=0.0, float blue=0.0) =>  //{
+    switch
+        0 > red   or red   > 255 => runtime.error(str.format('ColorExtension -> rgb_to_hsl(): "red" parameter is out of range, expecting 0-255, received: {0}',     red))
+        0 > green or green > 255 => runtime.error(str.format('ColorExtension -> rgb_to_hsl(): "green" parameter is out of range, expecting 0-255, received: {0}', green))
+        0 > blue  or blue  > 255 => runtime.error(str.format('ColorExtension -> rgb_to_hsl(): "blue" parameter is out of range, expecting 0-255, received: {0}',   blue))
+    float _r1 = red / 255.0
+    float _g1 = green / 255.0
+    float _b1 = blue / 255.0
+    float _max_color = math.max(_r1, _g1, _b1)
+    float _min_color = math.min(_r1, _g1, _b1)
+    float _diff = _max_color - _min_color
+    float _H = 0.0
+    float _S = 0.0
+    float _L = (_max_color + _min_color) / 2.0
+    if _max_color != _min_color
+        // saturation calculation:
+        switch
+            (_L <= 0.5) => _S := _diff / (_max_color + _min_color)
+            => _S := _diff / (2.0 - _max_color - _min_color) 
+        // hue calculation:
+        switch (_max_color)
+            _r1 => _H := 60.0 * ((_g1 - _b1) / _diff)
+            _g1 => _H := 60.0 * (2.0 + (_b1 - _r1) / _diff)
+            => _H := 60.0 * (4.0 + (_r1 - _g1) / _diff)
+    if _H < 0.0
+        _H += 360.0
+    [_H, _S * 100.0, _L * 100.0]
+//{ usage:
+// int r = input(0), int g = input(0), int b = input(0)
+// [th, ts, tl] = rgb_to_hsl(r, g, b)
+// if barstate.islast
+//     label.new(bar_index, 10., str.format('rgb ({0}, {1}, {2})', r, g, b), color=color.rgb(r, g, b, 0))
+//     label.new(bar_index, 0., str.format('hsl ({0}, {1}, {2})', th, ts, tl), color=hsl(th, ts, tl, 0))
+//{ remarks:
+//      https://gmigdos.wordpress.com/2011/01/13/javascript-convert-rgb-values-to-hsl/
+//      https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
+//}}}
+
+// @function Complementary of selected color
+// @param primary color, the primary
+// @returns color.
+export complement (color primary) => //{
+    float _r = color.r(primary)
+    float _g = color.g(primary)
+    float _b = color.b(primary)
+    float _t = color.t(primary)
+    [_h, _s, _l] = rgb_to_hsl(_r, _g, _b)
+    hsl((360 + _h + 180.0) % 360.0, _l, _s, _t)
+//{ usage:
+// color primary = input.color(color.red)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 10.0, '▆▆▆▆', color=primary, textcolor=complement(primary))
+//{ remarks:
+//}}}
+
+// @function Inverts selected color.
+// @param primary color, the primary.
+// @returns color.
+export invert (color primary) => //{
+    float _r = color.r(primary)
+    float _g = color.g(primary)
+    float _b = color.b(primary)
+    float _t = color.t(primary)
+    [_h, _s, _l] = rgb_to_hsl(_r, _g, _b)
+    hsl((360 + _h + 180.0) % 360.0, 100.0 - _l, _s, _t)
+//{ usage:
+// color primary = input.color(color.red)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 10.0, '▆▆▆▆', color=primary, textcolor=complement(primary))
+//{ remarks:
+//}}}
+
+// @function Color is cool or warm.
+// @param base color, the color to check.
+// @returns bool.
+export is_cool (color base) => //{
+    float _r = color.r(base)
+    float _g = color.g(base)
+    float _b = color.b(base)
+    float _t = color.t(base)
+    [_h, _s, _l] = rgb_to_hsl(_r, _g, _b)
+    _h > 120.0 and _h < 300.0
+//{ usage:
+// color primary = input.color(color.red)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, str.format('color is {0}.', is_cool(primary) ? 'cool' : 'warm'),color=primary, textcolor=complement(primary))
+//{ remarks:
+//}}}
+
+// @function Color temperature.
+// @param base color, the color to check.
+// @returns bool.
+export temperature (color base) => //{
+    float _r = color.r(base)
+    float _g = color.g(base)
+    float _b = color.b(base)
+    // // convert rgb to tristimulus values:
+    // float _x = (-0.14282 * _r) + (1.54924 * _g) + (-0.95641 * _b)
+    // float _y = (-0.32466 * _r) + (1.57837 * _g) + (-0.73191 * _b) // illuminance
+    // float _z = (-0.68202 * _r) + (0.77073 * _g) + (0.56332 * _b)
+    // float _xyz = _x + _y + _z
+    // // calculate the normalized chromacity values:
+    // float _u = _x / _xyz
+    // float _v = _y / _xyz
+    // // compute CCT value:
+    // float _n = (_u - 0.3320) / (0.1858 - _v)
+    // float _cct = 449.0 * math.pow(_n, 3.0) + 3525.0 * math.pow(_n, 2.0) + 6823.3 * _n + 5520.33
+    // faster compressed algorithm:
+    float _n = ((0.23881) * _r + (0.25499) * _g + (-0.58291) * _b) / ((0.11109) * _r + (-0.85406) * _g + (0.52289) * _b)
+    449.0 * math.pow(_n, 3.0) + 3525 * math.pow(_n, 2.0) + 6823.3 * _n + 5520.33
+//{ usage:
+// color primary = input.color(color.red)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, str.format('color is {0}, {1}.', is_cool(primary) ? 'cool' : 'warm', temperature(primary)),color=primary, textcolor=complement(primary))
+//{ remarks:
+//      https://stackoverflow.com/questions/38876429/how-to-convert-from-rgb-values-to-color-temperature/38889696
+//      https://dsp.stackexchange.com/questions/8949/how-to-calculate-the-color-temperature-tint-of-the-colors-in-an-image
+//}}}
+
+// @function Color is high key (orange yellow green).
+// @param base color, the color to check.
+// @returns bool.
+export is_high_key (color base) => //{
+    float _r = color.r(base)
+    float _g = color.g(base)
+    float _b = color.b(base)
+    float _t = color.t(base)
+    [_h, _s, _l] = rgb_to_hsl(_r, _g, _b)
+    _h > 30.0 and _h < 140.0
+//{ usage:
+// color primary = input.color(color.red)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, str.format('color is {0}.', is_high_key(primary) ? 'high' : 'low'),color=primary, textcolor=complement(primary))
+//{ remarks:
+//}}}
+
+// @function Mix two colors together.
+// @param base color, the base color.
+// @param mix color, the color to mix.
+// @param rate float, default=0.5, the rate of mixture, range within 0.0 and 1.0.
+// @returns color.
+export mix (color base, color mix, float rate=0.5) => //{
+    if rate <= 0.0 or rate >= 1.0
+        runtime.error('ColorExtension -> mix(): "rate" must be within 0.0 and 1.0')
+    float _t0 = color.t(base)
+    float _t1 = color.t(mix)
+    [_h0, _s0, _l0] = rgb_to_hsl( color.r(base), color.g(base), color.b(base))
+    [_h1, _s1, _l1] = rgb_to_hsl( color.r(mix), color.g(mix), color.b(mix))
+    hsl(_h0 + (_h1 - _h0) * rate  , _s0 + (_s1 - _s0) * rate, _l0 + (_l1 - _l0) * rate, _t0 + (_t1 - _t0) * rate)
+//{ usage:
+// color base = input.color(color.red)
+// color mix_col = input.color(color.red)
+// float rate = input.float(1.0)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, 'base color.', color=base)
+//     label.new(bar_index+10, 0.0, 'mix color.', color=mix_col)
+//     label.new(bar_index+20, 0.0, 'result.', color=mix(base, mix_col, rate))
+//{ remarks:
+//      https://stackoverflow.com/questions/14819058/mixing-two-colors-naturally-in-javascript
+//}}}
+
+// @function Selects 2 near spectrum colors (H +/- 45).
+// @param primary color, the base color.
+// @returns tuple with 2 colors.
+export analog (color primary) => //{
+    [_h, _s, _l] = rgb_to_hsl( color.r(primary), color.g(primary), color.b(primary))
+    [hsl((360.0 + _h - 45.0) % 360.0, _s, _l, color.t(primary)), hsl((360.0 + _h + 45.0) % 360.0, _s, _l, color.t(primary))]
+//{ usage:
+// color base = input.color(color.red)
+// [min, max] = analog(base)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, 'lower.', color=min)
+//     label.new(bar_index+10, 0.0, 'primary.', color=base)
+//     label.new(bar_index+20, 0.0, 'upper.', color=max)
+//{ remarks:
+//}}}
+
+// @function Selects 2 far spectrum colors (H +/- 120).
+// @param primary color, the base color.
+// @returns tuple with 2 colors.
+export triadic (color primary) => //{
+    [_h, _s, _l] = rgb_to_hsl( color.r(primary), color.g(primary), color.b(primary))
+    [hsl((360.0 + _h - 120.0) % 360.0, _s, _l, color.t(primary)), hsl((360.0 + _h + 120.0) % 360.0, _s, _l, color.t(primary))]
+//{ usage:
+// color base = input.color(color.red)
+// [min, max] = triadic(base)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, 'lower.', color=min)
+//     label.new(bar_index+10, 0.0, 'primary.', color=base)
+//     label.new(bar_index+20, 0.0, 'upper.', color=max)
+//{ remarks:
+//}}}
+
+// @function Uses primary and the complementary color, + 60º to form a rectangular pattern on the color wheel.
+// @param primary color, the base color.
+// @returns tuple with 3 colors.
+export tetradic (color primary) => //{
+    [_h, _s, _l] = rgb_to_hsl( color.r(primary), color.g(primary), color.b(primary))
+    [complement(primary), hsl((360.0 + _h + 60.0) % 360.0, _s, _l, color.t(primary)), hsl((360.0 + _h + 240.0) % 360.0, _s, _l, color.t(primary))]
+//{ usage:
+// color base = input.color(color.red)
+// [comp, min, max] = tetradic(base)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, 'lower.', color=min)
+//     label.new(bar_index+10, 0.0, 'primary.', color=base)
+//     label.new(bar_index+10, 10.0, 'complementary.', color=comp)
+//     label.new(bar_index+20, 0.0, 'upper.', color=max)
+//{ remarks:
+//}}}
+
+// @function Uses primary and generate 3 equally spaced (90º) colors.
+// @param primary color, the base color.
+// @returns tuple with 3 colors.
+export square (color primary) => //{
+    [_h, _s, _l] = rgb_to_hsl( color.r(primary), color.g(primary), color.b(primary))
+    [complement(primary), hsl((360.0 + _h + 90.0) % 360.0, _s, _l, color.t(primary)), hsl((360.0 + _h + 270.0) % 360.0, _s, _l, color.t(primary))]
+//{ usage:
+// color base = input.color(color.red)
+// [comp, min, max] = square(base)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, 'lower.', color=min)
+//     label.new(bar_index+10, 0.0, 'primary.', color=base)
+//     label.new(bar_index+10, 10.0, 'complementary.', color=comp)
+//     label.new(bar_index+20, 0.0, 'upper.', color=max)
+//{ remarks:
+//}}}
+
+
+// @function Pick color at value in a triangular gradient
+// @param value float, value to pick the color in the gradient.
+// @param mid_point float, percent at wich the triangular pattern peaks.
+// @param min_color color, lowest color in the gradient.
+// @param mid_color color, peak color in the gradient.
+// @param max_color color, highest color in the gradient.
+// @returns color
+gradient_triangular(float value=0.0, float mid_point=50.0, color min_color=color.black, color mid_color=color.white, color max_color=color.black) =>  //{
+//  @function: finds the color output of a triangular gradient
+    color _col = na
+    if value <= mid_point
+        _col := color.from_gradient(value, 0.0, mid_point, min_color, mid_color)
+        _col
+    else
+        _col := color.from_gradient(value, mid_point, 100.0, mid_color, max_color)
+        _col
+    _col
+//{ usage:
+// r1 = ta.rsi(close, 3)
+// c1 = gradient_triangular(r1, 20, color.red, color.yellow, color.lime)
+// c2 = gradient_triangular(r1, 50, color.red, color.yellow, color.lime)
+// c3 = gradient_triangular(r1, 80, color.red, color.yellow, color.lime)
+// plot(r1, color=c1, linewidth=15)
+// plot(r1, color=c2, linewidth=10)
+// plot(r1, color=c3, linewidth=5)
+//{ remarks:
+//}}}
+

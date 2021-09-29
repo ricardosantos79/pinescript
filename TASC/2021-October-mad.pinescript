@@ -1,0 +1,12 @@
+//@version=4
+study(title="MAD - Moving Average Difference")
+// (C) 2021 John F. Ehlers
+int short_length = input(title="Short Length", defval=8)
+int long_length = input(title="Long Length", defval=23)
+
+float short_avg = sma(close, short_length)
+float long_avg = sma(close, long_length)
+float mad = 100 * (short_avg - long_avg) / long_avg
+
+plot(series=mad, title="MAD", color=color.red, linewidth=2)
+hline(price=0, color=color.white)

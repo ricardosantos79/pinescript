@@ -1,0 +1,43 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title="tables-003-oscilator_distribution")
+
+float rsi_src = input(close)
+int rsi_length = input(14)
+float rsi = rsi(rsi_src, rsi_length)
+
+hline(0)
+hline(50)
+hline(100)
+plot(rsi)
+ 
+color c_tb_bg = color.new(color.black, 100)
+float i_cl_height = input(0.5)
+var int[] distribution = array.new_int(100, 0)
+
+var T = table.new(position=position.top_right, 
+     rows=100, columns=100, bgcolor=c_tb_bg, 
+     frame_color=color.black, frame_width=0, 
+     border_color=color.black, border_width=0)
+ 
+if bar_index > rsi_length
+    int _rsi_index = round(rsi)
+
+    array.set(distribution, _rsi_index, array.get(distribution, _rsi_index) + 1)
+    int _total = array.sum(distribution)
+
+    for _r = 0 to 99
+        for _c = 0 to 99
+            int _dist_value = round(array.get(distribution, _r) / _total * 100)
+            if _c > _dist_value 
+                table.cell(table_id=T,
+                     column=99-_c, row=99-_r, text='',
+                     width=0.0, height=i_cl_height, 
+                     text_color=color.white, text_halign=text.align_center, bgcolor=c_tb_bg)
+            else
+                table.cell(table_id=T,
+                     column=99-_c, row=99-_r, text='',
+                     width=1.0, height=i_cl_height, 
+                     text_color=color.white, text_halign=text.align_center, bgcolor=color.blue)

@@ -1,0 +1,110 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Linear Regression', overlay=true)
+
+f_array_linreg(_X, _Y) =>
+//{
+//| Returns a linear regression channel using (X,Y) vector points.
+//| Resources:
+//|     https://www.statisticshowto.com/probability-and-statistics/regression-analysis/find-a-linear-regression-equation/#FindaLinear
+    int _sizeY = array.size(id=_Y)
+    int _sizeX = array.size(id=_X)
+    float _sumX = array.sum(id=_X)
+    float _sumY = array.sum(id=_Y)
+    float _sumXY = 0.0
+    float _sumX2 = 0.0
+    float _sumY2 = 0.0
+    if _sizeY == _sizeX
+        for _i = 0 to _sizeY - 1 by 1
+            float _Xi = nz(array.get(id=_X, index=_i))
+            float _Yi = nz(array.get(id=_Y, index=_i))
+            _sumXY := _sumXY + _Xi * _Yi
+            _sumX2 := _sumX2 + math.pow(_Xi, 2)
+            _sumY2 := _sumY2 + math.pow(_Yi, 2)
+            _sumY2
+    float _a = (_sumY * _sumX2 - _sumX * _sumXY) / (_sizeX * _sumX2 - math.pow(_sumX, 2))
+    float _b = (_sizeX * _sumXY - _sumX * _sumY) / (_sizeX * _sumX2 - math.pow(_sumX, 2))
+    float[] _predictions = array.new_float(size=0, initial_value=0.0)
+    float _max_dev = 0.0
+    float _min_dev = 0.0
+    float _stdev = 0.0
+    for _i = 0 to _sizeX - 1 by 1
+        float _vector = _a + _b * array.get(id=_X, index=_i)
+        array.push(id=_predictions, value=_vector)
+        //
+        float _Yi = array.get(id=_Y, index=_i)
+        float _diff = _Yi - _vector
+        if _diff > _max_dev
+            _max_dev := _diff
+            _max_dev
+        if _diff < _min_dev
+            _min_dev := _diff
+            _min_dev
+        _stdev := _stdev + math.abs(_diff)
+        _stdev
+//| Output:
+//|     _predictions:   Array with adjusted _Y values.
+//|     _max_dev:       Max deviation from the mean.
+//|     _min_dev:       Min deviation from the mean.
+//|     _stdev/_sizeX:  Average deviation from the mean.
+//}
+    [_predictions, _max_dev, _min_dev, _stdev / _sizeX]
+
+
+
+int length = input(10)
+var float[] prices = array.new_float(size=length, initial_value=open)
+var int[] indices = array.new_int(size=length, initial_value=0)
+if ta.pivothigh(2, 2)
+    e = array.pop(id=prices)
+    i = array.pop(id=indices)
+    array.unshift(id=prices, value=high[2])
+    array.unshift(id=indices, value=bar_index[2])
+if ta.pivotlow(2, 2)
+    e = array.pop(id=prices)
+    i = array.pop(id=indices)
+    array.unshift(id=prices, value=low[2])
+    array.unshift(id=indices, value=bar_index[2])
+
+
+
+[D, Dmax, Dmin, Dstdev] = f_array_linreg(indices, prices)
+
+string _ln_extend = input.string(defval=extend.none, title='Extend lines', options=[extend.both, extend.left, extend.none, extend.right])
+color _ln_mid_col = input(defval=color.blue)
+color _ln_std_col = input(defval=color.aqua)
+color _ln_max_col = input(defval=color.purple)
+var line ln_mid = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, extend=_ln_extend, color=_ln_mid_col, style=line.style_solid, width=2)
+var line ln_max = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, extend=_ln_extend, color=_ln_max_col, style=line.style_dotted, width=1)
+var line ln_min = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, extend=_ln_extend, color=_ln_max_col, style=line.style_dotted, width=1)
+var line ln_upper = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, extend=_ln_extend, color=_ln_std_col, style=line.style_dashed, width=1)
+var line ln_lower = line.new(x1=bar_index, y1=open, x2=bar_index, y2=open, extend=_ln_extend, color=_ln_std_col, style=line.style_dashed, width=1)
+
+int first = 0
+int last = array.size(id=indices) - 1
+ln_y1 = array.get(id=D, index=first)
+ln_y2 = array.get(id=D, index=last)
+
+line.set_xy1(id=ln_mid, x=array.get(id=indices, index=first), y=ln_y1)
+line.set_xy2(id=ln_mid, x=array.get(id=indices, index=last), y=ln_y2)
+line.set_xy1(id=ln_max, x=array.get(id=indices, index=first), y=ln_y1 + Dmax)
+line.set_xy2(id=ln_max, x=array.get(id=indices, index=last), y=ln_y2 + Dmax)
+line.set_xy1(id=ln_min, x=array.get(id=indices, index=first), y=ln_y1 + Dmin)
+line.set_xy2(id=ln_min, x=array.get(id=indices, index=last), y=ln_y2 + Dmin)
+line.set_xy1(id=ln_upper, x=array.get(id=indices, index=first), y=ln_y1 + Dstdev)
+line.set_xy2(id=ln_upper, x=array.get(id=indices, index=last), y=ln_y2 + Dstdev)
+line.set_xy1(id=ln_lower, x=array.get(id=indices, index=first), y=ln_y1 - Dstdev)
+line.set_xy2(id=ln_lower, x=array.get(id=indices, index=last), y=ln_y2 - Dstdev)
+
+
+// bool show_debug = input(false)
+// var label debug = label.new(bar_index, open, '')
+// if show_debug
+//     label.set_xy(id=debug, x=bar_index, y=close)
+//     label.set_text(id=debug, text=tostring(indices) + '\n' + tostring(D))
+// else
+//     label.delete(id=debug)
+
+

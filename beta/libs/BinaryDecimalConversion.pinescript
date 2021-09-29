@@ -1,0 +1,41 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Converts decimal to and from binary.
+library(title='BinaryDecimalConversion')
+
+// @function convert integer to binary string
+// @param number int, value to convert.
+// @returns string
+export to_binary(int number) => //{
+    string _str = ''
+    int _num = number
+    while _num >= 1
+        int _rem = _num % 2
+        _str := (_rem == 0 ? '0' : '1') + _str
+        _num := (_num - _rem) / 2
+    _str
+//{ usage:
+// st = to_binary(3232)
+// if barstate.islastconfirmedhistory
+//     label.new(bar_index, 0.0, st) // 110010100000
+//}}
+
+// @function Converts a binary in a string to decimal.
+// @param binary string, binary number in a string.
+// @returns int
+export to_decimal (string binary) => //{
+    int _val = 0
+    int _b = int(str.tonumber(binary))
+    int i = 0
+    while _b > 0
+        int _rem = _b % 10
+        _val += int(_rem * math.pow(2, i))
+        _b := (_b - _rem) / 10
+        i += 1
+    _val
+//{ usage:
+// plot(to_decimal('110010100000')) // 3232
+//}}

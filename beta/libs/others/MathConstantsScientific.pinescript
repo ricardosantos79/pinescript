@@ -1,0 +1,117 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Mathematical Constants
+library(title='MathConstantsScientific')
+
+//  reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/master/src/Numerics/Constants.cs
+
+
+// A collection of frequently used mathematical constants.
+    
+// Scientific Prefixes {
+
+// @function The SI prefix factor corresponding to 1 000 000 000 000 000 000 000 000
+export Yotta () => //{
+    1e24
+//}
+
+// @function The SI prefix factor corresponding to 1 000 000 000 000 000 000 000
+export Zetta () => //{
+    1e21
+//}
+
+// @function The SI prefix factor corresponding to 1 000 000 000 000 000 000
+export Exa () => //{
+    1e18
+//}
+
+// @function The SI prefix factor corresponding to 1 000 000 000 000 000
+export Peta () => //{
+    1e15
+//}
+
+// @function The SI prefix factor corresponding to 1 000 000 000 000
+export Tera () => //{
+    1e12
+//}
+
+// @function The SI prefix factor corresponding to 1 000 000 000
+export Giga () => //{
+    1e9
+//}
+
+// @function The SI prefix factor corresponding to 1 000 000
+export Mega () => //{
+    1e6
+//}
+
+// @function The SI prefix factor corresponding to 1 000
+export Kilo () => //{
+    1e3
+//}
+
+// @function The SI prefix factor corresponding to 100
+export Hecto () => //{
+    1e2
+//}
+
+// @function The SI prefix factor corresponding to 10
+export Deca () => //{
+    1e1
+//}
+
+// @function The SI prefix factor corresponding to 0.1
+export Deci () => //{
+    1e-1
+//}
+
+// @function The SI prefix factor corresponding to 0.01
+export Centi () => //{
+    1e-2
+//}
+
+// @function The SI prefix factor corresponding to 0.001
+export Milli () => //{
+    1e-3
+//}
+
+// @function The SI prefix factor corresponding to 0.000 001
+export Micro () => //{
+    1e-6
+//}
+
+// @function The SI prefix factor corresponding to 0.000 000 001
+export Nano () => //{
+    1e-9
+//}
+
+// @function The SI prefix factor corresponding to 0.000 000 000 001
+export Pico () => //{
+    1e-12
+//}
+
+// @function The SI prefix factor corresponding to 0.000 000 000 000 001
+export Femto () => //{
+    1e-15
+//}
+
+// @function The SI prefix factor corresponding to 0.000 000 000 000 000 001
+export Atto () => //{
+    1e-18
+//}
+
+// @function The SI prefix factor corresponding to 0.000 000 000 000 000 000 001
+export Zepto () => //{
+    1e-21
+//}
+
+// @function The SI prefix factor corresponding to 0.000 000 000 000 000 000 000 001
+export Yocto () => //{
+    1e-24
+//}
+//}
+

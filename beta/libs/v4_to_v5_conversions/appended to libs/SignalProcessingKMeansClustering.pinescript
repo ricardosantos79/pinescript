@@ -1,0 +1,162 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function K-Means Clustering', overlay=true, max_labels_count=500)
+
+// @function performs K-Means Algorithm to find n clusters.
+// @param _X float array, with x data points
+// @param _Y float array, y with data points
+// @param _number_of_clusters int, number of clusters to find center.
+// @returns float array with the cluster centers for the given data.
+f_kmeans_cluster(float[] _X, float[] _Y, int _number_of_clusters=2) =>
+//| -----------------------------------------------------------
+//| 1:  setup and errors
+    int _X_size = array.size(id=_X)
+    int _Y_size = array.size(id=_X)
+
+    float[] _centers_x = array.new_float(size=0, initial_value=0.)
+    float[] _centers_y = array.new_float(size=0, initial_value=0.)
+
+    if _X_size < 1
+        runtime.error('f_kmeans_cluster(): "_X" has the wrong size')
+        [_centers_x, _centers_y]
+    else if _Y_size < 1
+        runtime.error('f_kmeans_cluster(): "_Y" has the wrong size')
+        [_centers_x, _centers_y]
+    else if _X_size != _Y_size
+        runtime.error('f_kmeans_cluster(): "_X" and "_Y" do not match')
+        [_centers_x, _centers_y]
+    else if _number_of_clusters < 1
+        runtime.error('f_kmeans_cluster(): "_number_of_clusters" must be a positive number > 0')
+        [_centers_x, _centers_y]
+    else if _number_of_clusters > _X_size
+        runtime.error('f_kmeans_cluster(): "_number_of_clusters" must not exceed the number of data points in "_X, _Y".')
+        [_centers_x, _centers_y]
+    else
+        int[] _centers_count = array.new_int(size=_number_of_clusters, initial_value=1)
+    
+        float[] _distances = array.new_float(size=0, initial_value=0.)
+        int[] _group = array.new_int(size=0, initial_value=0)
+
+//| 2:  initial cluster centers
+//|     can use alternative method of initialization (kmeans++, random) for now will only use random
+        for _i = 0 to _number_of_clusters - 1 by 1
+            int _value = int(math.random(_X_size))
+            array.push(id=_centers_x, value=array.get(id=_X, index=_value))
+            array.push(id=_centers_y, value=array.get(id=_Y, index=_value))
+//|     2.b: calculate distances to centers:
+        for _i = 0 to _number_of_clusters - 1 by 1
+            float _total_sum_of_distance = 0.0
+            for _j = 0 to _X_size - 1 by 1
+                float _x = array.get(id=_X, index=_j)
+                float _y = array.get(id=_Y, index=_j)
+                //  calculate distance to cluster and populate the _group
+                int _min_group = 0
+                float _min_distance = math.sqrt(math.pow(_x - array.get(id=_centers_x, index=0), 2) + math.pow(_y - array.get(id=_centers_x, index=0), 2))
+                for _k = 1 to _number_of_clusters - 1 by 1
+                    float _c_x = array.get(id=_centers_x, index=_k)
+                    float _c_y = array.get(id=_centers_y, index=_k)
+                    float _distance = math.sqrt(math.pow(_x - _c_x, 2) + math.pow(_y - _c_y, 2))  //some examples did not sqrt
+                    if _distance < _min_distance
+                        _min_distance := _distance
+                        _min_group := _k
+                        _min_group
+                array.push(id=_group, value=_min_group)
+                array.push(id=_distances, value=_min_distance)
+                _total_sum_of_distance := _total_sum_of_distance + _min_distance
+                _total_sum_of_distance
+
+            _total_sum_of_distance := _total_sum_of_distance * math.random(1.0)
+
+            for _j = 0 to _X_size - 1 by 1
+                _total_sum_of_distance := _total_sum_of_distance - array.get(id=_group, index=_j)
+                if _total_sum_of_distance > 0
+                    continue
+                else
+                    array.set(id=_centers_x, index=_i, value=array.get(id=_X, index=_j))
+                    array.set(id=_centers_y, index=_i, value=array.get(id=_Y, index=_j))
+                    break
+//| 3:  Choose center with probability proportional to its squared distance from existing centers.
+            for _j = 0 to _X_size - 1 by 1
+                float _x = array.get(id=_X, index=_j)
+                float _y = array.get(id=_Y, index=_j)
+                //  calculate distance to cluster and populate the _group
+                int _min_group = 0
+                float _min_distance = math.sqrt(math.pow(_x - array.get(id=_centers_x, index=0), 2) + math.pow(_y - array.get(id=_centers_x, index=0), 2))
+                for _k = 1 to _number_of_clusters - 1 by 1
+                    float _c_x = array.get(id=_centers_x, index=_k)
+                    float _c_y = array.get(id=_centers_y, index=_k)
+                    float _distance = math.sqrt(math.pow(_x - _c_x, 2) + math.pow(_y - _c_y, 2))  //some examples did not sqrt
+                    if _distance < _min_distance
+                        _min_distance := _distance
+                        _min_group := _k
+                        _min_group
+                array.set(id=_group, index=_j, value=_min_group)
+                array.set(id=_distances, index=_j, value=_min_distance)
+//| 4:  find cluster centers.
+        for _i = 0 to _X_size - 1 by 1
+            float _x = array.get(id=_X, index=_i)
+            float _y = array.get(id=_Y, index=_i)
+            int _group_i = array.get(id=_group, index=_i)
+
+            int _center_count = array.get(id=_centers_count, index=_group_i)
+            float _center_x = array.get(id=_centers_x, index=_group_i)
+            float _center_y = array.get(id=_centers_y, index=_group_i)
+            array.set(id=_centers_count, index=_group_i, value=_center_count + 1)
+            array.set(id=_centers_x, index=_group_i, value=_center_x + _x)
+            array.set(id=_centers_y, index=_group_i, value=_center_y + _y)
+
+        for _i = 0 to _number_of_clusters - 1 by 1
+            int _center_count = array.get(id=_centers_count, index=_i)
+            float _center_x = array.get(id=_centers_x, index=_i)
+            float _center_y = array.get(id=_centers_y, index=_i)
+
+            array.set(id=_centers_x, index=_i, value=_center_x / _center_count)
+            array.set(id=_centers_y, index=_i, value=_center_y / _center_count)
+//| 6:  Output.
+        [_centers_x, _centers_y]
+//{ usage:
+//{ remarks:
+//      http://rosettacode.org/wiki/K-means%2B%2B_clustering
+//}}}
+
+
+size = input(20)
+data_x = array.new_float(size)
+data_y = array.new_float(size)
+for _i = 0 to size-1
+    array.set(data_x, _i, math.floor(math.random() * 500))
+    array.set(data_y, _i, math.random() * 500)
+
+flabel(_x, _y, _t='', _col=color.blue, _size=size.tiny)=>label.new(bar_index+int(_x), 0.0+_y, _t, color=color.new(_col, 20), style=label.style_circle, size=_size)
+fline(_x1, _y1, _x2, _y2, _col=color.blue)=>
+    line.new(bar_index+int(_x1), 0.0+_y1, bar_index+int(_x2), 0.0+_y2, extend=extend.right, color=_col, style=line.style_dashed, width=2)
+    line.new(bar_index+int(_x1), 0.0+_y1, bar_index+int(_x2), 0.0+_y2, extend=extend.none, color=_col, style=line.style_arrow_right, width=1)
+clusters = input(3)
+[kx, ky] = f_kmeans_cluster(data_x, data_y, clusters)
+
+float centerx = array.avg(kx)
+float centery = array.avg(ky)
+
+f_c(_i)=>color.rgb(255-_i*(255/clusters), _i*(255/clusters), 100, 0)
+
+if barstate.islastconfirmedhistory
+    // data points
+    for _i = 0 to size-1
+        flabel(array.get(data_x, _i), array.get(data_y, _i))
+    // cluster centers
+    for _k = 0 to clusters-1
+        float _kx = array.get(kx, _k)
+        float _ky = array.get(ky, _k)
+        color _c = f_c(_k)
+        flabel(_kx, _ky, str.tostring(_k), _col=_c, _size=size.huge)
+        if _k == 0
+            float _mx = (array.get(kx, clusters-1) + _kx) / 2.0
+            float _my = (array.get(ky, clusters-1) + _ky) / 2.0
+            fline(centerx, centery, _mx, _my, _col=_c)
+        else
+            float _mx = (centerx + array.get(kx, _k-1) + _kx) / 3.0
+            float _my = (centery + array.get(ky, _k-1) + _ky) / 3.0
+            fline(centerx, centery, _mx, _my, _col=_c)
+

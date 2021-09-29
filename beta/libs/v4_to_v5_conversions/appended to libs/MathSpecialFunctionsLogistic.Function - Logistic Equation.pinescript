@@ -1,0 +1,33 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Function - Logistic Equation')
+
+f_logde(_pop, _limit) =>
+    1. * _pop * (1. - _pop / _limit)
+
+int length = input(14)
+
+float pop = ta.change(close, length)
+
+float limit = ta.highest(length) - ta.lowest(length)
+
+logde_neg = f_logde(pop, limit)
+logde_pos = -f_logde(-pop, limit)
+
+plot(series=logde_pos, title='logistic eq', color=color.new(color.green, 0))
+plot(series=logde_neg, title='logistic eq', color=color.new(color.maroon, 0))
+hline(0)
+
+float upper = limit * 0.5
+float lower = -upper
+rp = plot(series=upper, title='R+', color=color.new(color.gray, 0))
+rm = plot(series=lower, title='R-', color=color.new(color.gray, 0))
+fill(rp, rm, color=color.new(color.gray, 70))
+
+
+color bgc = logde_neg < lower ? color.new(color.maroon, 0) : logde_pos > upper ? color.new(color.green, 0) : color.new(color.silver, 0)
+barcolor(bgc)
+
+

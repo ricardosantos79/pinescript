@@ -1,0 +1,601 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Methods for complex number trignometry operations.
+library(title='MathComplexTrignometry')
+
+// reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Trigonometry.cs
+//      test values : https://www.mathsisfun.com/numbers/complex-number-calculator.html
+
+// imports:
+import RicardoSantos/DebugConsole/2 as console
+[__T, __C] = console.init(30)
+//
+import RicardoSantos/MathTrig/1 as trig
+//
+import RicardoSantos/MathConstants/1 as constants
+//
+import RicardoSantos/MathComplexCore/3 as complex
+import RicardoSantos/MathComplexOperator/2 as complex_op
+import RicardoSantos/MathComplexExtension/2 as complex_ex
+//
+
+// preview of functions parameters:
+bool show_1 = input.bool(title='Show Trig functions:', defval=true)
+bool show_2 = input.bool(title='Show hyper Trig functions:', defval=true)
+bool show_3 = input.bool(title='Show arc Trig functions:', defval=true)
+bool show_4 = input.bool(title='Show hyper arc Trig functions:', defval=true)
+input_a = complex.new(3.1416, 1.618)
+
+// @function Hyperbolic Sine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export sinh (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> sinh(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.sinh(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _absre = math.abs(_re)
+            if _absre >= 22.0
+                float _h = math.exp(_absre) * 0.5
+                complex.new(math.sign(_re) * _h * math.cos(_im), _h * math.sin(_im))
+            else
+                complex.new(trig.sinh(_re) * math.cos(_im), trig.cosh(_re) * math.sin(_im))
+//{ usage:
+if show_2
+    console.queue_one(__C, str.format('sinh({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(sinh(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic cosine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export cosh (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> cosh(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.cosh(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _absre = math.abs(_re)
+            if _absre >= 22.0
+                float _h = math.exp(_absre) * 0.5
+                complex.new(_h * math.cos(_im), math.sign(_re) * _h * math.sin(_im))
+            else
+                complex.new(trig.cosh(_re) * math.cos(_im), trig.sinh(_re) * math.sin(_im))
+//{ usage:
+if show_2
+    console.queue_one(__C, str.format('cosh({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(cosh(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic tangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export tanh (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> tanh(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.tanh(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _absre = math.abs(_re)
+            if _absre >= 22.0
+                float _e = math.exp(-_absre)
+                if _e == 0.0
+                    complex.new(math.sign(_re), 0.0)
+                else
+                    complex.new(math.sign(_re), 4.0 * math.cos(_im) * math.sin(_im) * math.pow(_e, 2.0))
+            else
+                float POSINF = 1.7976931348623157e+308 // positive float infinity, credit to Xel_Arjona.
+                float _tani = math.tan(_im)
+                float _sinhr = trig.sinh(_re)
+                float _coshr = trig.cosh(_re)
+                if math.abs(_tani) >= POSINF
+                    complex.new(_coshr / _sinhr, 0.0)
+                else
+                    float _beta = 1.0 + math.pow(_tani, 2.0)
+                    float _denom = 1.0 + _beta * math.pow(_sinhr, 2.0)
+                    complex.new(_beta * _coshr * _sinhr / _denom, _tani / _denom)
+//{ usage:
+if show_2
+    console.queue_one(__C, str.format('tanh({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(tanh(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic cotangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export coth (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> coth(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.coth(complex.get_real(complex)), 0.0)
+        else
+            complex_op.divide(complex.one(), tanh(complex))
+//{ usage:
+if show_2
+    console.queue_one(__C, str.format('coth({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(coth(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Secant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export sech (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> sech(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.sech(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _absre = math.abs(_re)
+            float _tani = math.tan(_im)
+            float _cosi = math.cos(_im)
+            float _sinhr = trig.sinh(_re)
+            float _coshr = trig.cosh(_re)
+            if _absre >= 22.0
+                float _e = math.exp(-_absre)
+                if _e == 0.0
+                    complex.zero()
+                else
+                    float _e2 = math.pow(_e, 2.0)
+                    complex.new(4.0 * _coshr * _cosi * _e2, -4.0 * _sinhr * _tani * _cosi * _e2)
+            else
+                float POSINF = 1.7976931348623157e+308 // positive float infinity, credit to Xel_Arjona.
+                if math.abs(_tani) >= POSINF
+                    complex.new(0.0, -math.sign(_tani) / _sinhr)
+                else
+                    float _beta = 1.0 + math.pow(_tani, 2.0)
+                    float _denom = 1.0 +_beta * math.pow(_sinhr, 2.0)
+                    complex.new(_coshr / _cosi / _denom, -_sinhr * _tani / _cosi / _denom)
+//{ usage:
+if show_2
+    console.queue_one(__C, str.format('sech({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(sech(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Cosecant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export csch (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> csch(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.csch(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _absre = math.abs(_re)
+            float _coti = trig.cot(_im)
+            float _sini = math.sin(_im)
+            float _sinhr = trig.sinh(_re)
+            float _coshr = trig.cosh(_re)
+            if _absre >= 22.0
+                float _e = math.exp(-_absre)
+                if _e == 0.0
+                    complex.zero()
+                else
+                    float _e2 = math.pow(_e, 2.0)
+                    complex.new(4.0 * _sinhr * _coti * _sini * _e2, -4.0 * _coshr * _sini * _e2)
+            else
+                float POSINF = 1.7976931348623157e+308 // positive float infinity, credit to Xel_Arjona.
+                if math.abs(_coti) >= POSINF
+                    complex.new(math.sign(_coti) / _sinhr, 0.0)
+                else
+                    float _beta = 1.0 + math.pow(_coti, 2.0)
+                    float _denom = 1.0 +_beta * math.pow(_sinhr, 2.0)
+                    complex.new(_sinhr * _coti / _sini / _denom, -_coshr / _sini / _denom)
+//{ usage:
+if show_2
+    console.queue_one(__C, str.format('csch({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(csch(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Sine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export sin (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> sin(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(math.sin(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            complex.new(math.sin(_re) * trig.cosh(_im), math.cos(_re) * trig.sinh(_im))
+//{ usage:
+if show_1
+    console.queue_one(__C, str.format('sin({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(sin(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric cosine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export cos (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> cos(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(math.cos(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            complex.new(math.cos(_re) * trig.cosh(_im), -math.sin(_re) * trig.sinh(_im))
+//{ usage:
+if show_1
+    console.queue_one(__C, str.format('cos({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(cos(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric tangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export tan (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> tan(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(math.tan(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float[] _z = tanh(complex.new(-_im, _re))
+            complex.new(complex.get_imaginary(_z), -complex.get_real(_z))
+//{ usage:
+if show_1
+    console.queue_one(__C, str.format('tan({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(tan(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric cotangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export cot (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> cot(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.cot(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float[] _z = coth(complex.new(_im, -_re))
+            complex.new(complex.get_imaginary(_z), -complex.get_real(_z))
+//{ usage:
+if show_1
+    console.queue_one(__C, str.format('cot({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(cot(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Secant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export sec (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> sec(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.sec(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _cosr = math.cos(_re)
+            float _sinhi = trig.sinh(_im)
+            float _denom = math.pow(_cosr, 2) + math.pow(_sinhi, 2)
+            complex.new(_cosr * trig.cosh(_im) / _denom, math.sin(_re) * _sinhi / _denom)
+//{ usage:
+if show_1
+    console.queue_one(__C, str.format('sec({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(sec(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Cosecant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export csc (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> csc(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_real(complex)
+            complex.new(trig.csc(complex.get_real(complex)), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float _sinr = math.sin(_re)
+            float _sinhi = trig.sinh(_im)
+            float _denom = math.pow(_sinr, 2) + math.pow(_sinhi, 2)
+            complex.new(_sinr * trig.cosh(_im) / _denom, -math.cos(_re) * _sinhi / _denom)
+//{ usage:
+if show_1
+    console.queue_one(__C, str.format('csc({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(csc(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Arc Sine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export asin (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> asin(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float _re = complex.get_real(complex)
+        float _im = complex.get_imaginary(complex)
+        float[] _imo = complex.imaginary_one()
+        float[] _nimo = complex_op.negative(_imo)
+        float[] _one = complex.one()
+        if _im > 0.0 or (_im == 0.0 and _re < 0.0)
+            float[] _ncomplex = complex_op.negative(complex)
+            float[] _sq = complex_ex.square_root(complex_op.subtract(_one, complex_ex.square(_ncomplex)))
+            float[] _ln = complex_ex.natural_logarithm(complex_op.add(_sq, complex_op.multiply(_imo, _ncomplex)))
+            complex_op.negative(complex_op.multiply(_nimo, _ln))
+        else
+            float[] _sq = complex_ex.square_root(complex_op.subtract(_one, complex_ex.square(complex)))
+            float[] _ln = complex_ex.natural_logarithm(complex_op.add(_sq, complex_op.multiply(_imo, complex)))
+            complex_op.multiply(_nimo, _ln)
+//{ usage:
+if show_3
+    console.queue_one(__C, str.format('asin({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(asin(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Arc Cosine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export acos (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> acos(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float _re = complex.get_real(complex)
+        float _im = complex.get_imaginary(complex)
+        float[] _imo = complex.imaginary_one()
+        float[] _nimo = complex_op.negative(complex.imaginary_one())
+        float[] _one = complex.one()
+        if _im < 0.0 or (_im == 0.0 and _re > 0.0)
+            float[] _ncomplex = complex_op.negative(complex)
+            float[] _1_sqrt = complex_ex.square_root(complex_op.subtract(_one, complex_ex.square(_ncomplex)))
+            complex_op.subtract(complex.new(math.pi, 0.0), complex_op.multiply(_nimo, complex_ex.natural_logarithm(complex_op.add(_ncomplex, complex_op.multiply(_imo, _1_sqrt)))))
+        else
+            float[] _1_sqrt = complex_ex.square_root(complex_op.subtract(_one, complex_ex.square(complex)))
+            complex_op.multiply(_nimo, complex_ex.natural_logarithm(complex_op.add(complex, complex_op.multiply(_imo, _1_sqrt))))
+//{ usage:
+if show_3
+    console.queue_one(__C, str.format('acos({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(acos(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Arc Tangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export atan (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> atan(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float _re = complex.get_real(complex)
+        float _im = complex.get_imaginary(complex)
+        float[] _iz = complex.new(-_im, _re)
+        float[] _one = complex.one()
+        complex_op.multiply(complex.new(0.0, 0.5), complex_op.subtract(complex_ex.natural_logarithm(complex_op.subtract(_one, _iz)), complex_ex.natural_logarithm(complex_op.add(_one, _iz))))
+//{ usage:
+if show_3
+    console.queue_one(__C, str.format('atan({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(atan(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Arc Cotangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export acot (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> acot(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        if complex.is_zero(complex)
+            complex.new(constants.PiOver2(), 0.0)
+        else
+            float _re = complex.get_real(complex)
+            float _im = complex.get_imaginary(complex)
+            float[] _one = complex.one()
+            float[] _half = complex.new(0.5, 0.0)
+            float[] _imo = complex.imaginary_one()
+            float[] _inv = complex_op.divide(_imo, complex)
+            complex_op.multiply(complex_op.multiply(_imo, _half), complex_op.subtract(complex_ex.natural_logarithm(complex_op.subtract(_one, _inv)), complex_ex.natural_logarithm(complex_op.add(_one, _inv))))
+//{ usage:
+if show_3
+    console.queue_one(__C, str.format('acot({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(acot(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Arc Secant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export asec (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> asec(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float _re = complex.get_real(complex)
+        float _im = complex.get_imaginary(complex)
+        float[] _one = complex.one()
+        float[] _imo = complex.imaginary_one()
+        float[] _inv = complex_op.divide(_one, complex)
+        float[] _nimo = complex_op.negative(_imo)
+        float[] _imosqrt = complex_op.multiply(_imo, complex_ex.square_root(complex_op.subtract(_one, complex_ex.square(_inv))))
+        complex_op.multiply(_nimo, complex_ex.natural_logarithm(complex_op.add(_inv, _imosqrt)))
+//{ usage:
+if show_3
+    console.queue_one(__C, str.format('asec({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(asec(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Trigonometric Arc Cosecant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export acsc (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> acsc(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float _re = complex.get_real(complex)
+        float _im = complex.get_imaginary(complex)
+        float[] _one = complex.one()
+        float[] _imo = complex.imaginary_one()
+        float[] _inv = complex_op.divide(_one, complex)
+        float[] _nimo = complex_op.negative(_imo)
+        float[] _sqrt = complex_ex.square_root(complex_op.subtract(_one, complex_ex.square(_inv)))
+        complex_op.multiply(_nimo, complex_ex.natural_logarithm(complex_op.add(complex_op.multiply(_imo, _inv), _sqrt)))
+//{ usage:
+if show_3
+    console.queue_one(__C, str.format('acsc({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(acsc(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Arc Sine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export asinh (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> asinh(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float[] _one = complex.one()
+        float[] _sq = complex_ex.square_root(complex_op.add(complex_ex.square(complex), _one))
+        complex_ex.natural_logarithm(complex_op.add(complex, _sq))
+//{ usage:
+if show_4
+    console.queue_one(__C, str.format('asinh({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(asinh(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Arc Cosine of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export acosh (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> acosh(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float[] _one = complex.one()
+        float[] _sqn = complex_ex.square_root(complex_op.subtract(complex, _one))
+        float[] _sqp = complex_ex.square_root(complex_op.add(complex, _one))
+        float[] _sq = complex_op.multiply(_sqn, _sqp)
+        complex_ex.natural_logarithm(complex_op.add(complex, _sq))
+//{ usage:
+if show_4
+    console.queue_one(__C, str.format('acosh({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(acosh(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Arc Tangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export atanh (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> atanh(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float[] _one = complex.one()
+        float[] _half = complex.new(0.5, 0.0)
+        float[] _lnn = complex_ex.natural_logarithm(complex_op.subtract(_one, complex))
+        float[] _lnp = complex_ex.natural_logarithm(complex_op.add(_one, complex))
+        float[] _ln = complex_op.subtract(_lnp, _lnn)
+        complex_op.multiply(_half, _ln)
+//{ usage:
+if show_4
+    console.queue_one(__C, str.format('atanh({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(atanh(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Arc Cotangent of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export acoth (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> acoth(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float[] _one = complex.one()
+        float[] _half = complex.new(0.5, 0.0)
+        float[] _inv = complex_op.divide(_one, complex)
+        float[] _lnn = complex_ex.natural_logarithm(complex_op.subtract(_one, _inv))
+        float[] _lnp = complex_ex.natural_logarithm(complex_op.add(_one, _inv))
+        float[] _ln = complex_op.subtract(_lnp, _lnn)
+        complex_op.multiply(_half, _ln)
+//{ usage:
+if show_4
+    console.queue_one(__C, str.format('acoth({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(acoth(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Arc Secant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export asech (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> asech(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float[] _one = complex.one()
+        float[] _inv = complex_op.divide(_one, complex)
+        float[] _sqn = complex_ex.square_root(complex_op.subtract(_inv, _one))
+        float[] _sqp = complex_ex.square_root(complex_op.add(_inv, _one))
+        float[] _sq = complex_op.multiply(_sqn, _sqp)
+        complex_ex.natural_logarithm(complex_op.add(_inv, _sq))
+//{ usage:
+if show_4
+    console.queue_one(__C, str.format('asech({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(asech(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+// @function Hyperbolic Arc Cosecant of complex number.
+// @param complex float array, complex number.
+// @returns float array.
+export acsch (float[] complex) => //{
+    if not complex.is_complex(complex)
+        runtime.error('MathComplexTrignometry -> acsch(): "complex" is the wrong size.')
+        complex.nan()
+    else
+        float[] _one = complex.one()
+        float[] _inv = complex_op.divide(_one, complex)
+        float[] _sq = complex_ex.square_root(complex_op.add(complex_ex.square(_inv), _one))
+        complex_ex.natural_logarithm(complex_op.add(_inv, _sq))
+//{ usage:
+if show_4
+    console.queue_one(__C, str.format('acsch({0}): {1}', complex.to_string(input_a, '#.##'), complex.to_string(acsch(input_a), '#.##')))
+//{ remarks:
+//}}}
+
+//###########################################
+console.update(__T, __C)

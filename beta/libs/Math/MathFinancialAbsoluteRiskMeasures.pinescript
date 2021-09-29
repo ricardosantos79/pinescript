@@ -1,0 +1,151 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Financial Absolute Risk Measures.
+library(title='MathFinancialAbsoluteRiskMeasures')
+
+// reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/master/src/Numerics/Financial/AbsoluteRiskMeasures.cs
+
+// Note: The following statistics would be considered an absolute risk statistic in the finance realm as well.
+//      Standard Deviation
+//      Annualized Standard Deviation = Math.Sqrt(Monthly Standard Deviation x ( 12 ))
+//      Skewness
+//      Kurtosis
+
+// @function Standard deviation of gains in a data sample.
+// @param sample float array, data sample.
+// @returns float.
+export gain_stdev (float[] sample) => //{
+    int _size = array.size(sample)
+    if _size > 0
+        float[] _G = array.new_float()
+        for _i = 0 to _size-1
+            float _xi = array.get(sample, _i)
+            if _xi >= 0.0
+                array.push(_G, _xi)
+        array.stdev(_G)
+//{ usage:
+// plot(gain_stdev(array.from(250.0, -35, 100, 50, -120, 200)))
+//{ notes:
+// Calculation is similar to Standard Deviation , except it calculates an average (mean) return only for periods with a gain
+// and measures the variation of only the gain periods around the gain mean. Measures the volatility of upside performance.
+// © Copyright 1996, 1999 Gary L.Gastineau. First Edition. © 1992 Swiss Bank Corporation.
+//}}}
+
+// @function Standard deviation of losses in a data sample.
+// @param sample float array, data sample.
+// @returns float.
+export loss_stdev(float[] sample) => //{
+    int _size = array.size(sample)
+    if _size > 0
+        float[] _L = array.new_float()
+        for _i = 0 to _size-1
+            float _xi = array.get(sample, _i)
+            if _xi < 0.0
+                array.push(_L, _xi)
+        array.stdev(_L)
+//{ usage:
+// plot(loss_stdev(array.from(250.0, -35, 100, 50, -120, 200)))
+//{ notes:
+// Similar to standard deviation, except this statistic calculates an average (mean) return for only the periods with a loss and then
+// measures the variation of only the losing periods around this loss mean. This statistic measures the volatility of downside performance.
+// http://www.offshore-library.com/kb/statistics.php
+//}}}
+
+// @function Downside standard deviation in a data sample.
+// @param sample float array, data sample.
+// @param minimal_acceptable_return float, minimum gain value.
+// @returns float.
+export downside_stdev (float[] sample, float minimal_acceptable_return=0.0) => //{
+    int _size = array.size(sample)
+    if _size > 0
+        float[] _D = array.new_float()
+        for _i = 0 to _size-1
+            float _xi = array.get(sample, _i)
+            if _xi < minimal_acceptable_return
+                array.push(_D, _xi)
+        array.stdev(_D)
+//{ usage:
+// plot(downside_stdev(array.from(250.0, -35, 100, 50, -120, 200), 100.0))
+//{ notes:
+// This measure is similar to the loss standard deviation except the downside deviation
+// considers only returns that fall below a defined minimum acceptable return (MAR) rather than the arithmetic mean.
+// For example, if the MAR is 7%, the downside deviation would measure the variation of each period that falls below
+// 7%. (The loss standard deviation, on the other hand, would take only losing periods, calculate an average return for
+// the losing periods, and then measure the variation between each losing return and the losing return average).
+//}}}
+
+// @function Standard deviation of less than average returns in a data sample.
+// @param sample float array, data sample.
+// @returns float.
+export semi_stdev (float[] sample) => //{
+    int _size = array.size(sample)
+    if _size > 0
+        float[] _S = array.new_float()
+        float _mean = array.avg(sample)
+        for _i = 0 to _size-1
+            float _xi = array.get(sample, _i)
+            if _xi < _mean
+                array.push(_S, _xi)
+        array.stdev(_S)
+//{ usage:
+// plot(semi_stdev(array.from(250.0, -35, 100, 50, -120, 200)))
+//{ notes:
+// A measure of volatility in returns below the mean. It's similar to standard deviation, but it only
+// looks at periods where the investment return was less than average return.
+//}}}
+
+// @function ratio of average gains of average losses in a data sample.
+// @param sample float array, data sample.
+// @returns float.
+export gain_loss_ratio (float[] sample) => //{
+    int _size = array.size(sample)
+    if _size > 0
+        float[] _G = array.new_float()
+        float[] _L = array.new_float()
+        for _i = 0 to _size-1
+            float _xi = array.get(sample, _i)
+            if _xi >= 0
+                array.push(_G, _xi)
+            else
+                array.push(_L, _xi)
+        math.abs(array.stdev(_G) / array.stdev(_L))
+//{ usage:
+// plot(gain_loss_ratio(array.from(250.0, -35, 100, 50, -120, 200)))
+//{ notes:
+// Measures a fund’s average gain in a gain period divided by the fund’s average loss in a losing
+// period. Periods can be monthly or quarterly depending on the data frequency.
+//}}}
+
+// @function Compound Risk Score
+// @param source float, input data, default=close.
+// @param length int, period of observation, default=12)
+// @returns float.
+export compound_risk_score (float source=close, int length=12) => //{
+    float _total = 0.0
+    float _absolute = 0.0
+    if length < 1
+        error('MathFinancialAbsoluteMeasures -> compound_risk_score(): "length" must be positive > 0.')
+        float(na)
+    else
+        for _i = 1 to length
+            float _diff = source[0] - source[_i]
+            _total += _diff
+            _absolute += math.abs(_diff)
+        (_total / _absolute) * 100
+//{ usage:
+// int length = input.int(100), int avg_length = input.int(25)
+// float cr = compound_risk_score(close, length)
+// float ma = math.avg(ta.sma(cr, avg_length), 50.0)
+// plot(series=cr, color=color.new(color.red, 0))
+// plot(series=ma, color=color.new(color.teal, 0))
+// hline(100), hline(50), hline(0), hline(-50), hline(-100)
+//{ remarks:
+//  if you took a trade for every bars close for the duration of the length
+//  how would those trades fair atm?
+//  values closer to (100 | -100) are better for its (bull | bear), closer to 0 will be closer to break eaven.
+//  this indicator is optimal for trending markets.
+//}}}

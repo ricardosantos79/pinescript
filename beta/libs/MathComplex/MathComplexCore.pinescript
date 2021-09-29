@@ -1,0 +1,206 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Core functions to handle complex numbers.
+library(title='MathComplexCore')
+
+// references:
+//      https://en.wikipedia.org/wiki/Complex_number
+//      js: https://rosettacode.org/wiki/Fast_Fourier_transform
+//      https://github.com/trekhleb/javascript-algorithms/blob/477f30b0bdac6024874d2976de1eca7afe0176dd/src/algorithms/math/complex-number/ComplexNumber.js#L3
+//      https://github.com/infusion/Complex.js/
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs
+
+// imports:
+import RicardoSantos/DebugConsole/2 as console
+// console.init(), console.queue(), console.update()
+[__T, __C] = console.init(20) //initiate console configuration variables.
+//
+
+// @function Set the real part of complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param real float, value to replace real value of complex_number.
+// @returns Void, Modifies complex_number.
+export set_real (float[] complex_number, float real) => //{
+    array.set(id=complex_number, index=0, value=real)
+//}
+
+// @function Set the imaginary part of complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param imaginary float, value to replace imaginary value of complex_number.
+// @returns Void, Modifies complex_number.
+export set_imaginary (float[] complex_number, float imaginary=0.0) => //{
+    array.set(id=complex_number, index=1, value=imaginary)
+//}
+
+// @function Creates a prototype array to handle complex numbers.
+// @param real float, real value of the complex number. default=0.
+// @param imaginary float, imaginary number of the complex number. default=0.
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export new (float real=0.0, float imaginary=0.0) => //{
+    array.from(real, imaginary)
+//}
+
+// @function complex number "0+0i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export zero () => //{
+    array.new_float(2, 0.0)
+//}
+
+// @function complex number "1+0i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export one () => //{
+    array.from(1.0, 0.0)
+//}
+
+// @function complex number "0+1i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export imaginary_one () => //{
+    array.from(0.0, 1.0)
+//}
+
+// @function complex number "0+1i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export nan () => //{
+    array.new_float(2, na)
+//}
+
+// @function Create a complex number from a point's polar coordinates.
+// @param magnitude float, default=0.0, The magnitude, which is the distance from the origin (the intersection of the x-axis and the y-axis) to the number.
+// @param phase float, default=0.0, The phase, which is the angle from the line to the horizontal axis, measured in radians.
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export from_polar_coordinates (float magnitude=0.0, float phase=0.0) => //{
+    array.from(magnitude * math.cos(phase), magnitude * math.sin(phase))
+//}
+
+// @function Get the real part of complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns float, Real part of the complex_number.
+export get_real (float[] complex_number) => //{
+    array.get(id=complex_number, index=0)
+//}
+
+// @function Get the imaginary part of complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns float, Imaginary part of the complex number.
+export get_imaginary (float[] complex_number) => //{
+    array.get(id=complex_number, index=1)
+//}
+
+// @function Checks that its a valid complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_complex (float[] complex_number) => //{
+    array.size(complex_number) == 2
+//}
+
+// @function Checks that its empty "na" complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_nan (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        runtime.error('MathComplex -> is_nan(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        na(get_real(complex_number)) or na(get_imaginary(complex_number))
+//}
+
+// @function Checks that the complex_number is real.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_real (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        runtime.error('MathComplex -> is_real(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        get_imaginary(complex_number) == 0.0
+//}
+
+// @function Checks that the complex_number is real and not negative.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_real_non_negative (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        runtime.error('MathComplex -> is_real_non_negative(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        get_real(complex_number) >= 0.0 and get_imaginary(complex_number) == 0
+//}
+
+// @function Checks that the complex_number is zero.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_zero (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        runtime.error('MathComplex -> is_real(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        (get_real(complex_number) + get_imaginary(complex_number)) == 0.0
+//}
+
+// @function Compares two complex numbers: 
+// @param complex_number_a float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_number_b float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns boolean value representing the equality.
+export equals (float[] complex_number_a, float[] complex_number_b) => //{
+    float _epsilon = 1e-15
+    math.abs(get_real(complex_number_b) - get_real(complex_number_a)) <= _epsilon and math.abs(get_imaginary(complex_number_b) - get_imaginary(complex_number_a)) <= _epsilon
+//}
+
+// @function Converts complex_number to a string format, in the form: "a+bi" 
+// @param complex pseudo complex number in the form of a array [real, imaginary].
+// @param format string, formating to apply.
+// @returns a string in "a+bi" format
+export to_string (float[] complex, string format='#.##########') => //{
+    if not is_complex(complex)
+        runtime.error('MathComplex -> to_string(): "complex" has the wrong size.')
+        string(na)
+    else
+    	float _re = get_real(complex)
+    	float _im = get_imaginary(complex)
+    	string _str = ''
+    	if na(_re)
+    		_str := str.tostring(_im, format) + 'i'
+    	else if _im < 0
+    		_str := str.tostring(_re, format) + '' + str.tostring(_im, format) + 'i'
+    	else
+    		_str := str.tostring(_re, format) + '+' + str.tostring(_im, format) + 'i'
+    	_str
+//{ usage:
+// console.queue_one(__C, str.format('to_string conversion of complex number "5.2+3.0i": {0}', to_string(new(5.2, 3.0), '#.##'))) // 
+//}
+
+if barstate.islastconfirmedhistory
+    float _i0 = 1.0
+    float _i1 = 2.0
+    float _i2 = 3.0
+    float _i3 = 4.0
+    A = new(0.0, 0.0)
+    B = one()
+    console.queue_one(__C, str.format('input parameters: {0}, {1}, {2}, {3}', _i0, _i1, _i2, _i3))
+    console.queue_one(__C, str.format('##   Create      ##', ''))
+    console.queue_one(__C, str.format('new complex number A: {0}', to_string(A, '#.##')))
+    console.queue_one(__C, str.format('new complex number B: {0}', to_string(A, '#.##')))
+    console.queue_one(__C, str.format('new complex number zero(): {0}', to_string(zero(), '#.##')))
+    console.queue_one(__C, str.format('new complex number one(): {0}', to_string(one(), '#.##')))
+    console.queue_one(__C, str.format('new complex number imaginary_one(): {0}', to_string(imaginary_one(), '#.##')))
+    console.queue_one(__C, str.format('new complex number nan(): {0}', to_string(nan(), '#.##')))
+    console.queue_one(__C, str.format('new complex number from_polar_coordinates({0}, {1}): {2}', _i2, _i3, to_string(from_polar_coordinates(_i2, _i3), '#.##')))
+    console.queue_one(__C, str.format('##   Access      ##', ''))
+    set_real(A, _i0), set_imaginary(A, _i1)
+    console.queue_one(__C, str.format('set real and imaginary parts of A with inputs({0}, {1}): {2}', _i0, _i1, to_string(A, '#.##')))
+    console.queue_one(__C, str.format('set real and imaginary parts of B with inputs({0}, {1}): {2}', _i2, _i3, to_string(B, '#.##')))
+    console.queue_one(__C, str.format('get real and imaginary parts of B:({0}, {1})', get_real(B), get_imaginary(B)))
+    console.queue_one(__C, str.format('##   Test        ##', ''))
+    console.queue_one(__C, str.format('Test: is A complex number: {0}', is_complex(A)))
+    console.queue_one(__C, str.format('Test: is A NaN: {0}', is_nan(A)))
+    console.queue_one(__C, str.format('Test: is A real: {0}', is_real(A)))
+    console.queue_one(__C, str.format('Test: is A real non negative: {0}', is_real_non_negative(A)))
+    console.queue_one(__C, str.format('Test: is A zero: {0}', is_zero(A)))
+
+
+// update console
+console.update(__T, __C)
+

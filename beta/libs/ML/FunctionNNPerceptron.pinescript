@@ -1,0 +1,46 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Perceptron Function for Neural networks.
+library(title='FunctionNNPerceptron')
+
+import RicardoSantos/MLActivationFunctions/3 as activation
+
+// reference: 
+//      https://www.educba.com/perceptron-learning-algorithm/
+//      https://blog.primen.dk/basic-neural-network-model-insights/
+//      https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
+//	    https://en.wikipedia.org/wiki/Artificial_neural_network
+//	    https://blog.primen.dk/basic-neural-network-code-example-java/
+
+// @function generalized perceptron node for Neural Networks.
+// @param inputs float array, the inputs of the perceptron.
+// @param weights float array, the weights for inputs.
+// @param bias float, default=1.0, the default bias of the perceptron.
+// @param activation_function string, default='sigmoid', activation function applied to the output.
+// @output float
+export perceptron (float[] inputs, float[] weights, float bias=1.0, string activation_function='sigmoid') => //{
+    // TODO: {
+    //      - implement missing parameter(s) for (elu, selu) functions
+    //      - method for softmax
+    //           }
+    int _size_i = array.size(inputs)
+    float _sum = bias
+    for _i = 0 to _size_i-1
+        _sum += array.get(inputs, _i) * array.get(weights, _i)
+    activation.function(value=_sum, name=activation_function)
+//{ usage:
+var float bias = 0.50
+float y = close/close[1]
+float[] x = array.from(y, y[1], y[2], y[3], y[4])
+float[] w = array.from(0.8, -0.7, -0.5, -0.3, -0.5)
+float p = perceptron(x, w, bias)
+plot(p)
+//{ remarks:
+//}}}
+
+
+
+

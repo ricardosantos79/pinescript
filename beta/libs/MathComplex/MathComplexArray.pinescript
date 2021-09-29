@@ -1,0 +1,121 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Array methods to handle complex number arrays.
+library(title='MathComplexArray')
+
+
+// Complex numbers prototype: {
+//     description:
+//         A set of utility functions to handle complex numbers.
+//     references:
+//         https://en.wikipedia.org/wiki/Complex_number
+//         js: https://rosettacode.org/wiki/Fast_Fourier_transform
+//         https://github.com/trekhleb/javascript-algorithms/blob/477f30b0bdac6024874d2976de1eca7afe0176dd/src/algorithms/math/complex-number/ComplexNumber.js#L3
+//         https://github.com/infusion/Complex.js/
+
+// required imports:
+import RicardoSantos/MathComplexCore/3 as complex
+
+// @function Prototype to initialize a array of complex numbers.
+// @param size size of the array.
+// @param initial_complex Complex number to be used as default value, in the form of array [real, imaginary].
+// @returns float array, pseudo complex Array in the form of a array [0:real, 1:imaginary, 2:real, 3:imaginary,...]
+export new (int size=0, float[] initial_complex) => //{
+    if size > 0
+    	float _init_real = array.get(id=initial_complex, index=0)
+    	float _init_imaginary = array.get(id=initial_complex, index=1)
+    
+        float[] _complex_array = array.new_float(0)
+        for _i = 0 to size-1
+            array.push(id=_complex_array, value=_init_real)
+            array.push(id=_complex_array, value=_init_imaginary)
+        _complex_array
+    else
+        array.new_float(0)
+//}
+
+// @function Get the complex number in a array, in the form of a array [real, imaginary]
+// @param id float array, ID of the array.
+// @param index int, Index of the complex number.
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export get(float[] id, int index) => //{
+    int _size = math.round(array.size(id) / 2)
+    int _index = index * 2
+    if index > -1 and index < _size
+        complex.new(array.get(id, _index), array.get(id, _index + 1))
+    else
+        complex.new(0.0, 0.0)
+//}
+
+// @function Sets the values complex number in a array.
+// @param id float array, ID of the array.
+// @param index int, Index of the complex number.
+// @param complex_number float array, Complex number, in the form: [real, imaginary].
+// @returns Void, updates array id.
+export set (float[] id, int index, float[] complex_number) => //{
+	float _re = complex.get_real(complex_number)
+	float _im = complex.get_imaginary(complex_number)
+    int _size = array.size(id)-1
+    int _index = index * 2
+    if index > -1 and _index < _size
+        array.set(id, _index, _re)
+        array.set(id, _index + 1, _im)
+//}
+
+// @function Push the values into a complex number array.
+// @param id float array, ID of the array.
+// @param complex_number float array, Complex number, in the form: [real, imaginary].
+// @returns Void, updates array id.
+export push (float[] id, float[] complex_number) => //{
+    if not complex.is_complex(complex_number)
+        runtime.error('MathComplexArray -> push(): "complex_number" has the wrong size.')
+    else
+    	float _re = complex.get_real(complex_number)
+    	float _im = complex.get_imaginary(complex_number)
+        array.push(id, _re)
+        array.push(id, _im)
+//}
+
+// @function Pop the values from a complex number array.
+// @param id float array, ID of the array.
+// @param complex_number float array, Complex number, in the form: [real, imaginary].
+// @returns Void, updates array id.
+export pop (float[] id) => //{
+    int _size = array.size(id)
+    if _size < 2
+        runtime.error(str.format('MathComplexArray -> pop(): "id" has the wrong size. {0}', _size))
+        array.new_float(na)
+    else
+        complex.new(array.pop(id), array.pop(id))
+//}
+
+// @function Reads a array of complex numbers into a string, of the form: "[ [a+bi], ... ]""
+// @param id float array, ID of the array.
+// @param format string, format of the number conversion, default='#.##########'.
+// @returns string, translated complex array into string.
+export to_string (float[] id, string format='#.##########') => //{
+    int _size = math.round(array.size(id) / 2)
+    string _str = '[ '
+    if _size > 0
+        for _i = 0 to _size-1
+            _str := _str + '[ ' + complex.to_string(get(id, _i), format) + ' ]'
+            if _i >= _size-1
+                _str := _str + ' ]'
+            else
+                _str := _str + ', '
+    _str
+//}
+
+
+if barstate.ishistory[1] and (barstate.isrealtime or barstate.islast)
+    a = new(1, complex.new(0.0, 0.0))
+    string _text = to_string(a, '#.##')
+    b = new(2, complex.new(1.0, 2.0))
+    _text += '\n' + to_string(b, '#.##')
+    label.new(x=bar_index, y=0.0, text=_text, style=label.style_label_left, textalign=text.align_left)
+
+
+

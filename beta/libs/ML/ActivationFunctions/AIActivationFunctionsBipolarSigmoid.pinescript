@@ -1,0 +1,61 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Bipolar sigmoid activation function
+library(title='AIActivationFunctionsBipolarSigmoid')
+
+// reference:
+//      https://github.com/andrewkirillov/AForge.NET/blob/master/Sources/Neuro/Activation%20Functions/BipolarSigmoidFunction.cs
+
+//  The class represents bipolar sigmoid activation function with
+//  the next expression:
+//
+// |                        2
+// |        f(x) = ------------------ - 1
+// |                1 + exp(-alpha * x)
+// |        
+// |                  2 * alpha * exp(-alpha * x )
+// |        f'(x) = -------------------------------- = alpha * (1 - f(x)^2) / 2
+// |                  (1 + exp(-alpha * x))^2
+//
+// - Function output range: (-1, 1).
+// - The alpha value determines steepness of the function. Increasing value of
+// this property changes sigmoid to look more like a threshold function. Decreasing
+// value of this property makes sigmoid to be very smooth (slowly growing from its
+// minimum value to its maximum value).
+//
+
+// @function Function at value point.
+// @param value float, value point.
+// @param alpha float, default=2.0, sigmoid alpha value.
+// @returns float
+export function (float value, float alpha=2.0) => //{
+	(( 2.0 / (1.0 + math.exp( -alpha * value))) - 1.0)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Function derivate at value point.
+// @param value float, value point.
+// @param alpha float, default=2.0, sigmoid alpha value.
+// @returns float
+export derivate (float value, float alpha=2.0) => //{
+    float _y = math.pow(function(value), 2.0)
+	alpha * (1.0 - _y) / 2.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Function derivate at value point.
+// @param value float, value point.
+// @param alpha float, default=2.0, sigmoid alpha value.
+// @returns float
+export derivate2 (float value, float alpha=2.0) => //{
+    alpha * (1.0 - math.pow(value, 2.0)) / 2.0
+//{ usage:
+//{ remarks:
+//}}}
+
+

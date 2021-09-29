@@ -1,0 +1,44 @@
+//@version=5
+indicator(title='[RS]Signal to Noise Bands', shorttitle='StN.B', overlay=true)
+
+float src = close
+int signal_length = input(defval=250)
+int dev_length = input(defval=10)
+float power = input(defval=2.)
+
+f_stn_bands(_src, _signal_length, _dev_length, _power) =>
+    float _signal = ta.sma(_src, _signal_length)
+    float _d = ta.stdev(_src, _dev_length)
+    float _range = _d * math.log10(math.pow(_signal, _power) / math.pow(_d, _power))
+    float _sp = _signal + _range
+    float _sn = _signal - _range
+    [_signal, _sp, _sn]
+
+f_max_stn_bands(_src, _signal_length, _dev_length, _power) =>
+    float _signal = ta.sma(_src, _signal_length)
+    float _d = ta.stdev(_src, _dev_length)
+    float _range = _d * math.log10(math.pow(_signal, _power) / math.pow(_d, _power))
+    if na(_range[1])
+        _range := _range
+        _range
+    if na(_range)
+        _range := nz(_range[1] * 0.618)
+        _range
+    else
+        _range := math.max(nz(_range[1], 0.0), _range)
+        _range
+    float _sp = _signal + _range
+    float _sn = _signal - _range
+    [_signal, _sp, _sn]
+
+[signal, sp, sn] = f_stn_bands(src, signal_length, dev_length, power)
+[msignal, msp, msn] = f_max_stn_bands(src, signal_length, dev_length, power)
+
+plot(series=signal, title='S', color=color.new(color.black, 0), style=plot.style_linebr)
+plot(series=sp, title='s+', color=color.new(color.black, 80), style=plot.style_linebr)
+plot(series=sn, title='s-', color=color.new(color.black, 80), style=plot.style_linebr)
+
+plot(series=msp, title='m+', color=color.new(color.black, 0), style=plot.style_linebr)
+plot(series=msn, title='m-', color=color.new(color.black, 0), style=plot.style_linebr)
+
+

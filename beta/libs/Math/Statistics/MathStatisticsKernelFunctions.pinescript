@@ -1,0 +1,197 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description TODO: add library description here
+library(title='MathStatisticsKernelFunctions')
+
+// reference:
+//      list: https://en.wikipedia.org/wiki/Kernel_%28statistics%29
+//      
+
+
+//    y+
+//      |    ---------------------------------    
+//      |    |               |               |
+//      |    |               |               |
+//      |    |               |               |
+//   -x -----o---------------o---------------o------ +x
+//      -bandwidth      origin (0)      +bandwidth
+
+// @function Uniform kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export uniform (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        0.5
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(uniform(b, 0.9), color=color.red), plot(b, color=color.silver)
+//{ remarks:
+//}}}
+
+// @function Triangular kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export triangular (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        1.0 -  math.abs(distance / bandwidth)
+//{ usage
+// b = -1.0 + (bar_index%100) * 0.02,  plot(triangular(b, 0.75)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Epanechnikov kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export epanechnikov (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        0.25 * (1.0 - math.pow(distance/bandwidth, 2.0))
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(epanechnikov(b, 0.9)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Quartic kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export quartic (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        0.9375 * math.pow(1.0 - math.pow(distance/bandwidth, 2.0), 2.0)
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  , plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Triweight kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export triweight (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        (35.0 / 32.0) * math.pow(1.0 - math.pow(distance/bandwidth, 2.0), 3.0)
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(triweight(b, 0.9)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Tricubic kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export tricubic (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        (70.0 / 81.0) * math.pow(1.0 - math.pow(math.abs(distance)/bandwidth, 3.0), 3.0)
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(tricubic(b, 0.9)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Gaussian kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export gaussian (float distance, float bandwidth=1.0) => //{
+    1.0 / math.sqrt(2.0 * math.pi) * math.pow(math.e, -0.5 * math.pow(distance / bandwidth, 2.0))
+//{ usage
+// b = -math.pi + (bar_index%100) * (math.pi*0.02),  plot(b, color=color.red), plot(gaussian(b, 3.0)), plot(gaussian(b, 2.0), color=color.aqua), plot(gaussian(b, 1.0), color=color.yellow)
+//{ remarks:
+//}}}
+
+// @function Cosine kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export cosine (float distance, float bandwidth=1.0) => //{
+    if math.abs(distance) > bandwidth
+        0.0
+    else
+        (math.pi / 4.0) * math.cos(math.pi / 2.0 * (distance / bandwidth))
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(cosine(b, 0.5)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function logistic kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export logistic (float distance, float bandwidth=1.0) => //{
+    _d = distance / bandwidth
+    1.0 / (math.pow(math.e, _d) + 2.0 + math.pow(math.e, -_d))
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(logistic(b, 0.1)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Sigmoid kernel.
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export sigmoid (float distance, float bandwidth=1.0) => //{
+    _d = distance / bandwidth
+    2.0 / math.pi * (1.0 / (math.pow(math.e, _d) + math.pow(math.e, -_d)))
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(sigmoid(b, 0.1)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+// @function Kernel selection method.
+// @param kernel string, kernel to select. (options="uniform", "triangle", "epanechnikov", "quartic", "triweight", "tricubic", "gaussian", "cosine", "logistic", "sigmoid")
+// @param distance float, distance to kernel origin.
+// @param bandwidth float, default=1.0, bandwidth limiter to weight the kernel.
+// @returns float.
+export select (string kernel, float distance, float bandwidth=1.0) => //{
+    switch (kernel)
+        'uniform' => uniform(distance, bandwidth)
+        'triangle' => triangular(distance, bandwidth)
+        'epanechnikov' => epanechnikov(distance, bandwidth)
+        'quartic' => quartic(distance, bandwidth)
+        'triweight' => triweight(distance, bandwidth)
+        'tricubic' => tricubic(distance, bandwidth)
+        'gaussian' => gaussian(distance, bandwidth)
+        'cosine' => cosine(distance, bandwidth)
+        'logistic' => logistic(distance, bandwidth)
+        'sigmoid' => sigmoid(distance, bandwidth)
+        => runtime.error('MathStatisticsKernel -> select(): "kernel" invalid kernel.'), float(na)
+//{ usage
+// b = -1 + (bar_index%100) * 0.02,  plot(select('uniform', b, 0.1)), plot(b, color=color.red)
+//{ remarks:
+//}}}
+
+
+
+string choice = input.string(defval='uniform', options=["uniform", "triangle", "epanechnikov", "quartic", "triweight", "gaussian", "cosine", "logistic", "sigmoid"])
+float bandwidth = input.float(0.5)
+
+test = -1.0 + (bar_index % 100) * 0.02 
+
+plot(series=test, title='cycle', color=color.silver)
+plot(series=uniform(test, bandwidth), title='uniform', color=color.red)
+plot(series=triangular(test, bandwidth), title='triangle', color=color.lime)
+plot(series=epanechnikov(test, bandwidth), title='epanechnikov', color=color.blue)
+plot(series=quartic(test, bandwidth), title='quartic', color=color.aqua)
+plot(series=triweight(test, bandwidth), title='triweight', color=color.purple)
+plot(series=tricubic(test, bandwidth), title='tricubic', color=color.fuchsia)
+plot(series=gaussian(test, bandwidth), title='gaussian', color=color.orange)
+plot(series=cosine(test, bandwidth), title='cosine', color=color.yellow)
+plot(series=logistic(test, bandwidth), title='logistic', color=color.olive)
+plot(series=sigmoid(test, bandwidth), title='sigmoid', color=color.maroon)
+
+plot(series=select(choice, test, bandwidth), title='choice', color=color.gray)

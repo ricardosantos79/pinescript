@@ -1,0 +1,37 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study(title='John Ehlers - Moving Average Difference with Hann Windowing(MADH)', shorttitle='MADH')
+
+float source = input(defval=close, title='Source:')
+int ShortLength = input(defval=8, title='Short Length:')
+int DominantCycle = input(defval=27, title='Dominant Cycle:')
+
+// hann and hamming window function:
+hann_window(_n, _m) => (_n >= 0.0) and (_n <= _m) ? 0.5 * (1.0 - cos(2.0 * math.pi * _n / _m)) : 0.0
+// https://en.wikipedia.org/wiki/Window_function
+// plot(hann_window(bar_index%100, 100))
+
+madh(_source, _short_length, _dominant_cycle)=>
+    int _long_length = int(_short_length + _dominant_cycle / 2)
+    float _filter1 = 0.0
+    float _filter2 = 0.0
+    // calculate the first average:
+    float _coef1 = 0.0
+    for _count = 1 to _short_length
+        _filter1 += hann_window(_count , _short_length + 1) * _source[_count - 1]
+        _coef1 += hann_window(_count , _short_length + 1)
+    _filter1 /= nz(_coef1)
+    // calculate the second average:
+    float _coef2 = 0.0
+    for _count = 1 to _long_length
+        _filter2 += hann_window(_count , _long_length + 1) * _source[_count - 1]
+        _coef2 += hann_window(_count , _long_length + 1)
+    _filter2 /= nz(_coef2)
+    nz(100.0 * (_filter1 - _filter2) / _filter2)
+
+madh0 = madh(source, ShortLength, DominantCycle)
+
+plot(series=madh0, title='MADH', color=color.yellow)
+hline(price=0, color=color.white)

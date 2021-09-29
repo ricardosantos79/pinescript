@@ -1,0 +1,42 @@
+//@version=5
+indicator(title='[RS]Function - Minkowski_distance')
+//  ||-------------------------------------------------------------------------||
+//  ||  Function Minkowski Distance:
+//  ||-------------------------------------------------------------------------||
+//  ||  Distance between 2 vectors.
+//  |{-------------------------------------------------------------------------||
+//  ||  Note:
+//  ||      https://www.cs.indiana.edu/~predrag/classes/2010springi211/week3_w.pdf
+//  ||      https://www.geeksforgeeks.org/minkowski-distance-python/
+//  ||      https://towardsdatascience.com/importance-of-distance-metrics-in-machine-learning-modelling-e51395ffe60d
+//  ||  
+//  ||  • P = 1 : should return manhattan distance
+//  ||  • P = 2 : should return euclidean distance
+//  ||  • P = infinite : Chebychev distance not possible in pinescript
+//  ||-------------------------------------------------------------------------||
+
+f_minkowski_distance(_a_x, _a_y, _b_x, _b_y, _p_value) =>
+    //sum the vector diference:
+    _sum = math.pow(math.abs(_a_x - _b_x), _p_value) + math.pow(math.abs(_a_y - _b_y), _p_value)
+    //root it:
+    _return = math.pow(_sum, 1 / _p_value)
+    _return
+//  ||-------------------------------------------------------------------------||
+//  |}---------------------------------------------------------------------<•
+p = input(1.0)
+md1 = f_minkowski_distance(10, 10, 20, 20, 1)
+md2 = f_minkowski_distance(10, 10, 20, 20, 2)
+mdx = f_minkowski_distance(10, 10, 20, 20, p)
+
+h = ta.valuewhen(high >= ta.highest(10), high, 0)
+b = ta.valuewhen(high >= ta.highest(10), bar_index, 0)
+mdn = f_minkowski_distance(h, b, close, bar_index, p)
+
+
+plot(series=md1, title='MD1 - Manhattan D', color=color.new(color.blue, 0))
+plot(series=md2, title='MD2 - Euclidean', color=color.new(color.red, 0))
+plot(series=mdx, title='MDX - input: p', color=color.new(color.navy, 0))
+plot(series=mdn, title='MDN - distance to when higher high', color=color.new(color.purple, 0))
+
+
+

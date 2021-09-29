@@ -1,0 +1,78 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='function - maximum profit')
+maximum_profit(_src, _length) =>  //{
+//  @function: maximum profit over a period of time
+//  @reference:
+//      https://github.com/trekhleb/javascript-algorithms/tree/master/src/algorithms/uncategorized/best-time-to-buy-sell-stocks
+//      https://github.com/trekhleb/javascript-algorithms/blob/master/src/algorithms/uncategorized/best-time-to-buy-sell-stocks/accumulatorBestTimeToBuySellStocks.js
+//  @parameters:
+//      _src: series float or int, price points. you can use a inversion for selling maximum profit ex:. -close
+//      _length: int, period of time to check
+//  @usage:
+//      plot(series=maximum_profit(close, 20), title='mp+', color=color.lime)
+//      plot(series=maximum_profit(-close, 20), title='mp-', color=color.red)
+    float _c = math.max(0.0, _src[0] - _src[1])
+    float _sum = 0.
+    if bar_index <= _length
+        _sum := 0.
+        _sum
+    else
+        for _s = _length - 1 to 1 by 1
+            for _i = _s - 1 to 0 by 1
+                _sum := _sum + _c[_i]
+                _sum
+    _sum
+//}
+
+maximum_profit_fast(_src, _length) =>  //{
+//  @function: maximum profit over a period of time, fast algorithm, ** series match(crosses) / values dont match **
+//  @parameters:
+//      _src: series float or int, price points. you can use a inversion for selling maximum profit ex:. -close
+//      _length: int, period of time to check
+//  @usage:
+//      plot(series=maximum_profit(close, 20), title='mp+', color=color.lime)
+//      plot(series=maximum_profit(-close, 20), title='mp-', color=color.red)
+    float _c = ta.cum(math.max(0., _src[0] - _src[1]))
+    float _sum = _c
+    for _i = _length - 1 to 1 by 1
+        _sum := _sum + _c - _c[_i]
+        _sum
+    _sum
+//}
+
+maximum_profit_alt(_src, _length) =>  //{
+//  @function: maximum profit over a period of time, fast algorithm, ** series do not match(faster crosses) / values dont match **
+//  @parameters:
+//      _src: series float or int, price points. you can use a inversion for selling maximum profit ex:. -close
+//      _length: int, period of time to check
+//  @usage:
+//      plot(series=maximum_profit(close, 20), title='mp+', color=color.lime)
+//      plot(series=maximum_profit(-close, 20), title='mp-', color=color.red)
+    float _c = math.sum(math.max(0., _src[0] - _src[1]), _length)
+    float _sum = _c
+    for _i = _length - 1 to 1 by 1
+        _sum := _sum + _c - _c[_i]
+        _sum
+    _sum
+//}
+
+int length = input(20)
+a = plot(series=maximum_profit(close, length), title='mp+', color=color.new(color.lime, 0))
+b = plot(series=maximum_profit(-close, length), title='mp-', color=color.new(color.red, 0))
+
+c = plot(series=maximum_profit_fast(close, length), title='mpf+', color=color.new(color.green, 0))
+d = plot(series=maximum_profit_fast(-close, length), title='mpf-', color=color.new(color.maroon, 0))
+
+e = plot(series=maximum_profit_alt(close, length), title='mpf+', color=color.new(color.blue, 0))
+f = plot(series=maximum_profit_alt(-close, length), title='mpf-', color=color.new(color.purple, 0))
+
+fill(plot1=a, plot2=c, color=color.new(color.lime, 75), title='Fill greens')
+fill(plot1=b, plot2=d, color=color.new(color.red, 75), title='Fill Reds')
+
+fill(plot1=a, plot2=e, color=color.new(color.blue, 75), title='Fill greens')
+fill(plot1=b, plot2=f, color=color.new(color.purple, 75), title='Fill Reds')
+
+

@@ -1,0 +1,219 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description LOESS, local weighted Smoothing function.
+library(title='AnalysisInterpolationLoess')
+
+// reference:
+// https://commons.apache.org/proper/commons-math/javadocs/api-3.3/org/apache/commons/math3/analysis/interpolation/LoessInterpolator.html
+
+// @function Helper function for the loess library
+// @param value float, value.
+// @returns float
+tricubic (float value) => //{
+    if value > 1.0
+        0.0
+    else
+        math.pow(1 - math.pow(value, 3), 3)
+//}
+
+// @function Helper function for the loess library
+// @param value float, value.
+// @param exponent float, exponent.
+// @returns float
+polyweight (float value, float exponent) => //{
+    if value > 1.0
+        0.0
+    else
+        math.pow(1 - math.pow(value, exponent), exponent)
+//{ credit to @midtownSk8rguy
+//}}
+
+// @function LOESS, local weighted Smoothing function.
+// @param sample_x int array, x values.
+// @param sample_y float array, y values.
+// @param point_span int, local point interval span.
+export loess (int[] sample_x, float[] sample_y, int point_span=2) => //{
+    int _size_x = array.size(id=sample_x)-1
+    int _size_y = array.size(id=sample_y)-1
+    // to improve performance there is:
+    // no monotonic sequence check, no null checks.
+    if _size_x < 1 or _size_y < 1
+        runtime.error('AnalysisInterpolationLoess -> loess(): samples x and y must have at the least 1 element.')
+        float[] _A = na
+    else if _size_x != _size_y
+        runtime.error('AnalysisInterpolationLoess -> loess(): samples x and y must have the same number of elements.')
+        float[] _A = na
+    else if point_span < 1
+        runtime.error('AnalysisInterpolationLoess -> loess(): point_span must be positive integer number over 0.')
+        float[] _A = na
+    else if 2 * point_span > _size_x
+        runtime.error('AnalysisInterpolationLoess -> loess(): point_span must be smaller than sample size.')
+        float[] _A = na
+    else
+        float[] _yloess = array.new_float(size=1 + _size_x)
+        for _i = 0 to _size_x
+            int _xi = array.get(id=sample_x, index=_i)
+            // define the index interval to pool the values
+            int _start = 0
+            int _end = _size_x
+            if _i < 1 + point_span
+                _start := math.max(0, _i - point_span)
+                _end := _i + point_span
+            else
+                _start := _i - point_span
+                _end := math.min(_i + point_span, _size_x)
+            // grab the values for the interval span
+            int[] _span_x = array.slice(id=sample_x, index_from=_start, index_to=_end)
+            float[] _span_y = array.slice(id=sample_y, index_from=_start, index_to=_end)
+            // calculate the distance, weights then perform local regression
+            int _size_s = array.size(id=_span_x)-1
+            float _sum_w = 0.0
+            float _sum_x = 0.0
+            float _sum_x2 = 0.0
+            float _sum_y = 0.0
+            float _sum_xy = 0.0
+            for _s = 0 to _size_s
+                int _xs = array.get(id=_span_x, index=_s)
+                float _ys = array.get(id=_span_y, index=_s)
+                int _ds = math.abs(_xs-_xi)
+                float _ws = tricubic(_ds / point_span)
+                float _wxs = _ws * _xs
+                _sum_w += _ws
+                _sum_x += _wxs
+                _sum_x2 += _wxs * _xs
+                _sum_y += _ws * _ys
+                _sum_xy += _wxs * _ys
+            float _mean_x = _sum_x / _sum_w
+            float _mean_y = _sum_y / _sum_w
+            float _mean_xy = _sum_xy / _sum_w
+            float _mean_x2 = _sum_x2 / _sum_w
+            float _mx2xx = _mean_x2 - math.pow(_mean_x, 2)
+            float _beta = 0.0
+            if math.sqrt(math.abs(_mx2xx)) < 1.0e-15
+                _beta := (_mean_xy - _mean_x * _mean_y) / _mx2xx
+            float _alpha = _mean_y - _beta * _mean_x
+            //update current y loess value at _i index
+            array.set(id=_yloess, index=_i, value=_beta * _xi + _alpha)
+        _yloess
+//{ usage:
+// length = input.int(50)
+// npoints= input.int(7)
+// f_l1(_x1, _y1, _x2, _y2) => line.new(_x1, _y1, _x2, _y2, color=#DDDD00, style=line.style_solid, width=1)
+
+// import RicardoSantos/ArrayExtension/2 as ae
+// a = bar_index < length ? array.from(0) : ae.to_int(ae.sequence_from_series(bar_index, length, 0, true), 'floor')
+// b = bar_index < length ? array.from(0.0) : ae.sequence_from_series(close, length, 0, true)
+
+// if barstate.islastconfirmedhistory
+//     c = loess(a, b, npoints)
+//     label.new(bar_index, 0.0, str.tostring(c, '#.###'))
+
+
+// 	for _i = 1 to array.size(a)-1
+//         _x1 =  array.get(a, _i-1)
+//         _x2 =  array.get(a, _i  )
+//         _by1 = array.get(c, _i-1)
+//         _by2 = array.get(c, _i)
+//         f_l1(_x1, _by1, _x2, _by2)
+
+// plot(close)
+//}}
+
+// @function aLOESS, adaptive local weighted Smoothing function.
+// @param sample_x int array, x values.
+// @param sample_y float array, y values.
+// @param point_span int, local point interval span.
+export aloess (int[] sample_x, float[] sample_y, int point_span=2, float span_exponent=3.0) => //{
+    int _size_x = array.size(id=sample_x)-1
+    int _size_y = array.size(id=sample_y)-1
+    // to improve performance there is:
+    // no monotonic sequence check, no null checks.
+    if _size_x < 1 or _size_y < 1
+        runtime.error('AnalysisInterpolationLoess -> aloess(): samples x and y must have at the least 1 element.')
+        float[] _A = na
+    else if _size_x != _size_y
+        runtime.error('AnalysisInterpolationLoess -> aloess(): samples x and y must have the same number of elements.')
+        float[] _A = na
+    else if point_span < 1
+        runtime.error('AnalysisInterpolationLoess -> aloess(): point_span must be positive integer number over 0.')
+        float[] _A = na
+    else if 2 * point_span > _size_x
+        runtime.error('AnalysisInterpolationLoess -> aloess(): point_span must be smaller than sample size.')
+        float[] _A = na
+    else
+        float[] _yloess = array.new_float(size=1 + _size_x)
+        for _i = 0 to _size_x
+            int _xi = array.get(id=sample_x, index=_i)
+            // define the index interval to pool the values
+            int _start = 0
+            int _end = _size_x
+            if _i < 1 + point_span
+                _start := math.max(0, _i - point_span)
+                _end := _i + point_span
+            else
+                _start := _i - point_span
+                _end := math.min(_i + point_span, _size_x)
+            // grab the values for the interval span
+            int[] _span_x = array.slice(id=sample_x, index_from=_start, index_to=_end)
+            float[] _span_y = array.slice(id=sample_y, index_from=_start, index_to=_end)
+            // calculate the distance, weights then perform local regression
+            int _size_s = array.size(id=_span_x)-1
+            float _sum_w = 0.0
+            float _sum_x = 0.0
+            float _sum_x2 = 0.0
+            float _sum_y = 0.0
+            float _sum_xy = 0.0
+            for _s = 0 to _size_s
+                int _xs = array.get(id=_span_x, index=_s)
+                float _ys = array.get(id=_span_y, index=_s)
+                int _ds = math.abs(_xs-_xi)
+                float _ws = polyweight(_ds / point_span, span_exponent)
+                float _wxs = _ws * _xs
+                _sum_w += _ws
+                _sum_x += _wxs
+                _sum_x2 += _wxs * _xs
+                _sum_y += _ws * _ys
+                _sum_xy += _wxs * _ys
+            float _mean_x = _sum_x / _sum_w
+            float _mean_y = _sum_y / _sum_w
+            float _mean_xy = _sum_xy / _sum_w
+            float _mean_x2 = _sum_x2 / _sum_w
+            float _mx2xx = _mean_x2 - math.pow(_mean_x, 2)
+            float _beta = 0.0
+            if math.sqrt(math.abs(_mx2xx)) < 1.0e-15
+                _beta := (_mean_xy - _mean_x * _mean_y) / _mx2xx
+            float _alpha = _mean_y - _beta * _mean_x
+            //update current y loess value at _i index
+            array.set(id=_yloess, index=_i, value=_beta * _xi + _alpha)
+        _yloess
+//{ usage:
+length = input.int(50)
+npoints = input.int(7)
+exp = input.float(3.0)
+f_l1(_x1, _y1, _x2, _y2) => line.new(_x1, _y1, _x2, _y2, color=#DDDD00, style=line.style_solid, width=1)
+
+import RicardoSantos/ArrayExtension/2 as ae
+a = bar_index < length ? array.from(0) : ae.to_int(ae.sequence_from_series(bar_index, length, 0, true), 'floor')
+b = bar_index < length ? array.from(0.0) : ae.sequence_from_series(close, length, 0, true)
+
+if barstate.islastconfirmedhistory
+    c = aloess(a, b, npoints, exp)
+    // label.new(bar_index, 0.0, str.tostring(c, '#.###'))
+
+
+	for _i = 1 to array.size(a)-1
+        _x1 =  array.get(a, _i-1)
+        _x2 =  array.get(a, _i  )
+        _by1 = array.get(c, _i-1)
+        _by2 = array.get(c, _i)
+        f_l1(_x1, _by1, _x2, _by2)
+
+plot(close)
+//}}
+
+
+
+

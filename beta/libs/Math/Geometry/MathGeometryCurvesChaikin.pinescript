@@ -1,0 +1,126 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Implements the chaikin algorithm to create a curved path, from assigned points.
+library("MathGeometryCurvesChaikin")
+
+// reference:
+//      https://www.bit-101.com/blog/2021/08/chaikins-algorithm-drawing-curves/
+
+// @function Chaikin algorithm method, uses provided points to generate a smoothed path.
+// @param points_x float array, the x value of points.
+// @param points_y float array, the y value of points.
+// @param closed bool, default=false, is the path closed or not.
+// @returns tuple with 2 float arrays.
+export chaikin (float[] points_x, float[] points_y, bool closed=false) => //{
+    int _size_x = array.size(points_x)
+    int _size_y = array.size(points_y)
+    if _size_x < 2
+        runtime.error('MathGeometryCurvesChaikin -> chaikin(): "points_x" has the wrong size.')
+        [array.new_float(na), array.new_float(na)]
+    if _size_x != _size_y
+        runtime.error('MathGeometryCurvesChaikin -> chaikin(): "points_x" and "points_y" size does not match.')
+        [array.new_float(na), array.new_float(na)]
+    else
+        float _first_x = array.get(points_x, 0)
+        float _first_y = array.get(points_y, 0)
+        float _last_x = array.get(points_x, _size_x-1)
+        float _last_y = array.get(points_y, _size_x-1)
+
+        float[] _path_x = array.new_float(0)
+        float[] _path_y = array.new_float(0)
+        if not closed
+            array.push(_path_x, _first_x)
+            array.push(_path_y, _first_y)
+        for _i = 0 to _size_x - 2
+            float _p0x = array.get(points_x, _i)
+            float _p0y = array.get(points_y, _i)
+            float _p1x = array.get(points_x, _i + 1)
+            float _p1y = array.get(points_y, _i + 1)
+            float _dx = _p1x - _p0x
+            float _dy = _p1y - _p0y
+            array.push(_path_x, _p0x + _dx * 0.25)
+            array.push(_path_y, _p0y + _dy * 0.25)
+            array.push(_path_x, _p0x + _dx * 0.75)
+            array.push(_path_y, _p0y + _dy * 0.75)
+
+        if not closed
+            array.push(_path_x, _last_x)
+            array.push(_path_y, _last_y)
+        else
+            float _dx = _first_x - _last_x
+            float _dy = _first_y - _last_y
+            array.push(_path_x, _last_x + _dx * 0.25)
+            array.push(_path_y, _last_y + _dy * 0.25)
+            array.push(_path_x, _last_x + _dx * 0.75)
+            array.push(_path_y, _last_y + _dy * 0.75)
+        [_path_x, _path_y]
+//}
+
+// @function Iterate the chaikin algorithm, to smooth a sample of points into a curve path.
+// @param points_x float array, the x value of points.
+// @param points_y float array, the y value of points.
+// @param iterations int, number of iterations to apply the smoothing.
+// @param closed bool, default=false, is the path closed or not.
+// @returns array of lines.
+export smooth (float[] points_x, float[] points_y, int iterations=5, bool closed=false) => //{
+    int _size_x = array.size(points_x)
+    int _size_y = array.size(points_y)
+    if _size_x < 2
+        runtime.error('MathGeometryCurvesChaikin -> smooth(): "points_x" has the wrong size.')
+        [array.new_float(na), array.new_float(na)]
+    if _size_x != _size_y
+        runtime.error('MathGeometryCurvesChaikin -> smooth(): "points_x" and "points_y" size does not match.')
+        [array.new_float(na), array.new_float(na)]
+    else
+        _path_x = array.copy(points_x)
+        _path_y = array.copy(points_y)
+        if iterations > 0
+            for _i = 1 to iterations
+                [_x, _y] = chaikin(_path_x, _path_y, closed)
+                _path_x := _x
+                _path_y := _y
+        [_path_x, _path_y]
+//}
+
+// @function Draw the path.
+// @param path_x float array, the x value of the path.
+// @param path_y float array, the y value of the path.
+// @param closed bool, default=false, is the path closed or not.
+// @returns array of lines.
+export draw (float[] path_x, float[] path_y, bool closed=false) =>
+    int _size_x = array.size(path_x)
+    int _size_y = array.size(path_y)
+    if _size_x < 2
+        runtime.error('MathGeometryCurvesChaikin -> smooth(): "points_x" has the wrong size.')
+        array.new_line(na)
+    if _size_x != _size_y
+        runtime.error('MathGeometryCurvesChaikin -> smooth(): "points_x" and "points_y" size does not match.')
+        array.new_line(na)
+    else
+        line[] path_segments = array.new_line(0)
+        for _i = 0 to _size_x - 2
+            int _p0x = int(array.get(path_x, _i))
+            float _p0y = array.get(path_y, _i)
+            int _p1x = int(array.get(path_x, _i+1))
+            float _p1y = array.get(path_y, _i+1)
+            array.push(path_segments, line.new(_p0x, _p0y, _p1x, _p1y))
+        if closed
+            array.push(path_segments, line.new(int(array.get(path_x, _size_x-1)), array.get(path_y, _size_x-1), int(array.get(path_x, 0)), array.get(path_y, 0)))
+        path_segments
+
+int sample_size = input.int(5)
+var float[] samples_x = array.new_float(sample_size)
+var float[] samples_y = array.new_float(sample_size)
+if barstate.isfirst
+    for _i = 0 to sample_size-1
+        array.set(samples_x, _i, 50.0 + 100.0 * math.random())
+        array.set(samples_y, _i, 50.0 + 100.0 * math.random())
+
+bool closed = input.bool(true)
+int iterations = input.int(2)
+if barstate.islastconfirmedhistory
+    [_x, _y] = smooth(samples_x, samples_y, iterations, closed)
+    draw(_x, _y, closed)

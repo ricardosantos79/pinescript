@@ -1,0 +1,213 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=4
+study("My Script", precision=16)
+// https://rdrr.io/r/stats/optimize.html
+// https://scipy-lectures.org/advanced/mathematical_optimization/
+// https://rdrr.io/cran/feasts/src/R/guerrero.R
+// https://feasts.tidyverts.org/reference/guerrero.html#references
+// https://www.mathworks.com/help/matlab/ref/fminsearch.html
+// https://www.gnu.org/software/gsl/doc/html/min.html
+
+log = array.new_float(0)
+
+f(_x)=>
+    a = cos(_x) + 1//pow(_x, 2)
+    array.push(log, a)
+    if array.size(log)>10
+        array.shift(log)
+    a
+
+f_fmin(_ax, _bx, _f___thisisnotdoinganything___, _tol)=>//{
+//  @function:
+//      an approximation  x  to the point where  f  attains a minimum  on
+//      the interval  (ax,bx)  is determined.
+//  @parameters:
+//      _ax: float, left endpoint of initial interval
+//      _bx: float, right endpoint of initial interval
+//      _f: function subprogram which evaluates  f(x)  for any  x in the interval  (ax,bx)
+//          not used at the moment, it auto uses a funtion  f(_x)  , due to pine limits might be possible
+//          to use a selector function for multiple functions in a script.
+//      _tol: float, desired length of the interval of uncertainty of the final
+//              result ( >= 0.0)
+//  @returns:
+//      _fmin: float, abcissa approximating the point where  _f  attains a minimum
+//{
+//      the method used is a combination of  golden  section  search  and
+//  successive parabolic interpolation.  convergence is never much slower
+//  than  that  for  a  fibonacci search.  if  f  has a continuous second
+//  derivative which is positive at the minimum (which is not  at  ax  or
+//  bx),  then  convergence  is  superlinear, and usually of the order of
+//  about  1.324....
+//      the function  f  is never evaluated at two points closer together
+//  than  eps*abs(fmin) + (tol/3), where eps is  approximately the square
+//  root  of  the  relative  machine  precision.   if   f   is a unimodal
+//  function and the computed values of   f   are  always  unimodal  when
+//  separated by at least  eps*abs(x) + (tol/3), then  fmin  approximates
+//  the abcissa of the global minimum of  f  on the interval  ax,bx  with
+//  an error less than  3*eps*abs(fmin) + tol.  if   f   is not unimodal,
+//  then fmin may approximate a local, but perhaps non-global, minimum to
+//  the same accuracy.
+//      this function subprogram is a slightly modified  version  of  the
+//  algol  60 procedure  localmin  given in richard brent, algorithms for
+//  minimization without derivatives, prentice - hall, inc. (1973).
+//}
+//  @reference
+//      // https://www.netlib.org/fmm/fmin.f
+//{
+    // _eps = 1.0
+    // _tol1 = 1.0 + _eps
+    // for _i = 0 to 999999999
+    //     _eps *= 0.5
+    //     _tol1 := 1.0 + _eps
+    //     if _tol1 <= 1.0
+    //         break
+    // _eps := sqrt(_eps)
+    // aproximate above value since it only runs once:
+    float _eps = 7.63e-6 // 0.0000076293945313
+    float _tol1 = 0.0, float _tol2 = 0.0
+
+    //init
+    float _c = 1.0 - math.rphi
+    float _a = _ax
+    float _b = _bx
+    float _v = _a + _c * (_b - _a)
+    float _u = 0.0
+    float _w = _v
+    float _x = _v
+    float _e = 0.0
+    
+    float _fu = 0.0
+    float _fx = f(_x)
+    float _fv = _fx
+    float _fw = _fx
+    
+    float _d = 0.0, float _xm = 0.0
+    float _p = 0.0, float _q = 0.0, float _r = 0.0
+    // main loop
+    int _status = 20
+    for _i = 0 to 99999
+        if _status == 20
+            _xm := 0.5 * (_a + _b)
+            _tol1 := _eps * abs(_x) + _tol / 3.0
+            _tol2 := 2.0 * _tol1
+            //heck exit condition
+            if abs(_x - _xm) <= (_tol2 - 0.5 * (_b - _a))
+                break
+            // is golden section necessary
+            if abs(_e) <= _tol1
+                _status := 40
+                continue
+
+            // fit parabola
+            _r := (_x - _w) * (_fx - _fv)
+            _q := (_x - _v) * (_fx - _fw)
+            _p := (_x - _v) * _q - (_x - _w) * _r
+            _q := 2.0 * (_q - _r)
+            if (_q > 0.0)
+                _p := -_p
+            _q := abs(_q)
+            _r := _e
+            _e := _d
+            _status := 30
+            continue
+
+        if _status == 30
+            if (abs(_p) >= abs(0.5 * _q * _r))
+                _status := 40
+                continue
+            if (_p <= _q * (_a - _x))
+                _status := 40
+                continue
+            if (_p >= _q * (_b - _x))
+                _status := 40
+                continue
+            // a parabolic interpolation step
+            _d := _p / _q
+            _u := _x + _d
+            // f must not be evaluated too close to ax or bx
+            if ((_u - _a) < _tol2)
+                _d := abs(_tol1) * sign(_xm - _x)
+            if ((_b - _u) < _tol2)
+                _d := abs(_tol1) * sign(_xm - _x)
+            _status := 50
+            continue
+        
+        if _status == 40
+            // Golden Section step:
+            _e := _x >= _xm ? _a - _x : _b - _x
+            _d := _c * _e
+            _status := 50
+            continue
+        
+        if _status == 50
+            // f must not be evaluated too close to x
+            _u := abs(_d) >= _tol1 ? _x + _d : _x + sign(_d) * abs(_tol1)
+            _fu := f(_u)
+            // update  a, b, v, w, and x
+            if (_fu > _fx) 
+                _status := 60
+                continue
+            else
+                if (_u >= _x)
+                    _a := _x
+                if (_u < _x) 
+                    _b := _x
+                _v := _w
+                _fv := _fw
+                _w := _x
+                _fw := _fx
+                _x := _u
+                _fx := _fu
+                _status := 20
+                continue
+
+        if _status == 60
+            if (_u < _x)
+                _a := _u
+            if (_u >= _x)
+                _b := _u
+            if (_fu < _fw)
+                _status := 70
+                continue
+            if (_w == _x)
+                _status := 70
+                continue
+            if (_fu <= _fv)
+                _status := 80
+                continue
+            if (_v == _x)
+                _status := 80
+                continue
+            if (_v == _w)
+                _status := 80
+                continue
+            _status := 20
+            continue
+
+        if _status == 70
+            _v := _w
+            _fv := _fw
+            _w := _u
+            _fw := _fu
+            _status := 20
+            continue
+
+        if _status == 80
+            _v := _u
+            _fv := _fu
+            _status := 20
+            continue
+    _fmin = _x
+//}//}
+
+//test result aproximates to pi:
+// https://www.gnu.org/software/gsl/doc/html/min.html
+value = f_fmin(0.0, 6.0, float(na), 0.01)
+array.push(log, value)
+plot(value)
+
+var label la = label.new(bar_index, 0.0, '')
+label.set_xy(la, bar_index, 0.0)
+label.set_text(la, tostring(log))

@@ -1,0 +1,51 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Threshold activation function
+library(title='AIActivationFunctionsThreshold')
+
+// reference:
+//      https://github.com/andrewkirillov/AForge.NET/blob/master/Sources/Neuro/Activation%20Functions/ThresholdFunction.cs
+
+//  The class represents threshold activation function with
+//  the next expression:
+//
+//| f(x) = 1, if x >= 0, otherwise 0
+//
+// - Function output range: (0, 1).
+// - The alpha value determines steepness of the function. Increasing value of
+// this property changes sigmoid to look more like a threshold function. Decreasing
+// value of this property makes sigmoid to be very smooth (slowly growing from its
+// minimum value to its maximum value).
+//
+
+// @function Function at value point.
+// @param value float, value point.
+// @returns float
+export function (float value) => //{
+    value >= 0.0 ? 1.0 : 0.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Function derivate at value point.
+// @param value float, value point.
+// @returns float
+export derivate (float value) => //{
+    na(value) ? 0.0 : 0.0
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Function derivate at value point.
+// @param value float, value point.
+// @returns float
+export derivate2 (float value) => //{
+    na(value) ? 0.0 : 0.0
+//{ usage:
+//{ remarks:
+//}}}
+
+

@@ -1,0 +1,263 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Mathematical Constants
+library(title='MathConstantsAtomic')
+
+//  reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/master/src/Numerics/Constants.cs
+
+
+// A collection of frequently used mathematical constants.
+    
+// ATOMIC AND NUCLEAR CONSTANTS {
+
+// @function Fine Structure Constant: alpha = e^2/4*Pi*e_0*h_bar*c_0 [1] (2007 CODATA)
+export FineStructureConstant () => //{
+    7.2973525376e-3
+//}
+
+// @function Rydberg Constant: R_infty = alpha^2*m_e*c_0/2*h [m^-1] (2007 CODATA)
+export RydbergConstant () => //{
+    10973731.568528
+//}
+
+// @function Bor Radius: a_0 = alpha/4*Pi*R_infty [m] (2007 CODATA)
+export BohrRadius () => //{
+    0.52917720859e-10
+//}
+
+// @function Hartree Energy: E_h = 2*R_infty*h*c_0 [J] (2007 CODATA)
+export HartreeEnergy () => //{
+    4.35974394e-18
+//}
+
+// @function Quantum of Circulation: h/2*m_e [m^2 s^-1] (2007 CODATA)
+export QuantumOfCirculation () => //{
+    3.6369475199e-4
+//}
+
+// @function Fermi Coupling Constant: G_F/(h_bar*c_0)^3 [GeV^-2] (2007 CODATA)
+export FermiCouplingConstant () => //{
+    1.16637e-5
+//}
+
+// @function Weak Mixin Angle: sin^2(theta_W) [1] (2007 CODATA)
+export WeakMixingAngle () => //{
+    0.22256
+//}
+
+// @function Electron Mass: [kg] (2007 CODATA)
+export ElectronMass () => //{
+    9.10938215e-31
+//}
+
+// @function Electron Mass Energy Equivalent: [J] (2007 CODATA)
+export ElectronMassEnergyEquivalent () => //{
+    8.18710438e-14
+//}
+
+// @function Electron Molar Mass: [kg mol^-1] (2007 CODATA)
+export ElectronMolarMass () => //{
+    5.4857990943e-7
+//}
+
+// @function Electron Compton Wavelength: [m] (2007 CODATA)
+export ComptonWavelength () => //{
+    2.4263102175e-12
+//}
+
+// @function Classical Electron Radius: [m] (2007 CODATA)
+export ClassicalElectronRadius () => //{
+    2.8179402894e-15
+//}
+
+// @function Thomson Cross Section: [m^2] (2002 CODATA)
+export ThomsonCrossSection () => //{
+    0.6652458558e-28
+//}
+
+// @function Electron Magnetic Moment: [J T^-1] (2007 CODATA)
+export ElectronMagneticMoment () => //{
+    -928.476377e-26
+//}
+
+// @function Electon G-Factor: [1] (2007 CODATA)
+export ElectronGFactor () => //{
+    -2.0023193043622
+//}
+
+// @function Muon Mass: [kg] (2007 CODATA)
+export MuonMass () => //{
+    1.88353130e-28
+//}
+
+// @function Muon Mass Energy Equivalent: [J] (2007 CODATA)
+export MuonMassEnegryEquivalent () => //{
+    1.692833511e-11
+//}
+
+// @function Muon Molar Mass: [kg mol^-1] (2007 CODATA)
+export MuonMolarMass () => //{
+    0.1134289256e-3
+//}
+
+// @function Muon Compton Wavelength: [m] (2007 CODATA)
+export MuonComptonWavelength () => //{
+    11.73444104e-15
+//}
+
+// @function Muon Magnetic Moment: [J T^-1] (2007 CODATA)
+export MuonMagneticMoment () => //{
+    -4.49044786e-26
+//}
+
+// @function Muon G-Factor: [1] (2007 CODATA)
+export MuonGFactor () => //{
+    -2.0023318414
+//}
+
+// @function Tau Mass: [kg] (2007 CODATA)
+export TauMass () => //{
+    3.16777e-27
+//}
+
+// @function Tau Mass Energy Equivalent: [J] (2007 CODATA)
+export TauMassEnergyEquivalent () => //{
+    2.84705e-10
+//}
+
+// @function Tau Molar Mass: [kg mol^-1] (2007 CODATA)
+export TauMolarMass () => //{
+    1.90768e-3
+//}
+
+// @function Tau Compton Wavelength: [m] (2007 CODATA)
+export TauComptonWavelength () => //{
+    0.69772e-15
+//}
+
+// @function Proton Mass: [kg] (2007 CODATA)
+export ProtonMass () => //{
+    1.672621637e-27
+//}
+
+// @function Proton Mass Energy Equivalent: [J] (2007 CODATA)
+export ProtonMassEnergyEquivalent () => //{
+    1.503277359e-10
+//}
+
+// @function Proton Molar Mass: [kg mol^-1] (2007 CODATA)
+export ProtonMolarMass () => //{
+    1.00727646677e-3
+//}
+
+// @function Proton Compton Wavelength: [m] (2007 CODATA)
+export ProtonComptonWavelength () => //{
+    1.3214098446e-15
+//}
+
+// @function Proton Magnetic Moment: [J T^-1] (2007 CODATA)
+export ProtonMagneticMoment () => //{
+    1.410606662e-26
+//}
+
+// @function Proton G-Factor: [1] (2007 CODATA)
+export ProtonGFactor () => //{
+    5.585694713
+//}
+
+// @function Proton Shielded Magnetic Moment: [J T^-1] (2007 CODATA)
+export ShieldedProtonMagneticMoment () => //{
+    1.410570419e-26
+//}
+
+// @function Proton Gyro-Magnetic Ratio: [s^-1 T^-1] (2007 CODATA)
+export ProtonGyromagneticRatio () => //{
+    2.675222099e8
+//}
+
+// @function Proton Shielded Gyro-Magnetic Ratio: [s^-1 T^-1] (2007 CODATA)
+export ShieldedProtonGyromagneticRatio () => //{
+    2.675153362e8
+//}
+
+// @function Neutron Mass: [kg] (2007 CODATA)
+export NeutronMass () => //{
+    1.674927212e-27
+//}
+
+// @function Neutron Mass Energy Equivalent: [J] (2007 CODATA)
+export NeutronMassEnegryEquivalent () => //{
+    1.505349506e-10
+//}
+
+// @function Neutron Molar Mass: [kg mol^-1] (2007 CODATA)
+export NeutronMolarMass () => //{
+    1.00866491597e-3
+//}
+
+// @function Neuron Compton Wavelength: [m] (2007 CODATA)
+export NeutronComptonWavelength () => //{
+    1.3195908951e-1
+//}
+
+// @function Neutron Magnetic Moment: [J T^-1] (2007 CODATA)
+export NeutronMagneticMoment () => //{
+    -0.96623641e-26
+//}
+
+// @function Neutron G-Factor: [1] (2007 CODATA)
+export NeutronGFactor () => //{
+    -3.82608545
+//}
+
+// @function Neutron Gyro-Magnetic Ratio: [s^-1 T^-1] (2007 CODATA)
+export NeutronGyromagneticRatio () => //{
+    1.83247185e8
+//}
+
+// @function Deuteron Mass: [kg] (2007 CODATA)
+export DeuteronMass () => //{
+    3.34358320e-27
+//}
+
+// @function Deuteron Mass Energy Equivalent: [J] (2007 CODATA)
+export DeuteronMassEnegryEquivalent () => //{
+    3.00506272e-10
+//}
+
+// @function Deuteron Molar Mass: [kg mol^-1] (2007 CODATA)
+export DeuteronMolarMass () => //{
+    2.013553212725e-3
+//}
+
+// @function Deuteron Magnetic Moment: [J T^-1] (2007 CODATA)
+export DeuteronMagneticMoment () => //{
+    0.433073465e-26
+//}
+
+// @function Helion Mass: [kg] (2007 CODATA)
+export HelionMass () => //{
+    5.00641192e-27
+//}
+
+// @function Helion Mass Energy Equivalent: [J] (2007 CODATA)
+export HelionMassEnegryEquivalent () => //{
+    4.49953864e-10
+//}
+
+// @function Helion Molar Mass: [kg mol^-1] (2007 CODATA)
+export HelionMolarMass () => //{
+    3.0149322473e-3
+//}
+
+// @function Avogadro constant: [mol^-1] (2010 CODATA)
+export Avogadro () => //{
+    6.0221412927e23
+//}
+
+//}
+

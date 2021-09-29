@@ -1,0 +1,280 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Functions to detect harmonic patterns
+library("HarmonicPattern")
+
+// @function Compute the price rate of the line AB divided by the the line BC
+// @param point_c float, the price at point C.
+// @param point_b float, the price at point B.
+// @param point_a float, the price at point A.
+// @returns float
+export line_price_rate (float point_c, float point_b, float point_a) => //{
+//  C   A
+//   \ /
+//    B
+    (point_a - point_b) / (point_b - point_c)
+//}
+
+// @function Compute the time rate of the line AB divided by the the line BC
+// @param _c float, the time or bar_index at point C.
+// @param _b float, the time or bar_index at point B.
+// @param _a float, the time or bar_index at point A.
+// @returns float
+export line_time_rate (float point_c, float point_b, float point_a) => //{
+//  C   A
+//   \ /
+//    B
+    (0 - (point_a - point_b)) / (point_b - point_c)
+//}
+
+// @function Check if value is within min/max range of tolerance.
+// @param value float, value to check tolerance.
+// @param min float, minimum value in range of tolerance.
+// @param max float, maximum value in range of tolerance.
+// @returns bool
+export is_inrange (float value, float min, float max) => //{
+    value <= max and value >= min
+//}
+
+
+//||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//  rates are expected in a backwards manner and of negative value.           ||
+//||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+//  G   E   C   A                                                             ||
+//   \ / \ / \ /                                                              ||
+//    F   D   B                                                               ||
+//||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+// @function Check if the rate(s) correspond to pattern ("Harmonic Triangle").
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isHarmonicTriangle (float rate_cba, float margin_of_error=0.05) => //{
+    bool _return = false
+    // return true if its rate is near a harmonic rate:
+    // this is analogous with the fibonnaci sequence, but is capped at (-5 --> 12) to limit resource usage
+	// 0.146, 0.236, 0.382, 0.618, 1, 1.618, 2.618, 4.236, 6.854, 11.089, 17.942, 29.03
+    for _i = 1 to 12
+        // calculate the derivative of phi sequence:
+        float _phid = 0 - math.pow(math.phi, -5.0 + _i)
+        if is_inrange(rate_cba, (_phid - margin_of_error), (_phid + margin_of_error))
+            _return := true
+            break
+    _return
+//}
+
+// @function Check if the rate(s) correspond to pattern ("2Tap", 'Double Top / Bottom').
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export is2Tap (float rate_cba, float margin_of_error=0.05) => //{
+    is_inrange(rate_cba, -1.000 - margin_of_error, -1.000 + margin_of_error)
+//}
+
+// @function Check if the rate(s) correspond to pattern ("3Tap", "Triple Top / Bottom").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export is3Tap (float rate_edc, float rate_cba, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -1.000 - margin_of_error, -1.000 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -1.000 - margin_of_error, -1.000 + margin_of_error)
+    _is_edc and _is_cba
+//}
+
+// @function Check if the rate(s) correspond to pattern ("4Tap", "Quadruple Top / Bottom").
+// @param rate_gfe float, percent rate of the triangle GFE. expects a negative rate.
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export is4Tap (float rate_gfe, float rate_edc, float rate_cba, float margin_of_error=0.05) => //{
+    _is_gfe = is_inrange(rate_gfe, -1.000 - margin_of_error, -1.000 + margin_of_error)
+    _is_edc = is_inrange(rate_edc, -1.000 - margin_of_error, -1.000 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -1.000 - margin_of_error, -1.000 + margin_of_error)
+    _is_gfe and _is_edc and _is_cba
+//}
+
+// @function Check if the rate(s) correspond to pattern ("AB=CD").
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isABCD (float rate_cba, float rate_dcb, float margin_of_error=0.05) => //{
+    _is_cba = is_inrange(rate_cba, -1.618 - margin_of_error, -1.270 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -0.786 - margin_of_error, -0.618 + margin_of_error)
+    _is_cba and _is_dcb
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Bat").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isBat (float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -0.500 - margin_of_error, -0.382 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -0.886 - margin_of_error, -0.382 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -2.618 - margin_of_error, -1.618 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -0.886 - margin_of_error, -0.886 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Butterfly").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isButterfly (float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -0.786 - margin_of_error, -0.786 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -0.886 - margin_of_error, -0.382 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -2.618 - margin_of_error, -1.618 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -1.618 - margin_of_error, -1.270 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Gartley").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isGartley (float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -0.618 - margin_of_error, -0.618 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -0.886 - margin_of_error, -0.382 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -2.618 - margin_of_error, -1.130 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -0.786 - margin_of_error, -0.786 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Crab").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isCrab (float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -0.886 - margin_of_error, -0.886 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -0.886 - margin_of_error, -0.382 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -3.618 - margin_of_error, -2.000 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -1.618 - margin_of_error, -1.618 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Shark").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isShark(float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -0.886 - margin_of_error, -0.886 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -1.618 - margin_of_error, -1.130 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -2.240 - margin_of_error, -1.270 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -1.130 - margin_of_error, -0.886 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("5o").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export is5o(float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -1.618 - margin_of_error, -1.130 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -2.240 - margin_of_error, -1.618 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -0.500 - margin_of_error, -0.500 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -0.236 - margin_of_error, +0.236 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Wolfe").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isWolfe(float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -1.618 - margin_of_error, -1.270 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -5.000 - margin_of_error, -0.000 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -1.618 - margin_of_error, -1.270 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -5.000 - margin_of_error, -0.000 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("3 Driver").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export is3Driver(float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -1.618 - margin_of_error, -1.270 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -5.000 - margin_of_error, -0.000 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -1.618 - margin_of_error, -1.270 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -5.000 - margin_of_error, -0.000 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Contracting Triangle").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isConTria(float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -0.886 - margin_of_error, -0.236 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -0.886 - margin_of_error, -0.236 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -0.886 - margin_of_error, -0.236 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -0.886 - margin_of_error, -0.236 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Expanding Triangle").
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isExpTria(float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_edc = is_inrange(rate_edc, -2.618 - margin_of_error, -1.125 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -2.618 - margin_of_error, -1.125 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -2.618 - margin_of_error, -1.125 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -2.618 - margin_of_error, -1.125 + margin_of_error)
+    _is_edc and _is_dcb and _is_cba and _is_eda
+//}
+
+// @function Check if the rate(s) correspond to pattern ("Head and Shoulders").
+// @param rate_fed float, percent rate of the triangle FED. expects a negative rate.
+// @param rate_feb float, percent rate of the triangle FEB. expects a negative rate.
+// @param rate_edc float, percent rate of the triangle EDC. expects a negative rate.
+// @param rate_dcb float, percent rate of the triangle DCB. expects a negative rate.
+// @param rate_cba float, percent rate of the triangle CBA. expects a negative rate.
+// @param rate_eda float, percent rate of the triangle EDA. expects a negative rate.
+// @param margin_of_error float, percent rate of expected error margin, default 0.05(5%).
+// @returns bool
+export isHnS(float rate_fed, float rate_feb, float rate_edc, float rate_dcb, float rate_cba, float rate_eda, float margin_of_error=0.05) => //{
+    _is_fed = is_inrange(rate_fed, -0.618 - margin_of_error, -0.090 + margin_of_error)
+    _is_feb = is_inrange(rate_feb, -0.886 - margin_of_error, -0.090 + margin_of_error)
+    _is_edc = is_inrange(rate_edc, -9.999 - margin_of_error, -1.000 + margin_of_error)
+    _is_dcb = is_inrange(rate_dcb, -1.250 - margin_of_error, -0.750 + margin_of_error)
+    _is_cba = is_inrange(rate_cba, -0.886 - margin_of_error, -0.090 + margin_of_error)
+    _is_eda = is_inrange(rate_eda, -1.618 - margin_of_error, -0.090 + margin_of_error)
+    _is_fed and _is_feb and _is_edc and _is_eda and _is_dcb and _is_cba
+//}
+

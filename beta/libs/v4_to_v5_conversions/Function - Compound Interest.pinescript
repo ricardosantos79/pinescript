@@ -1,0 +1,17 @@
+//@version=5
+indicator(title='Function - Compound Interest', overlay=false)
+
+f_compound_interest(_principle, _rate, _duration) =>
+//  Description: Calculate compound interest for given values.              {
+    float return_1 = _principle * math.pow(1 + _rate / 100, _duration)
+    return_1
+//------------------------------------------------------------------------------}
+
+
+float principle = input(defval=1000.00)
+float rate = input(defval=3.1416)
+float duration = input(defval=6.0)
+example = f_compound_interest(principle, rate, duration)
+plot(series=example, title='CI', color=color.new(color.blue, 0))
+
+

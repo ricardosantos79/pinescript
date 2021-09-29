@@ -1,0 +1,62 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Generalized Neural Network Layer method.
+library(title='FunctionNNLayer')
+
+import RicardoSantos/MLActivationFunctions/3 as activation
+import RicardoSantos/FunctionNNPerceptron/1 as nnp
+
+// reference: 
+//      https://blog.primen.dk/basic-neural-network-code-example-java/
+
+// @function helper method to generate random weights of (A * B) size.
+// @param previous_size int, number of nodes on the left.
+// @param next_size int, number of nodes on the right.
+// @returns float array.
+generate_random_weights (int previous_size, int next_size) => //{
+    //                 |    col          |     row      |
+    _weights = array.new_float(previous_size*next_size)
+    for _i = 0 to previous_size-1
+        for _j = 0 to next_size-1
+            array.set(_weights, _i * next_size + _j, math.random() * 2.0 - 1.0)
+    _weights
+//}
+
+// @function Generalized Layer.
+// @param value float, value to process.
+// @returns float
+export layer (float[] inputs, float[] weights, int n_nodes, float bias=1.0, string activation_function='sigmoid') => //{
+    // TODO:
+    // 0: errors
+    // 1: for each node run perceptron with inputs and selected node weights from matrix..
+    //      - library import for slicing matrix..
+    // 2: layer output
+    int _size_i = array.size(inputs)
+    int _size_w = array.size(weights)
+    int _size_m = _size_i * n_nodes
+    switch
+        n_nodes < 1 => runtime.error('FunctionNNLayer -> layer(): "n_nodes" must be a positive integer over 0.')
+        _size_i < 1 => runtime.error('FunctionNNLayer -> layer(): "inputs" array is empty.')
+        _size_w != _size_m => runtime.error(str.format('FunctionNNLayer -> layer(): number of elements in weights matrix do not match number of inputs/nodes, expecting {0}, found {1} .', _size_m, _size_w))
+    float[] _outputs = array.new_float(n_nodes)
+    for _n = 0 to n_nodes-1
+        float[] _weights = array.slice(weights, _n*_size_i, (_n*_size_i+_size_i)) // get weigths row or column from matrix
+        array.set(_outputs, _n, nnp.perceptron(inputs, _weights, bias, activation_function))
+    _outputs
+//{ usage:
+i = array.from(0.0, 1, 2)
+if barstate.islastconfirmedhistory
+    // run a simple NN once:
+    h1 = layer(i, generate_random_weights(3, 4), 4) // 1st hidden layer with 4 nodes, from inputs
+    h2 = layer(h1, generate_random_weights(4, 5), 5) // 2nd level hidden layer with 5 nodes , from first hidden
+    o = layer(h2, generate_random_weights(5, 3), 3) // output layer with 3 nodes 
+        // apply backpropagation to weights here?
+        // https://blog.primen.dk/understanding-backpropagation/
+        // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html
+    label.new(bar_index, 0.0, str.tostring(o))
+//{ remarks:
+//}}}
+

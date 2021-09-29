@@ -1,0 +1,160 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Helper Methods for the creation of arrays.
+library("SeasonalDecompositionByMovingAverage")
+// reference:
+//      https://tedboy.github.io/statsmodels_doc/_modules/statsmodels/tsa/seasonal.html
+
+// @function computes means for each season frequency in data.
+// @param sample float, array with data values.
+// @param frequency int, seasonal frequency.
+// @param remove_null bool, do not count null values, default is true.
+// @param default_null_value string, value to fill null values, default is 'zero', options: 'zero', 'mean'.
+// @returns int array
+export seasonal_mean(float[] sample, int frequency, bool remove_null=true, string default_null_value='zero') => //{
+// TODO: add conditional break overloads.
+    int _samplesize = array.size(id=sample)
+    float[] _means = array.new_float(size=frequency, initial_value=float(na))
+
+    float _null_value = 0.0
+    if default_null_value == 'mean'
+        _null_value := array.avg(id=sample)
+    for _freq = 0 to frequency-1
+        float _sum = 0.0
+        int _count = 0
+        for _i = _freq to _samplesize-1 by frequency
+            float _value = array.get(id=sample, index=_i)
+            if remove_null and na(_value)
+                continue
+            else
+                if na(_value)
+                    _value := _null_value
+                _sum += _value
+                _count += 1
+                continue
+        array.set(id=_means, index=_freq, value=_sum / _count)
+    _means
+// usage:
+if barstate.islast
+    data = array.from(1, 2, 3, 4, 5, 6, 7, 8, float(na), float(na), float(na), float(na), float(na))
+    m = seasonal_mean(data, 5, remove_null=false, default_null_value='mean')
+    label.new(bar_index, 0.0, str.tostring(m))
+//}
+
+// @function computes the usual correlation 
+//      (correlate(a1, a2) != correlate(a2, a1), 
+//      and conjugate the second argument for complex inputs
+// @param sample_a float array, 
+// @param sample_b float array
+// @param mode
+// export correlate_1d (float[] sample_a, float[] sample_b, string mode) => //{
+//     bool _inverted = false
+//     int _size_a = array.size(id=sample_a)
+//     int _size_b = array.size(id=sample_b)
+//     float[] _A = sample_a
+//     float[] _B = sample_b
+//     if _size_b > _size_a
+//         _A := sample_b
+//         _B := sample_a
+//         int _st = _size_a
+//         _size_a := _size_b
+//         _size_b := _st
+//         _inverted := false
+        
+    
+// reference:
+//      https://github.com/numpy/numpy/blob/main/numpy/core/src/multiarray/multiarraymodule.c#L1170
+//}
+
+// @function 
+// @param mode string, indicates the size of the output, options='full', 'valid', 'same'
+// @returns
+// export convolve(float[] sample_a, float[] sample_b, string mode='same') => //{
+    // a, v = array(a, copy=False, ndmin=1), array(v, copy=False, ndmin=1)
+    // int _size_a = array.size(id=sample_a)
+    // int _size_b = array.size(id=sample_b)
+    // if _size_b > _size_a
+    //     correlate()
+    //     a, v = v, a
+    // if len(a) == 0:
+    //     raise ValueError('a cannot be empty')
+    // if len(v) == 0:
+    //     raise ValueError('v cannot be empty')
+    // return multiarray.correlate(a, v[::-1], mode)
+
+// reference:
+//      https://github.com/numpy/numpy/blob/v1.21.0/numpy/core/numeric.py#L748-L844
+
+    // """
+    // Returns the discrete, linear convolution of two one-dimensional sequences.
+    // The convolution operator is often seen in signal processing, where it
+    // models the effect of a linear time-invariant system on a signal [1]_.  In
+    // probability theory, the sum of two independent random variables is
+    // distributed according to the convolution of their individual
+    // distributions.
+    // If `v` is longer than `a`, the arrays are swapped before computation.
+    // Parameters
+    // ----------
+    // a : (N,) array_like
+    //     First one-dimensional input array.
+    // v : (M,) array_like
+    //     Second one-dimensional input array.
+    // mode : {'full', 'valid', 'same'}, optional
+    //     'full':
+    //       By default, mode is 'full'.  This returns the convolution
+    //       at each point of overlap, with an output shape of (N+M-1,). At
+    //       the end-points of the convolution, the signals do not overlap
+    //       completely, and boundary effects may be seen.
+    //     'same':
+    //       Mode 'same' returns output of length ``max(M, N)``.  Boundary
+    //       effects are still visible.
+    //     'valid':
+    //       Mode 'valid' returns output of length
+    //       ``max(M, N) - min(M, N) + 1``.  The convolution product is only given
+    //       for points where the signals overlap completely.  Values outside
+    //       the signal boundary have no effect.
+    // Returns
+    // -------
+    // out : ndarray
+    //     Discrete, linear convolution of `a` and `v`.
+    // See Also
+    // --------
+    // scipy.signal.fftconvolve : Convolve two arrays using the Fast Fourier
+    //                           Transform.
+    // scipy.linalg.toeplitz : Used to construct the convolution operator.
+    // polymul : Polynomial multiplication. Same output as convolve, but also
+    //           accepts poly1d objects as input.
+    // Notes
+    // -----
+    // The discrete convolution operation is defined as
+    // .. math:: (a * v)[n] = \\sum_{m = -\\infty}^{\\infty} a[m] v[n - m]
+    // It can be shown that a convolution :math:`x(t) * y(t)` in time/space
+    // is equivalent to the multiplication :math:`X(f) Y(f)` in the Fourier
+    // domain, after appropriate padding (padding is necessary to prevent
+    // circular convolution).  Since multiplication is more efficient (faster)
+    // than convolution, the function `scipy.signal.fftconvolve` exploits the
+    // FFT to calculate the convolution of large data-sets.
+    // References
+    // ----------
+    // .. [1] Wikipedia, "Convolution",
+    //     https://en.wikipedia.org/wiki/Convolution
+    // Examples
+    // --------
+    // Note how the convolution operator flips the second array
+    // before "sliding" the two across one another:
+    // >>> np.convolve([1, 2, 3], [0, 1, 0.5])
+    // array([0. , 1. , 2.5, 4. , 1.5])
+    // Only return the middle values of the convolution.
+    // Contains boundary effects, where zeros are taken
+    // into account:
+    // >>> np.convolve([1,2,3],[0,1,0.5], 'same')
+    // array([1. ,  2.5,  4. ])
+    // The two arrays are of the same length, so there
+    // is only one position where they completely overlap:
+    // >>> np.convolve([1,2,3],[0,1,0.5], 'valid')
+    // array([2.5])
+    // """
+//}

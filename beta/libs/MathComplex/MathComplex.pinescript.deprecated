@@ -1,0 +1,684 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description A set of utility functions to handle complex numbers.
+library(title='MathComplex')
+
+// references:
+//      https://en.wikipedia.org/wiki/Complex_number
+//      js: https://rosettacode.org/wiki/Fast_Fourier_transform
+//      https://github.com/trekhleb/javascript-algorithms/blob/477f30b0bdac6024874d2976de1eca7afe0176dd/src/algorithms/math/complex-number/ComplexNumber.js#L3
+//      https://github.com/infusion/Complex.js/
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs
+
+// imports:
+import RicardoSantos/DebugConsole/2 as console
+// console.init(), console.queue(), console.update()
+[__T, __C] = console.init(20) //initiate console configuration variables.
+//
+import RicardoSantos/MathConstants/1 as mc
+// mc.Sqrt1Over2() -> sign()
+// mc.Pi2() -> cubic_roots()
+import RicardoSantos/MathExtension/6 as me
+// me.hypotenuse() -> sign()
+
+// @function Set the real part of complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param real float, value to replace real value of complex_number.
+// @returns Void, Modifies complex_number.
+export set_real (float[] complex_number, float real) => //{
+    array.set(id=complex_number, index=0, value=real)
+//}
+
+// @function Set the imaginary part of complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param imaginary float, value to replace imaginary value of complex_number.
+// @returns Void, Modifies complex_number.
+export set_imaginary (float[] complex_number, float imaginary=0.0) => //{
+    array.set(id=complex_number, index=1, value=imaginary)
+//}
+
+// @function Creates a prototype array to handle complex numbers.
+// @param real float, real value of the complex number. default=0.
+// @param imaginary float, imaginary number of the complex number. default=0.
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export new (float real=0.0, float imaginary=0.0) => //{
+    array.from(real, imaginary)
+//}
+
+// @function complex number "0+0i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export zero () => //{
+    array.new_float(2, 0.0)
+//}
+
+// @function complex number "1+0i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export one () => //{
+    array.from(1.0, 0.0)
+//}
+
+// @function complex number "0+1i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export imaginary_one () => //{
+    array.from(0.0, 1.0)
+//}
+
+// @function complex number "0+1i".
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export nan () => //{
+    array.new_float(2, na)
+//}
+
+// @function Create a complex number from a point's polar coordinates.
+// @param magnitude float, default=0.0, The magnitude, which is the distance from the origin (the intersection of the x-axis and the y-axis) to the number.
+// @param phase float, default=0.0, The phase, which is the angle from the line to the horizontal axis, measured in radians.
+// @return float array, pseudo complex number in the form of a array [real, imaginary].
+export from_polar_coordinates (float magnitude=0.0, float phase=0.0) => //{
+    array.from(magnitude * math.cos(phase), magnitude * math.sin(phase))
+//}
+
+// @function Get the real part of complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns float, Real part of the complex_number.
+export get_real (float[] complex_number) => //{
+    array.get(id=complex_number, index=0)
+//}
+
+// @function Get the imaginary part of complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns float, Imaginary part of the complex number.
+export get_imaginary (float[] complex_number) => //{
+    array.get(id=complex_number, index=1)
+//}
+
+// @function Checks that its a valid complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_complex (float[] complex_number) => //{
+    array.size(complex_number) == 2
+//}
+
+// @function Checks that its empty "na" complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_nan (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> is_nan(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        na(get_real(complex_number)) or na(get_imaginary(complex_number))
+//}
+
+// @function Checks that the complex_number is real.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_real (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> is_real(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        get_imaginary(complex_number) == 0.0
+//}
+
+// @function Checks that the complex_number is real and not negative.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_real_non_negative (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> is_real_non_negative(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        get_real(complex_number) >= 0.0 and get_imaginary(complex_number) == 0
+//}
+
+// @function Checks that the complex_number is zero.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns bool.
+export is_zero (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> is_real(): "complex_number" has the wrong size.')
+        bool(na)
+    else
+        (get_real(complex_number) + get_imaginary(complex_number)) == 0.0
+//}
+
+// @function Converts complex_number to a string format, in the form: "a+bi" 
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @param format string, formating to apply.
+// @returns a string in "a+bi" format
+export to_string (float[] complex_number, string format='#.##########') => //{
+	float _re = get_real(complex_number)
+	float _im = get_imaginary(complex_number)
+	string _str = ''
+	if na(_re)
+		_str := str.tostring(_im, format) + 'i'
+	else if _im < 0
+		_str := str.tostring(_re, format) + '' + str.tostring(_im, format) + 'i'
+	else
+		_str := str.tostring(_re, format) + '+' + str.tostring(_im, format) + 'i'
+	_str
+//}
+
+// @function Computes the conjugate of complex_number by reversing the sign of the imaginary part.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export conjugate (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> conjugate(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+        new(real=get_real(complex_number), imaginary=-1 * get_imaginary(complex_number))
+//{ reference:
+//      https://en.cppreference.com/w/c/numeric/complex/conj
+//}}
+
+// @function Adds complex number complex_number_b to complex_number_a, in the form:
+//         [_a.real + _b.real, _a.imaginary + _b.imaginary].
+// @param complex_number_a pseudo complex number in the form of a array [real, imaginary].
+// @param complex_number_b pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export add(float[] complex_number_a, float[] complex_number_b) => //{
+    float _re = get_real(complex_number_a) + get_real(complex_number_b)
+    float _im = get_imaginary(complex_number_a) + get_imaginary(complex_number_b)
+    new(real=_re, imaginary=_im)
+//}
+
+// @function Subtract complex_number_b from complex_number_a, in the form: 
+//         [_a.real - _b.real, _a.imaginary - _b.imaginary].
+// @param complex_number_a float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_number_b float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export subtract (float[] complex_number_a, float[] complex_number_b) => //{
+    float _re = get_real(complex_number_a) - get_real(complex_number_b)
+    float _im = get_imaginary(complex_number_a) - get_imaginary(complex_number_b)
+    new(real=_re, imaginary=_im)
+//}
+
+// @function Multiply complex_number_a with complex_number_b, in the form: 
+//         [(_a.real * _b.real) - (_a.imaginary * _b.imaginary), (_a.real * _b.imaginary) + (_a.imaginary * _b.real)]
+// @param complex_number_a float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_number_b float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export multiply (float[] complex_number_a, float[] complex_number_b) => //{
+	float _a_re = get_real(complex_number_a)
+	float _a_im = get_imaginary(complex_number_a)
+	float _b_re = get_real(complex_number_b)
+	float _b_im = get_imaginary(complex_number_b)
+	float _re = _a_re * _b_re - _a_im * _b_im
+    float _im = _a_re * _b_im + _a_im * _b_re
+    new(real=_re, imaginary=_im)
+//}
+
+// @function Divide complex_number _a with _b, in the form: 
+//         [(_a.real * _b.real) - (_a.imaginary * _b.imaginary), (_a.real * _b.imaginary) + (_a.imaginary * _b.real)]
+// @param complex_number_a float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_number_b float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export divide (float[] complex_number_a, float[] complex_number_b) => //{
+	float _re = get_real(complex_number_b)
+	float _im = get_imaginary(complex_number_b)
+    // Make sure we're dealing with complex number.
+    float[] _complexDivider = new(_re, _im)
+    // Multiply dividend by divider's conjugate.
+    float[] _finalDivident = multiply(complex_number_a, conjugate(_complexDivider))
+    // Calculating final divider using formula (a + bi)(a − bi) = a^2 + b^2
+    float finalDivider = math.pow(get_real(_complexDivider), 2) + math.pow(get_imaginary(_complexDivider), 2)
+	float _finaldivident_real = get_real(_finalDivident)
+	float _finaldivident_imaginary = get_imaginary(_finalDivident)
+    new(_finaldivident_real / finalDivider, _finaldivident_imaginary / finalDivider)
+//}
+
+// @function Computes the reciprocal or inverse of complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export reciprocal (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> reciprocal(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else if is_zero(complex_number)
+        zero()
+    else
+        divide(one(), complex_number)
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L744
+//}}
+
+// @function Negative of complex_number, in the form: [-_a.real, -_a.imaginary]
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export negative (float[] complex_number) => //{
+	new(real=-get_real(complex_number), imaginary=-get_imaginary(complex_number))
+//}
+
+// @function Inverse of complex_number, in the form: [1/_a.real, 1/_a.imaginary]
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export inverse (float[] complex_number) => //{
+	float _re = get_real(complex_number)
+	float _im = get_imaginary(complex_number)
+	// 1 / 0 = infinity, 1 / infinity = 0
+	if _re != 0 and _im != 0
+    	float _d = _re * _re + _im * _im
+        new(real=_re / _d, imaginary=(0 - _im) / _d)
+    else
+        new()
+//}
+
+// @function Exponential of complex_number.
+// @param complex_number pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export cexp (float[] complex_number) => //{
+	float _re = get_real(complex_number)
+	float _im = get_imaginary(complex_number)
+	var _er = math.exp(_re)
+    new(real=_er * math.cos(_im), imaginary=_er * math.sin(_im))
+//{ reference:
+//      https://en.cppreference.com/w/c/numeric/complex/cexp
+//      http://cboard.cprogramming.com/c-programming/89116-how-implement-complex-exponential-functions-c.html#post637921
+//}}
+
+// @function Ceils complex_number. 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param  digits int, digits to use as ceiling.
+// @returns
+//     _complex: pseudo complex number in the form of a array [real, imaginary]
+export ceil (float[] complex_number, int digits) => //{
+    float _places = math.pow(10, digits)
+    float _re = get_real(complex_number)
+    float _im = get_imaginary(complex_number)
+    new(real=math.ceil(_re * _places) / _places, imaginary=math.ceil(_im * _places) / _places)
+//}
+
+// @function Radius(magnitude) of complex_number, in the form: [sqrt(pow(complex_number))]
+//     This is defined as its distance from the origin (0,0) of the complex plane.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float value with radius.
+export radius (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> magnitude(): "complex_number" has the wrong size.')
+        float(na)
+    else
+        math.sqrt(math.pow(get_real(complex_number), 2) + math.pow(get_imaginary(complex_number), 2))
+//{ usage:
+// console.queue_one(__C, str.format('radius of complex number "5.2+3.0i" = {0, number, #.####}', radius(new(5.2, 3.0)))) // 6.0
+//}}
+
+// @function magnitude(absolute value) of complex_number, should be the same as the radius.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float.
+export magnitude (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> magnitude(): "complex_number" has the wrong size.')
+        float(na)
+    else
+        float _a = math.abs(get_real(complex_number))
+        float _b = math.abs(get_imaginary(complex_number))
+        if _a > _b
+            float _tmp = _b / _a
+            _a * math.sqrt(1.0 * math.pow(_tmp, 2))
+        else if _a == 0.0
+            _b
+        else
+            float _tmp = _a / _b
+            _b * math.sqrt(1.0 * math.pow(_tmp, 2))
+//{ usage:
+//      does not seem to be correct..
+// console.queue_one(__C, str.format('magnitude of complex number "5.2+3.0i" = {0, number, #.####} // should be 6', magnitude(new(5.2, 3.0))))
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L179
+//}}}
+
+// @function magnitude(absolute value) of complex_number, should be the same as the radius.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float.
+export magnitude_squared (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> magnitude(): "complex_number" has the wrong size.')
+        float(na)
+    else
+        float _re = math.pow(get_real(complex_number), 2)
+        float _im = math.pow(get_imaginary(complex_number), 2)
+        _re + _im
+//{ usage:
+// console.queue_one(__C, str.format('magnitude squared of complex number "5.2+3.0i" = {0, number, #.####}', magnitude_squared(new(5.2, 3.0)))) // 36.0
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L179
+//}}}
+
+// @function Unity of complex numbers.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, complex number.
+export sign (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> sign(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+        float _re = get_real(complex_number)
+        float _im = get_imaginary(complex_number)
+        if _re >= 1.0e307 and _im >= 1.0e307
+            new(mc.Sqrt1Over2(), mc.Sqrt1Over2())
+        else if _re >= 1.0e307 and _im <= -1.0e307
+            new(mc.Sqrt1Over2(), -mc.Sqrt1Over2())
+        else if _re <= -1.0e307 and _im >= 1.0e307
+            new(-mc.Sqrt1Over2(), mc.Sqrt1Over2())
+        else if _re <= -1.0e307 and _im <= -1.0e307
+            new(-mc.Sqrt1Over2(), -mc.Sqrt1Over2())
+        else
+            float _mod = me.hypotenuse(_re, _im)
+            if _mod == 0.0
+                zero()
+            else
+                new(_re / _mod, _im / _mod)
+//{ usage:
+// console.queue_one(__C, str.format('sign of complex number "5.2+3.0i" = {0}', to_string(sign(new(5.2, 3.0)), '#.##'))) // "0.87+0.5i"
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L218
+//}}}
+
+// @function Compares two complex numbers: 
+// @param complex_number_a float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_number_b float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns boolean value representing the equality.
+export equals (float[] complex_number_a, float[] complex_number_b) => //{
+    float _epsilon = 1e-15
+    math.abs(get_real(complex_number_b) - get_real(complex_number_a)) <= _epsilon and math.abs(get_imaginary(complex_number_b) - get_imaginary(complex_number_a)) <= _epsilon
+//}
+
+// @function The phase value of complex number complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param in_radians boolean, value for the type of angle value, default=true, options=(true: radians, false: degrees)
+// @returns float value with phase.
+export get_phase (float[] complex_number, bool in_radians=true) => //{
+	float _re = get_real(complex_number)
+	float _im = get_imaginary(complex_number)
+    float _phase = math.atan(math.abs(_im) / math.abs(_re))
+
+    if not in_radians
+        _phase := _phase * (180 / math.pi) // radian to degrees
+    else
+        if _re < 0 and _im > 0
+            _phase := math.pi - nz(_phase)
+        else if _re < 0 and _im < 0
+            _phase := -(math.pi - nz(_phase))
+        else if _re > 0 and _im < 0
+            _phase := -nz(_phase)
+        else if _re == 0 and _im > 0
+            _phase := math.pi / 2.0
+        else if _re == 0 and _im < 0
+            _phase := -math.pi / 2.0
+        else if _re < 0 and _im == 0
+            _phase := math.pi
+        else if _re > 0 and _im == 0
+            _phase := 0.0
+        else if _re == 0 and _im == 0
+            // More correctly would be to set 'indeterminate'.
+            // But just for simplicity reasons let's set zero.
+            _phase := 0.0
+        else
+            na
+    _phase
+//{ usage:
+// console.queue_one(__C, str.format('phase of complex number "5.2+3.0i" = in radeans: {0, number, #.##}, in degrees: {1, number, #.##}', get_phase(new(5.2, 3.0), true), get_phase(new(5.2, 3.0), false) )) // 36.0
+//}}
+
+// @function Natural logarithm of complex number (base E).
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, complex number.
+export natural_logarithm (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> natural_logarithm(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else if is_real_non_negative(complex_number)
+        new(math.log(get_real(complex_number)), 0.0)
+    else
+        float _re = math.pow(get_real(complex_number), 2)
+        float _im = math.pow(get_imaginary(complex_number), 2)
+        new(0.5 * math.log(magnitude_squared(complex_number)), get_phase(complex_number, true))
+//{ usage:
+// console.queue_one(__C, str.format('natural logarithm of complex number "-1.0+0i" = {0} // iπ', to_string(natural_logarithm(new(-1.0, 0.0)), '#.##'))) // "0.0+3.1416i", "iπ"
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L350
+//      https://www.mathworks.com/help/matlab/ref/log.html
+//}}}
+
+// @function Common logarithm of complex number (base 10).
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, complex number.
+export common_logarithm (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> common_logarithm(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+        divide(natural_logarithm(complex_number), new(mc.Ln10(), 0.0))
+//{ usage:
+// console.queue_one(__C, str.format('common logarithm of complex number "0-2i" = {0} ', to_string(common_logarithm(new(0.0, -2.0)), '#.##'))) // "0.301-0.6822i"
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L350
+//      https://www.mathworks.com/help/matlab/ref/log10.html
+//}}}
+
+// @function Common logarithm of complex number (custom base).
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param base float, base value.
+// @returns float array, complex number.
+export logarithm (float[] complex_number, float base) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> common_logarithm(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+        divide(natural_logarithm(complex_number), new(math.log(base), 0.0))
+//{ usage:
+// console.queue_one(__C, str.format('logarithm of complex number "0-2i" = {0} ', to_string(logarithm(new(0.0, -2.0), 10.0), '#.##'))) // "0.301-0.6822i"
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L350
+//      https://www.mathworks.com/help/matlab/ref/log10.html
+//}}}
+
+// @function Raise complex_number with complex_exponent. 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_exponent float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export power (float[] complex_number, float[] complex_exponent) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> power(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+    	float _a_re = get_real(complex_number)
+    	float _a_im = get_imaginary(complex_number)
+    	float _b_re = get_real(complex_exponent)
+    	float _b_im = get_imaginary(complex_exponent)
+        if is_zero(complex_number)
+            if is_zero(complex_exponent)
+                one()
+            else if _b_re > 0.0
+                zero()
+            else if _b_re < 0.0
+                if _b_im == 0
+                    new(float(na), 0.0) // "+∞+0i"
+                else
+                    nan() // "+∞+∞i"
+            nan()
+        else
+            // (exponent * natural_logarithm()).exponential()
+            cexp(multiply(complex_exponent, natural_logarithm(complex_number)))
+//{ usage:
+// console.queue_one(__C, str.format('power of complex number "2+1i" ^ "4+0i" = {0} ', to_string(power(new(2.0, 1.0), new(4.0, 0.0)), '#.##'))) // "-7+24i" 
+//{ remarks:
+// https://www.superprof.co.uk/resources/academic/maths/arithmetic/complex-numbers/power-of-a-complex-number.html
+//}}}
+
+// @function Raise complex_number with inverse of complex_exponent. 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param complex_exponent float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export root (float[] complex_number, float[] complex_exponent) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> root(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else if not is_complex(complex_exponent)
+        error('MathComplex -> root(): "complex_exponent" has the wrong size.')
+        array.new_float(na)
+    else
+    	power(complex_number, divide(one(), complex_exponent))
+//{ usage:
+// console.queue_one(__C, str.format('root of complex number ("2+0i" √ "-5+12i") = {0} ', to_string(root(new(-5.0, 12.0), new(2.0, 0.0)), '#.##'))) //
+//{ remarks:
+//      https://www.intmath.com/complex-numbers/7-powers-roots-demoivre.php
+//}}}
+
+// @function Square of complex_number (power 2). 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export square (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> square(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+        float _re = get_real(complex_number)
+        if is_real(complex_number)
+            new(math.pow(_re, 2.0), 0.0)
+        else
+            float _im = get_imaginary(complex_number)
+            new(math.pow(_re, 2.0) - math.pow(_im, 2.0), 2.0 * _re * _im)
+//{ usage:
+// console.queue_one(__C, str.format('square of complex number "12-6i"^2 = {0} ', to_string(square(new(12.0, -6.0)), '#.##'))) //
+//{ remarks:
+//      https://docs.microsoft.com/en-us/dotnet/api/system.numerics.complex.pow?view=net-5.0
+//}}}
+
+// @function Square root of complex_number (power 1/2). 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+export square_root (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> square_root(): "complex_number" has the wrong size.')
+        array.new_float(na)
+    else
+        float _re = get_real(complex_number)
+        if is_real_non_negative(complex_number)
+            new(math.sqrt(_re), 0.0)
+        else
+            float _im = get_imaginary(complex_number)
+            float _abs_re = math.abs(_re)
+            float _abs_im = math.abs(_im)
+            float _w = 0.0
+            
+            if _abs_re >= _abs_im
+                float _ratio = _im / _re
+                _w := math.sqrt(_abs_re) * math.sqrt(0.5 * (1.0 + math.sqrt(1.0 + math.pow(_ratio, 2))))
+            else
+                float _ratio = _re / _im
+                _w := math.sqrt(_abs_im) * math.sqrt(0.5 * (math.abs(_ratio) + math.sqrt(1.0 + math.pow(_ratio, 2))))
+            
+            if _re >= 0.0
+                new(_w, _im / (2.0 * _w))
+            else if _im >= 0.0
+                new(_abs_im / (2.0 * _w), _w)
+            else
+                new(_abs_im / (2.0 * _w), -_w)
+//{ usage:
+// console.queue_one(__C, str.format('square root of complex number "6-8i" = {0} ', to_string(square_root(new(6.0, -8.0)), '#.##'))) //
+//{ remarks:
+//      https://www.brainkart.com/article/Square-roots-of-a-complex-number_39098/
+//}}}
+
+// @function Square root of complex_number (power 1/2). 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns tuple with 2 complex numbers.
+export square_roots (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> square_roots(): "complex_number" has the wrong size.')
+        [array.new_float(na), array.new_float(na)]
+    else
+        _principal = square_root(complex_number)
+        [_principal, negative(_principal)]
+//{ usage:
+// [sr_pos, sr_neg] = square_roots(new(6.0, -8.0))
+// console.queue_one(__C, str.format('square roots of complex number "6-8i" = {0} ___ {1}', to_string(sr_pos, '#.##'), to_string(sr_neg, '#.##'))) //
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L492
+//}}}
+
+// @function Square root of complex_number (power 1/2). 
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @returns tuple with 2 complex numbers.
+export cubic_roots (float[] complex_number) => //{
+    if not is_complex(complex_number)
+        error('MathComplex -> square_roots(): "complex_number" has the wrong size.')
+        [array.new_float(na), array.new_float(na), array.new_float(na)]
+    else
+        float _r = math.pow(magnitude(complex_number), 1.0 / 3.0)
+        float _theta = get_phase(complex_number, true)
+        float _shift = mc.Pi2() / 3.0
+        [from_polar_coordinates(_r, _theta), from_polar_coordinates(_r, _theta + _shift), from_polar_coordinates(_r, _theta - _shift)]
+//{ usage:
+// [cr_neu, cr_pos, cr_neg] = cubic_roots(new(6.0, -8.0))
+// console.queue_one(__C, str.format('cubic roots of complex number "6-8i" = {0} ___ {1} ___ {2}', to_string(cr_neu, '#.##'), to_string(cr_pos, '#.##'), to_string(cr_neg, '#.##'))) //
+//{ remarks:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/Complex32.cs#L501
+//}}}
+
+// @function The polar form value of complex_number.
+// @param complex_number float array, pseudo complex number in the form of a array [real, imaginary].
+// @param in_radians boolean, value for the type of angle value, default=true, options=(true: radians, false: degrees)
+// @returns float array, pseudo complex number in the form of a array [real, imaginary]
+//     ** returns a array [radius, phase]
+export to_polar_form (float[] complex_number, bool in_radians=true) => //{
+    new(radius(complex_number), get_phase(complex_number, in_radians))
+//{ usage:
+// console.queue_one(__C, str.format('polar form of complex number "5.2+3.0i" = in radeans: {0} , in degrees: {1}', to_string(to_polar_form(new(5.2, 3.0), true), '#.##'),  to_string(to_polar_form(new(5.2, 3.0), false), '#.##'))) // 
+// cn = to_polar_form(new(5.2, 3.0), false)
+// plot(get_real(cn)), plot(get_imaginary(cn))
+// // reactangular form "5.2+3.0i" converts to: "6+0.5i" in radeans || "6+30i" in degrees
+//{ remarks:
+//      https://www.electronics-tutorials.ws/accircuits/complex-numbers.html
+//}}}
+
+
+// if barstate.ishistory[1] and (barstate.isrealtime or barstate.islast)
+//     float[] a = new(0.10, -0.25)
+//     float[] b = new(0.66, float(na))
+//     float[] c = add(a, b)
+//     float[] d = subtract(c, b)
+//     float[] e = multiply(a, d)
+//     float[] f = cexp(e)
+//     float[] g = conjugate(f)
+//     float[] h = divide(f, g)
+//     float i = radius(h)
+//     float j = get_phase(h, true)
+//     float[] k = to_polar_form(h, true)
+// //     float[] L = array_new(4, new(0, 0))
+// //     array_set(L, 0, a)
+// //     array_set(L, 1, b)
+// //     array_set(L, 2, c)
+// //     array_set(L, 3, d)
+// //     float[] m = array_get(L, 2)
+// //     float[] n = negative(m)
+// //     float[] o = inverse(b)
+//     _text = ''
+//     _text := _text + 'a: ' + to_string(a) + '\n'
+//     _text := _text + 'b: ' + to_string(b) + '\n'
+//     _text := _text + 'c: ' + to_string(c) + '\n'
+//     _text := _text + 'd: ' + to_string(d) + '\n'
+//     _text := _text + 'e: ' + to_string(e) + '\n'
+//     _text := _text + 'f: ' + to_string(f) + '\n'
+//     _text := _text + 'g: ' + to_string(g) + '\n'
+//     _text := _text + 'h: ' + to_string(h) + '\n'
+//     _text := _text + 'i: ' + str.tostring(i) + '\n'
+//     _text := _text + 'j: ' + str.tostring(j) + '\n'
+//     _text := _text + 'k: ' + to_string(k) + '\n'
+// //     _text := _text + 'L: ' + array_to_string(L) + '\n'
+// //     _text := _text + 'm: ' + to_string(m) + '\n'
+// //     _text := _text + 'n: ' + to_string(n) + '\n'
+// //     _text := _text + 'o: ' + to_string(o) + '\n'
+// //     _text := _text + 'p: ' + to_string(ceil(h, 3)) + '\n'
+// //     _text := _text + '' + 'o==o?' + (equals(o, o)?'true':'false') + ' || o==n?' + (equals(o, n)?'true':'false') + '\n'
+// //     label.new(x=bar_index, y=0.0, text=_text, style=label.style_label_left, textalign=text.align_left)
+
+
+// update console
+console.update(__T, __C)
+

@@ -1,0 +1,140 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Array Basic Operations for Integers
+library(title='ArrayOperationsFloat')
+import RicardoSantos/MathExtension/6 as me
+// @function Adds sample_b to sample_a and returns a new array.
+// @param sample_a values to be added to.
+// @param sample_b values to add.
+// @returns float array with added results.
+export add(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    if _size_a > 0
+        int _size_b = array.size(id=sample_b)
+        if _size_b > 0
+            float[] _output = array.new_float(size=_size_a)
+            for _i = 0 to _size_a - 1
+                float _ai = array.get(id=sample_a, index=_i)
+                float _bi = array.get(id=sample_b, index=_i % _size_b)
+                array.set(id=_output, index=_i, value=_bi + _ai)
+            _output
+//{ usage:
+// if barstate.islastconfirmedhistory
+//     float[] a = array.from(1.1, 2.2, 3.3), float[] b = array.from(5.5, 6.6, 1.1)
+//     float[] c = add(sample_a=a, sample_b=b) // [6.6, 8.8, 4.4]
+//     label.new(bar_index, 0.0, str.format('{0}\n+\n{1}\n=\n{2}', str.tostring(a, '#.###'), str.tostring(b, '#.###'), str.tostring(c, '#.###')))
+//}}
+
+// @function subtracts sample_b from sample_a and returns a new array.
+// @param sample_a values to be subtracted from.
+// @param sample_b values to subtract.
+// @returns float array with subtracted results.
+export subtract(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    if _size_a > 0
+        int _size_b = array.size(id=sample_b)
+        if _size_b > 0
+            float[] _output = array.new_float(size=_size_a)
+            for _i = 0 to _size_a - 1
+                float _ai = array.get(id=sample_a, index=_i)
+                float _bi = array.get(id=sample_b, index=_i % _size_b)
+                array.set(id=_output, index=_i, value=_ai - _bi)
+            _output
+//{ usage:
+// if barstate.islastconfirmedhistory
+//     float[] a = array.from(1.1, 2.2, 3.3), float[] b = array.from(5.5, 6.6, 1.1)
+//     float[] c = subtract(sample_a=a, sample_b=b) // [-4.4, -4.4, 2.2]
+//     label.new(bar_index, 0.0, str.format('{0}\n-\n{1}\n=\n{2}', str.tostring(a, '#.###'), str.tostring(b, '#.###'), str.tostring(c, '#.###')))
+//}}
+
+// @function multiply sample_a with sample_b and returns a new array.
+// @param sample_a values to multiply.
+// @param sample_b values to multiply with.
+// @returns float array with multiplied results.
+export multiply(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    if _size_a > 0
+        int _size_b = array.size(id=sample_b)
+        if _size_b > 0
+            float[] _output = array.new_float(size=_size_a)
+            for _i = 0 to _size_a - 1
+                float _ai = array.get(id=sample_a, index=_i)
+                float _bi = array.get(id=sample_b, index=_i % _size_b)
+                array.set(id=_output, index=_i, value=_ai * _bi)
+            _output
+//{ usage:
+// if barstate.islastconfirmedhistory
+//     float[] a = array.from(1.1, 2.2, 3.3), float[] b = array.from(5.5)
+//     float[] c = multiply(sample_a=a, sample_b=b) // [6.05, 12.1, 18.15]
+//     label.new(bar_index, 0.0, str.format('{0}\n*\n{1}\n=\n{2}', str.tostring(a, '#.###'), str.tostring(b, '#.###'), str.tostring(c, '#.###')))
+//}}
+
+// @function divide sample_a with sample_b and returns a new array.
+// @param sample_a values to divide.
+// @param sample_b values to divide with.
+// @returns float array with divided results.
+export divide(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    if _size_a > 0
+        int _size_b = array.size(id=sample_b)
+        if _size_b > 0
+            float[] _output = array.new_float(size=_size_a)
+            for _i = 0 to _size_a - 1
+                float _ai = array.get(id=sample_a, index=_i)
+                float _bi = array.get(id=sample_b, index=_i % _size_b)
+                array.set(id=_output, index=_i, value=_ai / _bi)
+            _output
+//{ usage:
+// if barstate.islastconfirmedhistory
+//     float[] a = array.from(9.6, 3.5, 15.25), float[] b = array.from(5.6, 2.12)
+//     float[] c = divide(sample_a=a, sample_b=b) // [1.714, 1.651, 2.723]
+//     label.new(bar_index, 0.0, str.format('{0}\n/\n{1}\n=\n{2}', str.tostring(a, '#.###'), str.tostring(b, '#.###'), str.tostring(c, '#.###')))
+//}}
+
+// @function rise sample_a to  the power of sample_b and returns a new array.
+// @param sample_a base values to raise.
+// @param sample_b values of exponents.
+// @returns float array with raised results.
+export power(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    if _size_a > 0
+        int _size_b = array.size(id=sample_b)
+        if _size_b > 0
+            float[] _output = array.new_float(size=_size_a)
+            for _i = 0 to _size_a - 1
+                float _ai = array.get(id=sample_a, index=_i)
+                float _bi = array.get(id=sample_b, index=_i % _size_b)
+                array.set(id=_output, index=_i, value=math.pow(_ai, _bi))
+            _output
+//{ usage:
+// if barstate.islastconfirmedhistory
+//     float[] a = array.from(2.2, 3.5, 1.1), float[] b = array.from(5.1, 2.3)
+//     float[] c = power(sample_a=a, sample_b=b) // [55.764, 17.838, 1.626]
+//     label.new(bar_index, 0.0, str.format('{0}\n^\n{1}\n=\n{2}', str.tostring(a, '#.###'), str.tostring(b, '#.###'), str.tostring(c, '#.###')))
+//}}
+
+// @function float remainder of sample_a under the dividend sample_b and returns a new array.
+// @param sample_a values of quotients.
+// @param sample_b values of dividends.
+// @returns float array with remainder results.
+export remainder(float[] sample_a, float[] sample_b) => //{
+    int _size_a = array.size(id=sample_a)
+    if _size_a > 0
+        int _size_b = array.size(id=sample_b)
+        if _size_b > 0
+            float[] _output = array.new_float(size=_size_a)
+            for _i = 0 to _size_a - 1
+                float _ai = array.get(id=sample_a, index=_i)
+                float _bi = array.get(id=sample_b, index=_i % _size_b)
+                array.set(id=_output, index=_i, value=me.fmod(numerator=_ai, denominator=_bi))
+            _output
+//{ usage:
+// if barstate.islastconfirmedhistory
+//     float[] a = array.from(0.9,0.5,15.4), float[] b = array.from(0.5,0.2)
+//     float[] c = remainder(sample_a=a, sample_b=b) // [0.4, 0.1, 0.4]
+//     label.new(bar_index, 0.0, str.format('{0}\n^\n{1}\n=\n{2}', str.tostring(a, '#.###'), str.tostring(b, '#.###'), str.tostring(c, '#.###')))
+//}}
+

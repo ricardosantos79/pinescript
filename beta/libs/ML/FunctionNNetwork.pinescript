@@ -1,0 +1,152 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Method for a generalized Neural Network.
+library("FunctionNNetwork")
+
+import RicardoSantos/FunctionNNLayer/3 as nl
+import RicardoSantos/MLLossFunctions/1 as loss
+import RicardoSantos/MLActivationFunctions/3 as activation
+// reference:
+//      https://blog.primen.dk/understanding-backpropagation/
+//      https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html
+//      https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+//      https://www.anotsorandomwalk.com/backpropagation-example-with-numbers-step-by-step/
+//      https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
+
+// @function helper method to generate random weights of (A * B) size.
+// @param previous_size int, number of nodes on the left.
+// @param next_size int, number of nodes on the right.
+// @returns float array.
+generate_random_weights (int previous_size, int next_size) => //{
+    //                 |    col          |     row      |
+    _weights = array.new_float(previous_size*next_size)
+    for _i = 0 to previous_size-1
+        for _j = 0 to next_size-1
+            array.set(_weights, _i * next_size + _j, math.random() * 2.0 - 1.0)
+    _weights
+//}
+
+// @function helper method to propagate the signals forward.
+// @param x TODO: fill parameters
+// @returns float array.
+propagate_forward (float[] inputs, float[] weights, int[] layer_sizes, int weights_max_width) => //{
+	// TODO: might be good to remove output layer from loop? (inputs -> loop hidden -> outputs)
+	//     : missing bias parameter..
+    int _size_i = array.size(inputs)
+    int _size_ls = array.size(layer_sizes)
+
+	float[] _layer_outputs = nl.layer(inputs, array.slice(weights, 0, _size_i * array.get(layer_sizes, 0)), array.get(layer_sizes, 0))
+	if _size_ls > 1
+        float[] _layer_output = _layer_outputs
+    	for _layer = 1 to _size_ls - 1
+    	    // find the base level of current layer weights:
+    	    //      base = (sum of nodes up to previous layer) * (max weights in a node)
+    	    //      (weights in layer) = base + (previous layer nodes) * (current layer nodes)
+    	    int _w_base_idx = array.sum(array.slice(layer_sizes, 0, _layer-1)) * weights_max_width
+    	    float[] _layer_weights = array.slice(weights, _w_base_idx, _w_base_idx + array.get(layer_sizes, _layer - 1) * array.get(layer_sizes, _layer))
+    	    _layer_output := nl.layer(_layer_output, _layer_weights, array.get(layer_sizes, _layer))
+    	    array.concat(_layer_outputs, _layer_output)
+    _layer_outputs
+//}
+
+
+
+// @function Generalized Neural Network Method.
+// @param x TODO: add parameter x description here
+// @returns TODO: add what function returns
+export network (
+     float[] inputs, float[] targets, float[] weights, 
+     int[] layer_sizes, float[] layer_biases, string[] layer_functions, 
+     string loss_function='mse', float learning_rate=0.01
+     ) => //{
+    // TODO: Layer bias is not implemented.
+    
+    int _weights_max_width = array.max(layer_sizes) // highest number of nodes on each layer as base for weight rectangle matrix slicing.
+    int _total_nodes = array.sum(layer_sizes)
+    
+    int _size_i = array.size(inputs)
+    int _size_t = array.size(targets)
+    int _size_w = array.size(weights)
+    int _size_ls = array.size(layer_sizes)
+    int _size_lb = array.size(layer_biases)
+    int _size_lf = array.size(layer_functions)
+    int _size_wi = _size_ls * _weights_max_width
+    
+    // TODO: rework error messages.
+    switch
+        (_size_i < 1)   => runtime.error('FunctionNNetwork -> network(): "inputs" has wrong size.')
+        (_size_t < 1)   => runtime.error('FunctionNNetwork -> network(): "targets" has wrong size.')
+        (_size_w < 1)   => runtime.error('FunctionNNetwork -> network(): "weights" has wrong size.')
+        (_size_ls < 1)  => runtime.error('FunctionNNetwork -> network(): "layer_sizes" has wrong size.')
+        (_size_lb < 1)  => runtime.error('FunctionNNetwork -> network(): "layer_biases" has wrong size.')
+        (_size_lf < 1)  => runtime.error('FunctionNNetwork -> network(): "layer_functions" has wrong size.')
+        (_size_t != array.get(layer_sizes, _size_ls - 1))  => runtime.error('FunctionNNetwork -> network(): "targets" size does not match output layer size in "layer_sizes"')
+        (na(loss_function)) => runtime.error('FunctionNNetwork -> network(): "loss_function" is invalid.') //temp just for use sake
+        (na(learning_rate)) => runtime.error('FunctionNNetwork -> network(): "learning_rate" is invalid.') //temp just for use sake
+	
+	// propagate forward:
+	float[] _layer_outputs = propagate_forward(inputs, weights, layer_sizes, _weights_max_width)
+
+    // error:
+    // TODO: function selection:
+    float _error_total = loss.mse(targets, array.slice(_layer_outputs, _total_nodes - (array.get(layer_sizes, _size_ls - 1)), _total_nodes))
+    
+    // propagate backward:
+    //##########################################################################
+    float[] _errors = array.new_float(0)
+    float[] _error_deltas = array.new_float(_total_nodes)
+    int _last_delta_idx = -1
+
+    // iterate over the network backwards 
+    for _layer = (_size_ls - 1) to 0
+        //layer weights
+        int _this_layer_size = array.get(layer_sizes, _layer)
+        
+        bool _is_not_last_layer = _layer != (_size_ls - 1)
+        if _is_not_last_layer
+            // get current layer weights:
+            int _w_base_idx = array.sum(array.slice(layer_sizes, 0, _layer)) * _weights_max_width
+            float[] _layer_weights = array.slice(weights, _w_base_idx, _w_base_idx + array.get(layer_sizes, _layer) * array.get(layer_sizes, _layer + 1))
+            
+            int _next_layer_size = array.get(layer_sizes, _layer + 1)
+            // iterate over weights in current layer
+            for _w = 0 to array.size(_layer_weights) - 1
+                float _error = 0.0
+                float _weight_in_this_layer = array.get(_layer_weights, _w)
+                // iterate over nodes in next layer
+                for _next_node = 0 to _next_layer_size - 1
+                    float _error_delta_in_next_layer_node = 1.0 // #############
+                    _error += _weight_in_this_layer * _error_delta_in_next_layer_node
+                array.push(_errors, _error)
+        else
+            int _output_layer_size = array.get(layer_sizes, _size_ls - 1)
+            float[] _output_layer = array.slice(_layer_outputs, _total_nodes - _output_layer_size, _total_nodes)
+            for _node_idx = 0 to _output_layer_size - 1
+                float _target = array.get(targets, _node_idx)
+                float _output = array.get(_output_layer, _node_idx)
+                array.push(_errors, _target - _output)
+        
+        for _n = 0 to _this_layer_size - 1
+            float _this_node = 1.0//this_layer[_n]
+            _last_delta_idx += 1
+            array.set(_error_deltas, _last_delta_idx, array.get(_errors, _n) * activation.sigmoid_derivative(_this_node))//float _this_node_delta = 0.0//errors[_n] * derivative(this_node_output)
+            
+    [_layer_outputs, _error_deltas]
+//{ usage:
+if barstate.islastconfirmedhistory
+    // 7, 5 = i3, h5 h3 o2
+    inputs = array.from(0.0, 1, 2)
+    expected_outputs = array.from(1.0, 1.0)
+    weights = generate_random_weights(10, 5)
+    layer_sizes = array.from(5, 3, 2)
+    layer_biases = array.from(1.0, 1.0, 1.0)
+    layer_functions = array.from('sigmoid', 'sigmoid', 'sigmoid')
+    [o, e] = network(inputs, expected_outputs, weights, layer_sizes, layer_biases, layer_functions, 'mse')
+    label.new(bar_index, 0.0, str.format('{0}\n{1}', str.tostring(o), str.tostring(e)))
+//{ remarks:
+//}}}
+
+

@@ -1,0 +1,69 @@
+
+// © RicardoSantos
+
+//@version=5
+indicator("My Script", max_labels_count=500)
+eps = 1.0e-15
+r = high-low
+int x = int(500*(close-low)/r)
+y = 500*(open-low)/r
+// plot(x), plot(y)
+size = 100
+var xs = array.new_int(size, 0)
+var ys = array.new_float(size, 0.0)
+var ls = array.new_label(size, label(na))
+queue()=>
+    array.unshift(xs, x), array.pop(xs)
+    array.unshift(ys, y), array.pop(ys)
+queue()
+
+lqueue(_label)=>array.push(ls, _label), label.delete(array.shift(ls))
+
+fc(_x, _y)=>color.rgb(255-255*(_x/500), 255-255*(_y/500), 255*((_x+_y)/1000), 0)
+// if barstate.islastconfirmedhistory
+
+for _i = 0 to size-1
+    // _x1 = bar_index + array.get(xs, _i-1)
+    // _y1 = array.get(ys, _i-1)
+    _x = bar_index + array.get(xs, _i)
+    _y = array.get(ys, _i)
+    lqueue(label.new(_x, _y, '', color=fc(_x, _y), style=label.style_circle, size=size.tiny))
+
+f_draw_right_angledline(_y, _rate)=>
+    line.new(bar_index, _y, bar_index+500, 500.0*_rate, xloc.bar_index, extend.none, color.gray, line.style_dashed, 1)
+f_draw_left_angledline(_y, _rate)=>
+    line.new(bar_index+500, _y, bar_index, 500.0*_rate, xloc.bar_index, extend.none, color.gray, line.style_dashed, 1)
+    
+f_draw_gann_square()=>
+    b = box.new(bar_index, 500.0, bar_index+500, 0.0, color.gray, 2, line.style_solid, extend.none, xloc.bar_index, color(na))
+    box.delete(b[1])
+    lb01 = f_draw_right_angledline(0.0, 0.236)
+    lb02 = f_draw_right_angledline(0.0, 0.382)
+    lb03 = f_draw_right_angledline(0.0, 0.5)
+    lb04 = f_draw_right_angledline(0.0, 0.618)
+    lb05 = f_draw_right_angledline(0.0, 0.786)
+    lb06 = f_draw_right_angledline(0.0, 1.0)
+    lt01 = f_draw_right_angledline(500.0, 0.236)
+    lt02 = f_draw_right_angledline(500.0, 0.382)
+    lt03 = f_draw_right_angledline(500.0, 0.5)
+    lt04 = f_draw_right_angledline(500.0, 0.618)
+    lt05 = f_draw_right_angledline(500.0, 0.786)
+    // lt06 = f_draw_right_angledline(500.0, 1.0)
+    line.delete(lb01[1]), line.delete(lb02[1]), line.delete(lb03[1]), line.delete(lb04[1]), line.delete(lb05[1]), line.delete(lb06[1])
+    line.delete(lt01[1]), line.delete(lt02[1]), line.delete(lt03[1]), line.delete(lt04[1]), line.delete(lt05[1])//, line.delete(lt06[1])
+    rb01 = f_draw_left_angledline(0.0, 0.236)
+    rb02 = f_draw_left_angledline(0.0, 0.382)
+    rb03 = f_draw_left_angledline(0.0, 0.5)
+    rb04 = f_draw_left_angledline(0.0, 0.618)
+    rb05 = f_draw_left_angledline(0.0, 0.786)
+    rb06 = f_draw_left_angledline(0.0, 1.0)
+    rt01 = f_draw_left_angledline(500.0, 0.236)
+    rt02 = f_draw_left_angledline(500.0, 0.382)
+    rt03 = f_draw_left_angledline(500.0, 0.5)
+    rt04 = f_draw_left_angledline(500.0, 0.618)
+    rt05 = f_draw_left_angledline(500.0, 0.786)
+    // rt06 = f_draw_left_angledline(500.0, 1.0)
+    line.delete(rb01[1]), line.delete(rb02[1]), line.delete(rb03[1]), line.delete(rb04[1]), line.delete(rb05[1]), line.delete(rb06[1])
+    line.delete(rt01[1]), line.delete(rt02[1]), line.delete(rt03[1]), line.delete(rt04[1]), line.delete(rt05[1])//, line.delete(rt06[1])
+    
+f_draw_gann_square()

@@ -1,0 +1,506 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Gamma Functions.
+library(title='MathSpecialFunctionsGamma')
+
+// reference:
+//      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/SpecialFunctions/Gamma.cs#L571
+//      https://mathworld.wolfram.com/GammaFunction.html
+
+// imports:
+import RicardoSantos/MathConstants/1 as mc
+// mc.LogTwoSqrtEOverPi(), mc.TwoSqrtEOverPi(), mc.Sqrt2()
+import RicardoSantos/MathExtension/6 as me
+// me.near_equal()
+import RicardoSantos/Probability/2 as pr
+// pr.ierf()
+
+// Constants:
+float EPSILON = 1.0e-15
+float BIG_FLOAT = 4503599627370496.0
+float BIG_FLOAT_INV = 2.22044604925031308085e-16
+var float POSITIVE_INF = 1.0 / nz(0.0)
+var float NEGATIVE_INF = math.log(nz(0.0))
+
+int GAMMA_N = 10 // The order of the "GammaLn" approximation.
+float GAMMA_R = 10.900511 // Auxiliary variable when evaluating the "GammaLn" function.
+
+// Polynomial coefficients for the "GammaLn" approximation.
+// float[] GammaDk = array.from(2.48574089138753565546e-5, 1.05142378581721974210, -3.45687097222016235469, 4.51227709466894823700, -2.98285225323576655721, 
+//      1.05639711577126713077, -1.95428773191645869583e-1, 1.70970543404441224307e-2, -5.71926117404305781283e-4, 4.63399473359905636708e-6, -2.71994908488607703910e-9)
+
+// @function Enumeration of the polynomial coefficients for the "GammaLn" approximation.
+// @param index int, 0 => index => 10, index of coeficient.
+// @returns float
+export GammaQ (int index) => //{
+    switch index
+        0 => 2.48574089138753565546e-5
+        1 => 1.05142378581721974210
+        2 => -3.45687097222016235469
+        3 => 4.51227709466894823700
+        4 => -2.98285225323576655721
+        5 => 1.05639711577126713077
+        6 => -1.95428773191645869583e-1
+        7 => 1.70970543404441224307e-2
+        8 => -5.71926117404305781283e-4
+        9 => 4.63399473359905636708e-6
+        10 => -2.71994908488607703910e-9
+        => float(na)
+// plot(GammaQ(0))
+//}
+
+// @function Computes the logarithm of the Gamma function.
+// @param z The argument of the gamma function.
+// @returns The logarithm of the gamma function.
+export GammaLn (float z) => //{
+    if z < 0.5
+        float _s = GammaQ(0)
+        for _i = 1 to GAMMA_N
+            _s += GammaQ(_i) / (_i - z)
+
+        mc.LnPi() - math.log(math.sin(math.pi * z)) - math.log(_s) - mc.LogTwoSqrtEOverPi() - ((0.5 - z) * math.log((0.5 - z + GAMMA_R) / math.e))
+    else
+        float _s = GammaQ(0)
+        for _i = 1 to GAMMA_N
+            _s += GammaQ(_i) / (z + _i - 1.0)
+
+        math.log(_s) + mc.LogTwoSqrtEOverPi() + ((z - 0.5) * math.log((z - 0.5 + GAMMA_R) / math.e))
+//{ usage:
+// plot(GammaLn(0.42))
+//{ remarks:
+//      This implementation of the computation of the gamma and logarithm of the gamma function follows the derivation in
+//          "An Analysis Of The Lanczos Gamma Approximation", Glendon Ralph Pugh, 2004.
+//      We use the implementation listed on p. 116 which achieves an accuracy of 16 floating point digits. Although 16 digit accuracy
+//          should be sufficient for double values, improving accuracy is possible (see p. 126 in Pugh).
+//      Our unit tests suggest that the accuracy of the Gamma function is correct up to 14 floating point digits.
+//}}}
+
+// @function Computes the Gamma function.
+// @param z The argument of the gamma function.
+// @returns float, The logarithm of the gamma function.
+export Gamma (float z) => //{
+    if z < 0.5
+        float _s = GammaQ(0)
+        for _i = 1 to GAMMA_N
+            _s += GammaQ(_i) / (_i - z)
+        math.pi / (math.sin(math.pi * z) * _s * mc.TwoSqrtEOverPi() * math.pow((0.5 - z + GAMMA_R) / math.e, 0.5 - z))
+    else
+        float _s = GammaQ(0)
+        for _i = 1 to GAMMA_N
+            _s += GammaQ(_i) / (z + _i - 1.0)
+        _s * mc.TwoSqrtEOverPi() * math.pow((z - 0.5 + GAMMA_R) / math.e, z - 0.5)
+//{ usage:
+// plot(Gamma(math.sin(2.0 / (bar_index % 30))))
+// plot(Gamma(-3 + (bar_index % 600)*0.01)) // test ok: https://reference.wolfram.com/language/ref/Gamma.html
+// plot(-3 + (bar_index % 600)*0.01)
+//{ remarks:
+//      This implementation of the computation of the gamma and logarithm of the gamma function follows the derivation in
+//          "An Analysis Of The Lanczos Gamma Approximation", Glendon Ralph Pugh, 2004.
+//      We use the implementation listed on p. 116 which should achieve an accuracy of 16 floating point digits. Although 16 digit accuracy
+//          should be sufficient for double values, improving accuracy is possible (see p. 126 in Pugh).
+// 
+//      Our unit tests suggest that the accuracy of the Gamma function is correct up to 13 floating point digits.
+//}}}
+
+// Returns the lower incomplete regularized gamma function
+// @param a float, The argument for the gamma function.
+// @param x float, The upper integral limit.
+// @returns float, The lower incomplete gamma function.
+export GammaLowerRegularized (float a, float x) => //{
+    if a < 0.0
+        error('MathSpecialFunctions -> GamaLowerRegularized(): Parameter "a" value must not be negative (zero is ok).')
+        float(na)
+    else if x < 0.0
+        error('MathSpecialFunctions -> GamaLowerRegularized(): Parameter "x" value must not be negative (zero is ok).')
+        float(na)
+    else if me.near_equal(a, 0.0, EPSILON, 0.0)
+        // no need to check x near 0 as it exits anyway with same value.....
+        // if me.near_equal(x, 0.0)
+            //use right hand limit value because so that regularized upper/lower gamma definition holds.
+            // return 1.0
+        //return
+        1.0
+    else if me.near_equal(x, 0.0, EPSILON, 0.0)
+        //return
+        0.0
+    else
+        float _ax = (a * math.log(x)) - x - GammaLn(a)
+        if _ax < -709.78271289338399
+            //return
+            a < x ? 1.0 : 0.0
+        else if x <= 1 or x <= a
+            float _r2 = a
+            float _c2 = 1
+            float _ans2 = 1
+    
+            while (_c2 / _ans2) > EPSILON
+                _r2 += 1
+                _c2 := _c2 * x / _r2
+                _ans2 += _c2
+            //return
+            math.exp(_ax) * _ans2 / a
+        else
+            int _c = 0
+            float _y = 1.0 - a
+            float _z = x + _y + 1.0
+        
+            float _p3 = 1
+            float _q3 = x
+            float _p2 = x + 1
+            float _q2 = _z * x
+            float _ans = _p2 / _q2
+        
+            float _error = 999999999999999
+        
+            while _error > EPSILON
+                _c += 1
+                _y += 1
+                _z += 2
+                float _yc = _y * _c
+        
+                float _p = (_p2 * _z) - (_p3 * _yc)
+                float _q = (_q2 * _z) - (_q3 * _yc)
+        
+                if _q != 0
+                    float _nextans = _p / _q
+                    _error := math.abs((_ans - _nextans) / _nextans)
+                    _ans := _nextans
+                else
+                    // zero div, skip
+                    _error := 1
+
+                // shift
+                _p3 := _p2
+                _p2 := _p
+                _q3 := _q2
+                _q2 := _q
+        
+                // normalize fraction when the numerator becomes large
+                if math.abs(_p) > BIG_FLOAT
+                    _p3 *= BIG_FLOAT_INV
+                    _p2 *= BIG_FLOAT_INV
+                    _q3 *= BIG_FLOAT_INV
+                    _q2 *= BIG_FLOAT_INV
+            //return 
+            1.0 - (math.exp(_ax) * _ans)
+//{ usage:
+// plot(GammaLowerRegularized(10.0, 14.0)) //0.89
+// plot(GammaLowerRegularized(10.0, 100.0)) //1.0
+// plot(GammaLowerRegularized(-25.0, -75.0)) //negative parameter error..
+//{ remarks:
+//      P(a,x) = 1/Gamma(a) * int(exp(-t)t^(a-1),t=0..x) for real a &gt; 0, x &gt; 0.
+//}}}
+
+// @function Returns the upper incomplete regularized gamma function
+// @param a float, The argument for the gamma function.
+// @param x float, The lower integral limit.
+// @returns float, The upper incomplete regularized gamma function.
+export GammaUpperRegularized (float a, float x) => //{
+    if x < 1.0 or x <= a
+        1.0 - GammaLowerRegularized(a, x)
+    else
+        float _ax = a * math.log(x) - x - GammaLn(a)
+        if _ax < -709.78271289338399
+            a < x ? 0.0 : 1.0
+        else
+            _ax := math.exp(_ax)
+            float _t = 0.0
+            float _y = 1 - a
+            float _z = x + _y + 1
+            float _c = 0
+            float _pkm2 = 1
+            float _qkm2 = x
+            float _pkm1 = x + 1
+            float _qkm1 = _z * x
+            float _ans = _pkm1 / _qkm1
+            while _t > EPSILON
+                _c += 1.0
+                _y += 1.0
+                _z += 2.0
+                float _yc = _y * _c
+                float _pk = _pkm1 * _z - _pkm2 * _yc
+                float _qk = _qkm1 * _z - _qkm2 * _yc
+                if _qk != 0
+                    float _r = _pk / _qk
+                    _t := math.abs((_ans - _r) / _r)
+                    _ans := _r
+                else
+                    _t := 1.0
+
+                _pkm2 := _pkm1
+                _pkm1 := _pk
+                _qkm2 := _qkm1
+                _qkm1 := _qk
+        
+                if math.abs(_pk) > BIG_FLOAT
+                    _pkm2 *= BIG_FLOAT_INV
+                    _pkm1 *= BIG_FLOAT_INV
+                    _qkm2 *= BIG_FLOAT_INV
+                    _qkm1 *= BIG_FLOAT_INV
+            _ans * _ax
+//{ usage:
+// plot(GammaUpperRegularized(0.25, 0.75))
+//{ remarks:
+//      Q(a,x) = 1/Gamma(a) * int(exp(-t)t^(a-1),t=0..x) for real a &gt; 0, x &gt; 0.
+//}}}
+
+// @function Returns the upper incomplete gamma function.
+// @param a float, The argument for the gamma function.
+// @param x float, The lower integral limit.
+// @returns float, The upper incomplete gamma function.
+export GammaUpperIncomplete (float a, float x) => //{
+    GammaUpperRegularized(a, x) * Gamma(a)
+//{ usage:
+// plot(GammaUpperIncomplete(10.0, 0.0)) // 362880
+//{ remarks:
+//      Gamma(a,x) = int(exp(-t)t^(a-1),t=0..x) for real a &gt; 0, x &gt; 0.
+//}}}
+
+// Returns the lower incomplete gamma function
+// @param a float, The argument for the gamma function.
+// @param x float, The upper integral limit.
+// @returns float, The lower incomplete gamma function.
+export GammaLowerIncomplete (float a, float x) => //{
+    GammaLowerRegularized(a, x) * Gamma(a)
+//{ usage:
+// plot(GammaUpperIncomplete(10.0, 14.0)) // 42950.63
+// plot(GammaUpperIncomplete(10.0, 100.0)) // 0.0
+//{ remarks:
+//      gamma(a,x) = int(exp(-t)t^(a-1),t=0..x) for real a &gt; 0, x &gt; 0.
+//}}}
+
+
+// This is too heavy for current architecture...
+// function Returns the inverse P^(-1) of the regularized lower incomplete gamma function
+// param a float, The argument for the gamma function.
+// param x float, The upper integral limit.
+// returns float, The lower incomplete gamma function.
+// export GammaLowerRegularizedInv (float a, float y0) => //{
+//     float _threshold = 5.0 * EPSILON
+//     float _return = float(na)
+//     if na(a) or na(y0)
+//         //return float.NaN;
+//         float(na)
+//     else if a < 0 or me.near_equal(a, 0.0, EPSILON, 0.0)
+//         // throw new ArgumentOutOfRangeException(nameof(a));
+//         error('MathSpecialFunctions -> GammaLowerRegularizedInv(): Parameter "a" out of range.')
+//         float(na)
+//     else if y0 < 0.0 or y0 > 1.0
+//         // throw new ArgumentOutOfRangeException(nameof(y0));
+//         error('MathSpecialFunctions -> GammaLowerRegularizedInv(): Parameter "y0" out of range.')
+//         float(na)
+//     else if me.near_equal(y0, 0.0, EPSILON, 0.0)
+//         // return 0
+//         _return := 0.0
+//     if me.near_equal(y0, 1.0, EPSILON, 0.0)
+//         // return float.PositiveInfinity;
+//         _return := 1e308//POSITIVE_INF
+//     else
+//         float _y0 = 1 - y0
+    
+//         float _xUpper = BIG_FLOAT
+//         float _xLower = 0.0
+//         float _yUpper = 1.0
+//         float _yLower = 0.0
+    
+//         // Initial Guess
+//         float _d = 1.0 / (9.0 * a)
+//         float _y = 1.0 - _d - (0.98 * mc.Sqrt2() * pr.ierf((2.0 * _y0) - 1.0) * math.sqrt(_d))
+//         float _x = a * math.pow(_y, 3)
+//         float _lgm = GammaLn(a)
+    
+//         for _i = 0 to 19
+//             if _x < _xLower or _x > _xUpper
+//                 _d := 0.0625
+//                 break
+//             _y := 1.0 - GammaLowerRegularized(a, _x) // negative x error!
+//             if _y < _yLower or _y > _yUpper
+//                 _d := 0.0625
+//                 break
+//             if _y < _y0
+//                 _xUpper := _x
+//                 _yLower := _y
+//             else
+//                 _xLower := _x
+//                 _yUpper := _y
+
+//             _d := ((a - 1.0) * math.log(_x)) - _x - _lgm
+//             if _d < -709.78271289338399
+//                 _d := 0.0625
+//                 break
+
+//             _d := -math.exp(_d)
+//             _d := (_y - _y0) / _d
+//             if math.abs(_d / _x) < EPSILON
+//                 // return x;
+//                 _return := _x
+//                 break
+            
+//             if (_d > (_x / 4.0)) and (_y0 < 0.05)
+//                 // Naive heuristics for cases near the singularity
+//                 _d := _x / 10.0
+
+//             _x -= _d
+
+//         if _xUpper == BIG_FLOAT
+//             if _x <= 0
+//                 _x := 1.0
+
+//             while _xUpper == BIG_FLOAT
+//                 _x := (1.0 + _d) * _x
+//                 _y := 1.0 - GammaLowerRegularized(a, _x)
+//                 if _y < _y0
+//                     _xUpper := _x
+//                     _yLower := _y
+//                     break
+
+//                 _d += _d
+
+//         int _dir = 0
+//         _d := 0.5
+//         for _i = 0 to 399
+//             _x := _xLower + (_d * (_xUpper - _xLower))
+//             _y := 1.0 - GammaLowerRegularized(a, _x)
+//             _lgm := (_xUpper - _xLower) / (_xLower + _xUpper)
+//             if math.abs(_lgm) < _threshold
+//                 _return := _x
+//                 break
+
+//             _lgm := (_y - _y0) / _y0
+//             if math.abs(_lgm) < _threshold
+//                 _return := _x
+//                 break
+    
+//             if _x <= 0.0
+//                 _return := 0.0
+//                 break
+    
+//             if _y >= _y0
+//                 _xLower := _x
+//                 _yUpper := _y
+//                 if _dir < 0
+//                     _dir := 0
+//                     _d := 0.5
+//                 else if _dir > 1
+//                     _d := (0.5 * _d) + 0.5
+//                 else
+//                     _d := (_y0 - _yLower) / (_yUpper - _yLower)
+//                 _dir += 1
+//             else
+//                 _xUpper := _x
+//                 _yLower := _y
+//                 if _dir > 0
+//                     _dir := 0
+//                     _d := 0.5
+//                 else if _dir < -1
+//                     _d *= 0.5
+//                 else
+//                     _d := (_y0 - _yLower) / (_yUpper - _yLower)
+//                 _dir -= 1
+//         _return := _x
+//     _return
+//{ usage:
+// plot(GammaLowerRegularizedInv(2.0, 0.55)) // 1.52347 // https://reference.wolfram.com/language/ref/InverseGammaRegularized.html
+// plot(GammaLowerRegularizedInv(2.0, (bar_index % 99) * 0.01))
+// plot(GammaLowerRegularizedInv(10, 100))
+//{ remarks:
+//      P(a,x) = 1/Gamma(a) * int(exp(-t)t^(a-1),t=0..x) for real a &gt; 0, x &gt; 0,
+//      such that P^(-1)(a,P(a,x)) == x.
+//}}}
+
+// This is too heavy for current architecture...
+// function Computes the Digamma function which is mathematically defined as the derivative of the logarithm of the gamma function.
+// param x float, The argument of the digamma function.
+// returns float, The value of the DiGamma function at "x".
+// export DiGamma (float x) => //{
+//     float _c = 12.0
+//     float _d1 = -0.57721566490153286
+//     float _d2 = 1.6449340668482264365
+//     float _s = 1e-6
+//     float _s3 = 1.0 / 12.0
+//     float _s4 = 1.0 / 120.0
+//     float _s5 = 1.0 / 252.0
+//     float _s6 = 1.0 / 240.0
+//     float _s7 = 1.0 / 132.0
+//     float _return = float(na)
+//     float _x = x
+//     bool _recursive = false
+//     bool _loop = true
+//     while _loop
+//         if na(x) 
+//             //(float.IsNegativeInfinity(x) || float.IsNaN(x))
+//             _return := float(na)
+//             break
+//         else if (x <= 0.0) and (math.floor(x) == x) // Handle special cases.
+//             _return := -1.0e308//float.NegativeInfinity
+//             break
+//         else if x < 0.0 // Use inversion formula for negative numbers.
+//             // _return := float(na)//DiGamma(1.0 - x) + (math.pi / math.tan(-math.pi * x)) // recursive call!!
+//             _x := 1 - x
+//             _recursive := true
+//             continue
+//         else if x <= _s
+//             float _result = _d1 - (1 / x) + (_d2 * x)
+//             if _recursive
+//                 _return := _result + (math.pi / math.tan(-math.pi * x))
+//                 break
+//             else
+//                 _return := _result
+//                 break
+//         else
+//             float _result = 0.0
+//             while _x < _c
+//                 _result -= 1 / _x
+//                 _x += 1
+        
+//             if _x >= _c
+//                 float _r = 1 / _x
+//                 _result += math.log(_x) - (0.5 * _r)
+//                 _r *= _r
+//                 _result -= _r * (_s3 - (_r * (_s4 - (_r * (_s5 - (_r * (_s6 - (_r * _s7))))))))
+            
+//             if _recursive
+//                 _return := _result + (math.pi / math.tan(-math.pi * x))
+//                 break
+//             else
+//                 _return := _result
+//                 break
+//     _return
+// { usage:
+// plot(DiGamma(-5 + (bar_index % 1000) * 0.01)) // https://mathworld.wolfram.com/DigammaFunction.html
+//{ remarks:
+// This implementation is based on
+//     Jose Bernardo
+//     Algorithm AS 103:
+//     Psi ( Digamma ) Function,
+//     Applied Statistics,
+//     Volume 25, Number 3, 1976, pages 315-317.
+// Using the modifications as in Tom Minka's lightspeed toolbox.
+//}}}
+
+// This is too heavy for current architecture...
+// function Computes the inverse Digamma function: this is the inverse of the logarithm of the gamma function. This function will
+// only return solutions that are positive.
+// param p float, The argument of the inverse digamma function.
+// returns float, The positive solution to the inverse DiGamma function at <paramref name="p"/>.
+// export DiGammaInv (float p) => //{
+//     if na(p)//(float.IsNaN(p))
+//         float(na)//return float.NaN;
+//     else if p < -1.0e308//(float.IsNegativeInfinity(p))
+//         0.0
+//     else if p > 1.0e308//(float.IsPositiveInfinity(p))
+//         1.0e308//return float.PositiveInfinity;
+//     else
+//         float _x = math.exp(p)
+//         float _d = 1.0
+//         while _d > 1.0e-15
+//             _x += _d * math.sign(p - DiGamma(_x))
+//             _d /= 2.0
+//         _x
+//{ usage:
+//{ remarks:
+// This implementation is based on the bisection method.
+//}}}

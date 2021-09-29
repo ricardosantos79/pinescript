@@ -1,0 +1,91 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Methods for debuging/output into a table, console like style.
+library(title='DebugConsole')
+
+// @function initiate property variables.
+// @param size int, console line size.
+// @returns tuple, table and string array.
+export init (int size=20) => //{
+    color _bg = color.rgb(0, 0, 0, 0)
+    var table _table = table.new(
+         position=position.bottom_left, 
+         columns=1, 
+         rows=1, 
+         bgcolor=_bg, 
+         frame_color=color.gray, 
+         frame_width=3, 
+         border_color=color.gray, 
+         border_width=2
+         )
+    var string[] _console = array.new_string(size, '')
+    table.cell(
+         table_id=_table,
+         column=0,
+         row=0,
+         text='',
+         width=100,
+         height=95,
+         text_color=color.silver,
+         text_halign=text.align_left,
+         text_valign=text.align_bottom,
+         text_size=size.normal,
+         bgcolor=_bg
+         )
+    [_table, _console]
+//}
+
+// @function Regular Queue, will be called once every bar its called.
+// @param console_id string array, console configuration array.
+// @param new_line string, with contents for new line.
+// @returns void.
+export queue (string[] console_id, string new_line) => //{
+    array.shift(console_id)
+    array.push(console_id, new_line)
+//}
+
+// @function Queue only one time, will not repeat itself.
+// @param console_id string array, console configuration array.
+// @param new_line string, with contents for new line.
+// @returns void.
+export queue_one (string[] console_id, string new_line) => //{
+    var bool _repeat = true
+    if _repeat
+        array.shift(console_id)
+        array.push(console_id, new_line)
+        _repeat := false
+//}
+
+// @function Update method for the console screen.
+// @param table_id table, table to update console text.
+// @param console_id string array, console configuration array.
+// @returns void.
+export update (table table_id, string[] console_id) => //{
+    string _t = array.join(console_id, '\n')
+    table.cell_set_text(
+         table_id=table_id,
+         column=0,
+         row=0,
+         text=_t)
+//}
+
+// initialize console configuration:
+[_t, _c] = init()
+// can use table.cell_"properties"() to adjust console style definitions:
+table.cell_set_width(_t, 0, 0, 80)
+
+// usage:
+queue_one(_c, 'only one')
+queue_one(_c, 'only one again')
+if barstate.islastconfirmedhistory
+    queue(_c, '0: ....')
+    queue(_c, '1: ....')
+    queue(_c, '2: ....')
+
+// update console screen:
+// this may be called more than one time through the script.
+update(_t, _c)
+

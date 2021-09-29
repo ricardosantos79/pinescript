@@ -1,0 +1,187 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+indicator(title='Multiple Regression Polynomial Forecast', overlay=true, max_lines_count=500)
+
+f_sequence_from_series(_src, _length, _shift, _direction_forward) =>  //{
+//  @function: Creates a array from a series sample range.
+//  @parameters:
+//      _src: series, any kind.
+//      _length: int, window period in bars to sample series.
+//      _shift: int, window period in bars to shift backwards the data sample.
+//      _direction_forward: bool, sample from start to end or end to start order.
+    _start = _direction_forward ? _length + _shift : 0 + _shift
+    _end = _direction_forward ? 0 + _shift : _length + _shift
+    _data = array.from(_src)  //defines type
+    array.clear(_data)
+    if bar_index <= _length + _shift
+        array.clear(_data)
+    else
+        for _i = _start to _end by 1
+            array.push(_data, _src[_i])
+    _data
+//}
+
+f_forecast_linear(_X, _Y, _target_x) =>  //{
+//  @function: Linear forecast, same as excel and other sheet packages. calculates the future value given known data.
+//  @parameters:
+//      _X: float[] or int[], data sample for X.
+//      _Y: float[] or int[], data sample for Y.
+//      _target_x: float or int, 0>x, value of X to predict Y.
+//  @reference:
+//      https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99?ui=en-us&rs=en-us&ad=us
+//      https://stackoverflow.com/questions/39373328/forecast-formula-from-excel-in-javascript
+    _sizex = array.size(_X)
+    _sizey = array.size(_Y)
+    _nr = 0.
+    _dr = 0.
+    _ax = array.avg(_X)
+    _ay = array.avg(_Y)
+    if _sizex != _sizey
+        _nr := na
+        _dr := na
+        _dr
+    else if _sizex < 1
+        _nr := na
+        _dr := na
+        _dr
+    else
+        for _i = 0 to _sizex - 1 by 1
+            _xi = array.get(_X, _i)
+            _yi = array.get(_Y, _i)
+            _nr := _nr + (_xi - _ax) * (_yi - _ay)
+            _dr := _dr + (_xi - _ax) * (_xi - _ax)
+            _dr
+    _b = _nr / _dr
+    _a = _ay - _b * _ax
+    _a + _b * _target_x
+//}
+
+f_array_polyreg(_X, _Y) =>  //{
+//| Returns a polynomial regression channel using (X,Y) vector points.
+//| Resources:
+//|     language D: https://rosettacode.org/wiki/Polynomial_regression
+    int _sizeY = array.size(id=_Y)
+    int _sizeX = array.size(id=_X)
+    //
+    float _meanX = array.sum(id=_X) / _sizeX
+    float _meanY = array.sum(id=_Y) / _sizeX
+    float _meanXY = 0.0
+    float _meanY2 = 0.0
+    float _meanX2 = 0.0
+    float _meanX3 = 0.0
+    float _meanX4 = 0.0
+    float _meanX2Y = 0.0
+    if _sizeY == _sizeX
+        for _i = 0 to _sizeY - 1 by 1
+            float _Xi = array.get(id=_X, index=_i)
+            float _Yi = array.get(id=_Y, index=_i)
+            _meanXY := _meanXY + _Xi * _Yi
+            _meanY2 := _meanY2 + math.pow(_Yi, 2)
+            _meanX2 := _meanX2 + math.pow(_Xi, 2)
+            _meanX3 := _meanX3 + math.pow(_Xi, 3)
+            _meanX4 := _meanX4 + math.pow(_Xi, 4)
+            _meanX2Y := _meanX2Y + math.pow(_Xi, 2) * _Yi
+            _meanX2Y
+        _meanXY := _meanXY / _sizeX
+        _meanY2 := _meanY2 / _sizeX
+        _meanX2 := _meanX2 / _sizeX
+        _meanX3 := _meanX3 / _sizeX
+        _meanX4 := _meanX4 / _sizeX
+        _meanX2Y := _meanX2Y / _sizeX
+        _meanX2Y
+    //-----------|covs
+    float _sXX = _meanX2 - _meanX * _meanX
+    float _sXY = _meanXY - _meanX * _meanY
+    float _sXX2 = _meanX3 - _meanX * _meanX2
+    float _sX2X2 = _meanX4 - _meanX2 * _meanX2
+    float _sX2Y = _meanX2Y - _meanX2 * _meanY
+    //-----------|
+    float _b = (_sXY * _sX2X2 - _sX2Y * _sXX2) / (_sXX * _sX2X2 - _sXX2 * _sXX2)
+    float _c = (_sX2Y * _sXX - _sXY * _sXX2) / (_sXX * _sX2X2 - _sXX2 * _sXX2)
+    float _a = _meanY - _b * _meanX - _c * _meanX2
+    //-----------|
+    float[] _predictions = array.new_float(size=0, initial_value=0.0)
+    float _max_dev = 0.0
+    float _min_dev = 0.0
+    float _stdev = 0.0
+    for _i = 0 to _sizeX - 1 by 1
+        float _Xi = array.get(id=_X, index=_i)
+        float _vector = _a + _b * _Xi + _c * _Xi * _Xi
+        array.push(id=_predictions, value=_vector)
+        //
+        float _Yi = array.get(id=_Y, index=_i)
+        float _diff = _Yi - _vector
+        if _diff > _max_dev
+            _max_dev := _diff
+            _max_dev
+        if _diff < _min_dev
+            _min_dev := _diff
+            _min_dev
+        _stdev := _stdev + math.abs(_diff)
+        _stdev
+//| Output:
+//|     _predictions:   Array with adjusted _Y values.
+//|     _max_dev:       Max deviation from the mean.
+//|     _min_dev:       Min deviation from the mean.
+//|     _stdev/_sizeX:  Average deviation from the mean.
+    [_predictions, _max_dev, _min_dev, _stdev / _sizeX]
+//}
+
+int i_sample_size = input(defval=5)
+int i_space_inbetween_lines = input(1)
+unitx = time - time[1]
+
+datax = f_sequence_from_series(time, i_sample_size, 0, true)
+datay = f_sequence_from_series(close, i_sample_size, 0, true)
+
+if bar_index > i_sample_size
+
+    if barstate.islast and barstate.ishistory[1] and barstate.isrealtime
+
+        estimatex = array.from(array.get(datax, 0))  // define array type
+        array.remove(estimatex, 0)
+        estimatey = array.from(array.get(datay, 0))  // define array type
+        array.remove(estimatey, 0)
+
+        for _i = i_sample_size - 2 to 0 by 1
+            _sx = array.slice(datax, _i, i_sample_size)
+            _sy = array.slice(datay, _i, i_sample_size)
+            _t = time + unitx * (i_sample_size - _i - 1)
+            _fy = f_forecast_linear(_sx, _sy, _t)
+            array.push(estimatey, _fy)
+            array.push(estimatex, _t)  //int(f_forecast_linear(_sy, _sx, _fy)))//time + unitx * _i)
+
+        // label.new(bar_index, close, tostring(estimatex))
+        // label.new(bar_index, close, tostring(estimatey))
+
+        for _i = 1 to array.size(estimatex) - 1 by 1
+            line.new(int(array.get(estimatex, _i - 1)), array.get(estimatey, _i - 1), int(array.get(estimatex, _i)), array.get(estimatey, _i), xloc.bar_time, color=color.orange, width=1)
+
+        array.concat(datax, estimatex)
+        array.concat(datay, estimatey)
+        // label.new(bar_index, close, tostring(datax))
+        // label.new(bar_index, close, tostring(datay))
+
+        [_py, _maxy, _miny, _sdy] = f_array_polyreg(datax, datay)  //(estimatex, estimatey)
+        // label.new(bar_index, close, tostring(_py))
+        for _i = 1 to array.size(_py) - 1 by 1 + i_space_inbetween_lines
+            _py0 = array.get(_py, _i)
+            _py1 = array.get(_py, _i - 1)
+            _x0 = int(array.get(datax, _i))
+            _x1 = int(array.get(datax, _i - 1))
+            // _x0 = int(array.get(estimatex, _i)), _x1 = int(array.get(estimatex, _i-1))
+            line.new(_x1, _py1, _x0, _py0, xloc.bar_time, color=color.aqua, width=1)
+            line.new(_x1, _py1 + _maxy, _x0, _py0 + _maxy, xloc.bar_time, color=color.navy, width=1)
+            line.new(_x1, _py1 + _miny, _x0, _py0 + _miny, xloc.bar_time, color=color.navy, width=1)
+            line.new(_x1, _py1 + _sdy, _x0, _py0 + _sdy, xloc.bar_time, color=color.blue, width=1)
+            line.new(_x1, _py1 - _sdy, _x0, _py0 - _sdy, xloc.bar_time, color=color.blue, width=1)
+
+
+
+
+
+
+
+
