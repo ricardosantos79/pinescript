@@ -4,7 +4,7 @@
 //@version=5
 
 // @description Color Extension methods.
-library(title='ColorExtension3')
+library(title='ColorExtension')
 
 // reference:
 //      https://tallys.github.io/color-theory/

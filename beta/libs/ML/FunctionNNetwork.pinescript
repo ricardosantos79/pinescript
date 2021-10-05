@@ -15,6 +15,7 @@ import RicardoSantos/MLActivationFunctions/3 as activation
 //      https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
 //      https://www.anotsorandomwalk.com/backpropagation-example-with-numbers-step-by-step/
 //      https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
+//      https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
 
 // @function helper method to generate random weights of (A * B) size.
 // @param previous_size int, number of nodes on the left.
@@ -45,14 +46,59 @@ propagate_forward (float[] inputs, float[] weights, int[] layer_sizes, int weigh
     	    // find the base level of current layer weights:
     	    //      base = (sum of nodes up to previous layer) * (max weights in a node)
     	    //      (weights in layer) = base + (previous layer nodes) * (current layer nodes)
+    	    int _previous_layer_size = array.get(layer_sizes, _layer - 1)
+    	    int _this_layer_size = array.get(layer_sizes, _layer)
     	    int _w_base_idx = array.sum(array.slice(layer_sizes, 0, _layer-1)) * weights_max_width
-    	    float[] _layer_weights = array.slice(weights, _w_base_idx, _w_base_idx + array.get(layer_sizes, _layer - 1) * array.get(layer_sizes, _layer))
-    	    _layer_output := nl.layer(_layer_output, _layer_weights, array.get(layer_sizes, _layer))
+    	    float[] _layer_weights = array.slice(weights, _w_base_idx, _w_base_idx + _previous_layer_size * _this_layer_size)
+    	    _layer_output := nl.layer(_layer_output, _layer_weights, _this_layer_size)
     	    array.concat(_layer_outputs, _layer_output)
     _layer_outputs
 //}
 
+// @function helper method to propagate the signals backward.
+// @param x TODO: fill parameters
+// @returns float array.
+propback_calculate_errors_for_output (float[] errors, float[] output_nodes, float[] targets) => //{
+    int _size_o = array.size(output_nodes)
+    int _size_t = array.size(targets)
+    
+    switch
+        (_size_o != _size_t) => runtime.error(str.format('FunctionNNetwork -> propback_calculate_errors(): parameters "output_nodes" and "targets" size does not match, found: {0}, {1} .', _size_o, _size_t))
 
+    for _n = 0 to _size_o - 1
+        float _target = array.get(targets, _n)
+        float _output = array.get(output_nodes, _n)
+        array.push(errors, _target - _output)
+//{ test:
+// if barstate.isfirst
+//     _e = array.new_float(0)
+//     _o = array.from(1.0, 2, 3)
+//     _t = array.from(1.1, 1.1, 1.1)
+//     propback_calculate_errors_for_output(_e, _o, _t)
+//     label.new(bar_index, 0.0, str.format('{0}', str.tostring(_e)))
+//}}
+
+// @function helper method to propagate the signals backward.
+// @param x TODO: fill parameters
+// @returns float array.
+propback_calculate_errors_for_hidden (float[] errors, float[] weights, float[] error_deltas) => //{
+    // iterate over weights in current layer
+    for _i = 0 to array.size(weights) - 1
+        float _error = 0.0
+        float _wi = array.get(weights, _i)
+        // iterate over nodes in next layer
+        for _n = 0 to array.size(error_deltas) - 1
+            float _error_delta_in_next_layer_node = array.get(error_deltas, _n) // #############
+            _error += _wi * _error_delta_in_next_layer_node
+        array.push(errors, _error)
+//{ test:
+// if barstate.isfirst
+//     _e = array.new_float(0)
+//     _w = array.from(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+//     _d = array.from(1.1, 1.1, 1.1)
+//     propback_calculate_errors_for_hidden(_e, _w, _d)
+//     label.new(bar_index, 0.0, str.format('{0}', str.tostring(_e)))
+//}}
 
 // @function Generalized Neural Network Method.
 // @param x TODO: add parameter x description here
@@ -95,46 +141,61 @@ export network (
     float _error_total = loss.mse(targets, array.slice(_layer_outputs, _total_nodes - (array.get(layer_sizes, _size_ls - 1)), _total_nodes))
     
     // propagate backward:
+    // reference for delta rule: https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+    // node_delta_error = (nodeoutput - nodetarget) * derivative(nodeoutput)
+    // update_weight = weight - learning_rate * node_error_delta
+    //##########################################################################
+    // Work in progress...
     //##########################################################################
     float[] _errors = array.new_float(0)
     float[] _error_deltas = array.new_float(_total_nodes)
     int _last_delta_idx = -1
 
     // iterate over the network backwards 
-    for _layer = (_size_ls - 1) to 0
-        //layer weights
-        int _this_layer_size = array.get(layer_sizes, _layer)
-        
-        bool _is_not_last_layer = _layer != (_size_ls - 1)
+    for _l = (_size_ls - 1) to 0
+        int _this_layer_size = array.get(layer_sizes, _l)
+        int _number_of_nodes_up_to_this_layer = array.sum(array.slice(layer_sizes, 0, _l))
+
+        bool _is_not_last_layer = _l != (_size_ls - 1)
         if _is_not_last_layer
+            int _next_layer_size = array.get(layer_sizes, _l + 1)
+            int _w_base_idx = _number_of_nodes_up_to_this_layer * _weights_max_width
+            int _number_of_weights_in_layer = _this_layer_size * _next_layer_size
             // get current layer weights:
-            int _w_base_idx = array.sum(array.slice(layer_sizes, 0, _layer)) * _weights_max_width
-            float[] _layer_weights = array.slice(weights, _w_base_idx, _w_base_idx + array.get(layer_sizes, _layer) * array.get(layer_sizes, _layer + 1))
-            
-            int _next_layer_size = array.get(layer_sizes, _layer + 1)
-            // iterate over weights in current layer
-            for _w = 0 to array.size(_layer_weights) - 1
-                float _error = 0.0
-                float _weight_in_this_layer = array.get(_layer_weights, _w)
-                // iterate over nodes in next layer
-                for _next_node = 0 to _next_layer_size - 1
-                    float _error_delta_in_next_layer_node = 1.0 // #############
-                    _error += _weight_in_this_layer * _error_delta_in_next_layer_node
-                array.push(_errors, _error)
+            float[] _layer_weights = array.slice(weights, _w_base_idx, _w_base_idx + _number_of_weights_in_layer)
+            float[] _layer_error_deltas = array.slice(_error_deltas, _number_of_nodes_up_to_this_layer, _number_of_nodes_up_to_this_layer + _this_layer_size)
+            propback_calculate_errors_for_hidden(_errors, _layer_weights, _layer_error_deltas)//, _next_layer_size, _number_of_nodes_up_to_this_layer)
         else
             int _output_layer_size = array.get(layer_sizes, _size_ls - 1)
             float[] _output_layer = array.slice(_layer_outputs, _total_nodes - _output_layer_size, _total_nodes)
-            for _node_idx = 0 to _output_layer_size - 1
-                float _target = array.get(targets, _node_idx)
-                float _output = array.get(_output_layer, _node_idx)
-                array.push(_errors, _target - _output)
-        
+            propback_calculate_errors_for_output (_errors, _output_layer, targets)
+
+        // calculate the error delta of each node in current layer:
+        // TODO: 
+        //      - derivative based on the activation function of current layer.
         for _n = 0 to _this_layer_size - 1
-            float _this_node = 1.0//this_layer[_n]
+            float _this_node = array.get(_layer_outputs, _number_of_nodes_up_to_this_layer + _n)
             _last_delta_idx += 1
-            array.set(_error_deltas, _last_delta_idx, array.get(_errors, _n) * activation.sigmoid_derivative(_this_node))//float _this_node_delta = 0.0//errors[_n] * derivative(this_node_output)
-            
-    [_layer_outputs, _error_deltas]
+            array.set(_error_deltas, _last_delta_idx, nz(array.get(_errors, _n), 1.0) * activation.sigmoid_derivative(_this_node))//###########################
+    
+    // update weights:
+    // https://machinelearningmastery.com/implement-backpropagation-algorithm-scratch-python/
+    // TODO:
+    //      for each layer
+    //          for each node in layer
+    //              for each weight in ?*input layer*?
+    // // // # Update network weights with error
+    // // def update_weights(network, row, l_rate):
+    // // 	for i in range(len(network)):
+    // // 		inputs = row[:-1]
+    // // 		if i != 0:
+    // // 			inputs = [neuron['output'] for neuron in network[i - 1]]
+    // // 		for neuron in network[i]:
+    // // 			for j in range(len(inputs)):
+    // // 				neuron['weights'][j] += l_rate * neuron['delta'] * inputs[j]
+    // // 			neuron['weights'][-1] += l_rate * neuron['delta']
+
+    [_layer_outputs, _error_deltas, _errors]
 //{ usage:
 if barstate.islastconfirmedhistory
     // 7, 5 = i3, h5 h3 o2
@@ -144,8 +205,8 @@ if barstate.islastconfirmedhistory
     layer_sizes = array.from(5, 3, 2)
     layer_biases = array.from(1.0, 1.0, 1.0)
     layer_functions = array.from('sigmoid', 'sigmoid', 'sigmoid')
-    [o, e] = network(inputs, expected_outputs, weights, layer_sizes, layer_biases, layer_functions, 'mse')
-    label.new(bar_index, 0.0, str.format('{0}\n{1}', str.tostring(o), str.tostring(e)))
+    [o, d, e] = network(inputs, expected_outputs, weights, layer_sizes, layer_biases, layer_functions, 'mse')
+    label.new(bar_index, 0.0, str.format('output:{0}\ndelta:{1}\nerror:{2}\nweights:{3}, errors:{4}', str.tostring(o), str.tostring(d), str.tostring(e), array.size(weights), array.size(e)))
 //{ remarks:
 //}}}
 
