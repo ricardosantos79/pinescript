@@ -190,17 +190,19 @@ export aloess (int[] sample_x, float[] sample_y, int point_span=2, float span_ex
             array.set(id=_yloess, index=_i, value=_beta * _xi + _alpha)
         _yloess
 //{ usage:
+adaptive = input.bool(false)
 length = input.int(50)
 npoints = input.int(7)
 exp = input.float(3.0)
 f_l1(_x1, _y1, _x2, _y2) => line.new(_x1, _y1, _x2, _y2, color=#DDDD00, style=line.style_solid, width=1)
 
-import RicardoSantos/ArrayExtension/2 as ae
-a = bar_index < length ? array.from(0) : ae.to_int(ae.sequence_from_series(bar_index, length, 0, true), 'floor')
-b = bar_index < length ? array.from(0.0) : ae.sequence_from_series(close, length, 0, true)
+import RicardoSantos/ArrayGenerate/1 as ag
+import RicardoSantos/ArrayExtension/1 as ae
 
+a = bar_index <= length ? array.from(0) : ae.to_int(ag.sequence_from_series(bar_index, length, 0, true), 'floor')
+b = bar_index <= length ? array.from(0.0) : ag.sequence_from_series(close, length, 0, true)
 if barstate.islastconfirmedhistory
-    c = aloess(a, b, npoints, exp)
+    c = adaptive ? aloess(a, b, npoints, exp) : loess(a, b, npoints)
     // label.new(bar_index, 0.0, str.tostring(c, '#.###'))
 
 
