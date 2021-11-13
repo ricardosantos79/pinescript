@@ -10,7 +10,7 @@ library(title='MathSpecialFunctionsTestFunctions')
 //      https://github.com/mathnet/mathnet-numerics/blob/a50d68d52def605a53d129cc60ea3371a2e97548/src/Numerics/SpecialFunctions/TestFunctions.cs
 
 // imports:
-import RicardoSantos/DebugConsole/2 as console
+import RicardoSantos/DebugConsole/1 as console
 [__T, __C] = console.init(25)
 import RicardoSantos/MathConstants/1 as constants
 // constants.Pi2() -> ackley()

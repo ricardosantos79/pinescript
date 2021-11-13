@@ -17,49 +17,255 @@ library(title='MathStatisticsKernelDensityEstimation')
 //|     "In statistics, kernel density estimation (KDE) is a non-parametric way to estimate the probability density function of a random variable." from wikipedia.com
 
 // imports:
-import RicardoSantos/MathStatisticsKernelFunctions/3 as kernel
+import RicardoSantos/MathStatisticsKernelFunctions/1 as kernel
 
     
 // @funtion KDE method.
-export kde (float[] _observations, string _kernel, float _bandwidth, int _nsteps) => //{
-    float _range = array.range(_observations)
-    float _min = array.min(_observations) - _range / 2
-    float _step = _range / _nsteps
-
-    float[] _density_range_fill = array.new_float(0)
-    for _i = 0 to _nsteps * 2 by 1
-        array.push(_density_range_fill, _min + _i * _step)
-    float[] _x = array.new_float(0)
-
-    float[] _y = array.new_float(0)
-
-    _osize = array.size(_observations)
-    for _i = 0 to array.size(_density_range_fill) - 1 by 1
-        float _temp = 0.
-        for _j = 0 to _osize - 1 by 1
-            _temp += kernel.select(_kernel, array.get(_density_range_fill, _i) - array.get(_observations, _j), 1.0 / _bandwidth)
-            _temp
-        array.push(_x, array.get(_density_range_fill, _i))
-        array.push(_y, 1 / _osize * _temp)
-    [_x, _y]  //round(array.get(_X, _i))
+// @param observations float array, sample data.
+// @param kernel string, the kernel to use, default='gaussian', options='uniform', 'triangle', 'epanechnikov', 'quartic', 'triweight', 'gaussian', 'cosine', 'logistic', 'sigmoid'.
+// @param bandwidth float, bandwidth to use in kernel, default=0.5, range=(0, +inf), less will smooth the data.
+// @param nsteps int, number of steps in range of distribution, default=20, this value is connected to how many line objects you can display per script.
+// @returns tuple with signature: (float array, float array)
+export kde (float[] observations, string kernel='gaussian', float bandwidth=0.5, int nsteps=20) => //{
+    int _osize = array.size(observations)
+    if _osize < 1
+        runtime.error('MathStatisticsKernelDensityEstimation -> kde(): "observations" has the wrong size.')
+        [array.new_float(na), array.new_float(na)]
+    else if nsteps < 1
+        runtime.error('MathStatisticsKernelDensityEstimation -> kde(): "nsteps" must be a positive number > 1.')
+        [array.new_float(na), array.new_float(na)]
+    else
+        float _range = array.range(observations)
+        float _min = array.min(observations) - _range / 2
+        float _step = _range / nsteps
+        
+        // generate the bins range of the distribution.
+        float[] _density_range_fill = array.new_float(nsteps * 2)
+        for _i = 0 to (nsteps * 2) - 1
+            array.set(_density_range_fill, _i, _min + _i * _step)
+        
+        float[] _x = array.new_float(0)
+        float[] _y = array.new_float(0)
+        for _i = 0 to array.size(_density_range_fill) - 1 by 1
+            float _temp = 0.
+            for _j = 0 to _osize - 1 by 1
+                _temp += kernel.select(kernel, array.get(_density_range_fill, _i) - array.get(observations, _j), 1.0 / bandwidth)
+                _temp
+            array.push(_x, array.get(_density_range_fill, _i))
+            array.push(_y, 1 / _osize * _temp)
+        [_x, _y]
 //{ usage:
 //{ remarks:
 //}}}
 
-int sample_size = input.int(7)
-var float[] observations = array.new_float(0)
-if barstate.isfirst
-    if sample_size < 1
-        array.push(observations, 93)
-        array.push(observations, 93)
-        array.push(observations, 96)
-        array.push(observations, 100)
-        array.push(observations, 101)
-        array.push(observations, 102)
-        array.push(observations, 102)
+// @function Draw a horizontal distribution at current location on chart.
+// @param distribution_x float array, distribution points x value.
+// @param distribution_y float array, distribution points y value.
+// @param distribution_lines line array, array to append the distribution curve lines.
+// @param graph_lines  line array, array to append the graph lines.
+// @param graph_labels  label array, array to append the graph labels.
+// @returns void, updates arrays: distribution_lines, graph_lines, graph_labels.
+export draw_horizontal (float[] distribution_x, float[] distribution_y, line[] distribution_lines, line[] graph_lines, label[] graph_labels) => //{
+    int _sizex = array.size(distribution_x)
+    int _sizey = array.size(distribution_y)
+    if _sizex < 1 or _sizex > 500
+        runtime.error('MathStatisticsKernelDensityEstimation -> draw_horizontal(): "distribution_x" has the wrong size, must be within range [1, 500].')
+    else if _sizex != _sizey
+        runtime.error('MathStatisticsKernelDensityEstimation -> draw_horizontal(): "distribution_x" and "distribution_y" size do not match.')
     else
-        for _i = 0 to sample_size-1
-            array.push(observations, 50.0 + 100.0 * math.random())
+        int _previousx = 0
+        float _previousy = array.get(distribution_y, 0)
+        if _sizex == _sizey and _sizex > 1
+            int _nearest0_index = 0
+            for _i = 1 to _sizex - 1 by 1
+                _px = _i
+                _py = array.get(distribution_y, _i)
+                bool _xiscloserto0 = math.abs(array.get(distribution_x, _i)) < math.abs(array.get(distribution_x, _nearest0_index))
+                if _xiscloserto0
+                    _nearest0_index := _i
+                    _nearest0_index
+                array.push(distribution_lines, line.new(bar_index + _previousx, _previousy, bar_index + _px, _py))
+    
+                _previousx := _px
+                _previousy := _py
+    
+                _previousy
+            int _top_index = array.indexof(distribution_y, array.max(distribution_y))
+            float _top_value = array.get(distribution_y, _top_index)
+            float _std = array.stdev(distribution_y)
+            array.push(graph_labels, label.new(bar_index, 0.0, str.tostring(array.get(distribution_x, 0)), style=label.style_label_right)) // range min
+            array.push(graph_labels, label.new(bar_index + _sizex, 0.0, str.tostring(array.get(distribution_x, _sizex - 1)), style=label.style_label_left)) // range max
+            array.push(graph_labels, label.new(bar_index + _top_index, 0.0, str.tostring(array.get(distribution_x, _top_index)), style=label.style_label_up, tooltip='Highest value')) // most frequent value
+            array.push(graph_labels, label.new(bar_index, _std, str.format('Y std: {0, number, #.###}', _std), style=label.style_label_right, textalign=text.align_right, tooltip='Standard deviation')) // distribution std
+            // array.push(graph_labels, label.new(bar_index, _top_value, str.format('Top probability: {0, number, #.###}\nSumY:{1, number, #.###}', nz(_top_value, 0.), array.sum(distribution_y)), style=label.style_label_right, textalign=text.align_right, tooltip=str.tostring(distribution_x) + '\n' + str.tostring(distribution_y)))
+            array.push(graph_lines, line.new(bar_index, 0.0, bar_index+_sizex, 0.0, extend=extend.none, color=color.gray, style=line.style_dotted, width=2)) // axis y
+            array.push(graph_lines, line.new(bar_index + _nearest0_index, 0.0 - _std, bar_index + _nearest0_index, _top_value + _std, extend=extend.none, color=color.gray, style=line.style_dotted, width=2)) // axis y
+            array.push(graph_lines, line.new(bar_index + _top_index, 0.0, bar_index + _top_index, _top_value, extend=extend.none, color=color.blue, style=line.style_dashed, width=1)) // most frequent value
+            array.push(graph_lines, line.new(bar_index, _std, bar_index + _sizex, _std, color=color.orange, style=line.style_dashed)) // distribution std
+//{ usage:
+// if barstate.islast
+//     draw_horizontal(x, y)
+//{ remarks:
+//}}}
+
+
+// @function Draw a vertical distribution at current location on chart.
+// @param distribution_x float array, distribution points x value.
+// @param distribution_y float array, distribution points y value.
+// @param distribution_lines line array, array to append the distribution curve lines.
+// @param graph_lines  line array, array to append the graph lines.
+// @param graph_labels  label array, array to append the graph labels.
+// @returns void, updates arrays: distribution_lines, graph_lines, graph_labels.
+export draw_vertical (float[] distribution_x, float[] distribution_y, line[] distribution_lines, line[] graph_lines, label[] graph_labels) => //{
+    int _sizex = array.size(distribution_x)
+    int _sizey = array.size(distribution_y)
+    if _sizex < 1 or _sizex > 500
+        runtime.error('MathStatisticsKernelDensityEstimation -> draw_horizontal(): "distribution_x" has the wrong size, must be within range [1, 500].')
+    else if _sizex != _sizey
+        runtime.error('MathStatisticsKernelDensityEstimation -> draw_horizontal(): "distribution_x" and "distribution_y" size do not match.')
+    else
+        int _previousx = 0
+        float _previousy = array.get(distribution_y, 0)
+        if _sizex == _sizey and _sizex > 1
+            
+            float _range = array.range(distribution_x)
+            float _bottom = array.min(distribution_x)
+            float _top = _bottom + _range
+            float _step = _range / _sizex
+            for _i = 1 to _sizex - 1 by 1
+                _px = math.min(int(array.get(distribution_y, _i)*500), 500)//_i
+                _py = _bottom +_i*_step//array.get(distribution_y, _i)
+                array.push(distribution_lines, line.new(bar_index + _previousx, _previousy, bar_index + _px, _py))
+    
+                _previousx := _px
+                _previousy := _py
+    
+            int _top_index = array.indexof(distribution_y, array.max(distribution_y))
+            float _top_value = array.get(distribution_y, _top_index)
+            float _std = array.stdev(distribution_y)
+            int _std_index = int(math.min(_std * 500, 500))
+            
+            float _most_dense_level = _bottom + _top_index * _step
+            int _most_dense_index = int(_top_value*500)
+            
+            array.push(graph_labels, label.new(bar_index, 0.0, str.tostring(array.get(distribution_x, 0)), style=label.style_label_up))
+            array.push(graph_labels, label.new(bar_index, _top, str.tostring(array.get(distribution_x, _sizex - 1)), style=label.style_label_down))
+            array.push(graph_labels, label.new(bar_index, _most_dense_level, str.tostring(array.get(distribution_x, _top_index)), style=label.style_label_right, tooltip='Highest value'))
+            array.push(graph_labels, label.new(bar_index + _std_index, _bottom, str.format('Y std: {0, number, #.###}', _std), style=label.style_label_up, textalign=text.align_right, tooltip='Standard deviation'))
+            // array.push(graph_labels, label.new(bar_index + _most_dense_index, _most_dense_level, str.format('\nTop probability: {0, number, #.###}\nSumY:{1, number, #.###}', nz(_top_value, 0.), array.sum(distribution_y)), style=label.style_label_left, textalign=text.align_left, tooltip=str.tostring(distribution_x) + '\n' + str.tostring(distribution_y)))
+            array.push(graph_lines, line.new(bar_index, _bottom, bar_index, _top, extend=extend.none, color=color.gray, style=line.style_dotted, width=2)) // axis x
+            array.push(graph_lines, line.new(bar_index, _bottom, bar_index+int(_most_dense_index*1.5), _bottom, extend=extend.none, color=color.gray, style=line.style_dotted, width=2)) // axis y
+            array.push(graph_lines, line.new(bar_index, _most_dense_level, bar_index + _most_dense_index, _most_dense_level, extend=extend.none, color=color.blue, style=line.style_dashed, width=1)) // most frequent value
+            array.push(graph_lines, line.new(bar_index + _std_index, _bottom, bar_index + _std_index, _top, color=color.orange, style=line.style_dashed)) // std
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Style the distribution lines.
+// @param lines line array, distribution lines to style.
+// @param horizontal bool, default=true, if the display is horizontal(true) or vertical(false).
+// @param to_histogram bool, default=false, if graph style should be switched to histogram.
+// @param line_color color, default=na, if defined will change the color of the lines.
+// @param line_style string, defaul=na, if defined will change the line style, options=('na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both)
+// @param linewidth int, default=na, if defined will change the line width.
+// @returns void.
+export style_distribution (line[] lines, bool horizontal=true, bool to_histogram=false, color line_color=na, string line_style=na, int line_width=na) => //{
+    int _size = array.size(lines)
+    if _size < 1
+        runtime.error('MathStatisticsKernelDensityEstimation -> style_distribution(): "lines" has the wrong size.')
+    else
+        for _i = 0 to _size-1
+            line _line = array.get(lines, _i)
+            if to_histogram
+                if horizontal
+                    line.set_y1(_line, 0.0)
+                    line.set_x1(_line, line.get_x2(_line)) // TODO: this is bugged at the moment
+                else
+                    line.set_x1(_line, bar_index)
+                    line.set_y1(_line, line.get_y2(_line))
+            if not na(line_color)
+                line.set_color(_line, line_color)
+            if not (line_style == '')
+                line.set_style(_line, line_style)
+            if not na(line_width)
+                line.set_width(_line, line_width)
+//{ usage:
+//{ remarks:
+//}}}
+
+// @function Style the graph lines and labels
+// @param lines line array, graph lines to style.
+// @param lines labels array, graph labels to style.
+// @param horizontal bool, default=true, if the display is horizontal(true) or vertical(false).
+// @param line_color color, default=na, if defined will change the color of the lines.
+// @param line_style string, defaul=na, if defined will change the line style, options=('na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both)
+// @param linewidth int, default=na, if defined will change the line width.
+// @returns void.
+export style_graph (
+         line[] lines, label[] labels,
+         color axis_x_color=na, string axis_x_style=na, int axis_x_width=na, 
+         color axis_y_color=na, string axis_y_style=na, int axis_y_width=na, 
+         color mostfreq_color=na, string mostfreq_style=na, int mostfreq_width=na,
+         color std_color=na, string std_style=na, int std_width=na,
+         color labels_color=na, color labels_text_color=na, string labels_size=na
+         ) => //{
+    int _size = array.size(lines)
+    if _size < 1
+        runtime.error('MathStatisticsKernelDensityEstimation -> style_distribution(): "lines" has the wrong size.')
+    else
+        // the lines
+        line _axis_x = array.get(lines, 0)
+        line _axis_y = array.get(lines, 1)
+        line _mostfreq = array.get(lines, 2)
+        line _stdline = array.get(lines, 3)
+        // axis x
+        if not na(axis_x_color)
+            line.set_color(_axis_x, axis_x_color)
+        if not (axis_x_style == '')
+            line.set_style(_axis_x, axis_x_style)
+        if not na(axis_x_width)
+            line.set_width(_axis_x, axis_x_width)
+        // axis y
+        if not na(axis_y_color)
+            line.set_color(_axis_y, axis_y_color)
+        if not (axis_y_style == '')
+            line.set_style(_axis_y, axis_y_style)
+        if not na(axis_y_width)
+            line.set_width(_axis_y, axis_y_width)
+        // most freq
+        if not na(mostfreq_color)
+            line.set_color(_mostfreq, mostfreq_color)
+        if not (mostfreq_style == '')
+            line.set_style(_mostfreq, mostfreq_style)
+        if not na(mostfreq_width)
+            line.set_width(_mostfreq, mostfreq_width)
+        // most freq
+        if not na(std_color)
+            line.set_color(_stdline, std_color)
+        if not (std_style == '')
+            line.set_style(_stdline, std_style)
+        if not na(std_width)
+            line.set_width(_stdline, std_width)
+        // the labels
+        if not na(labels_color)
+            for _i = 0 to array.size(labels)-1
+                label.set_color(array.get(labels, _i), labels_color)
+        if not na(labels_text_color)
+            for _i = 0 to array.size(labels)-1
+                label.set_textcolor(array.get(labels, _i), labels_text_color)
+        if not (labels_size == '')
+            for _i = 0 to array.size(labels)-1
+                label.set_size(array.get(labels, _i), labels_size)
+//{ usage:
+//{ remarks:
+//}}}
+
+
+int sample_size = input.int(100)
+var float[] observations = array.new_float(sample_size)
+if barstate.isfirst
+    for _i = 0 to sample_size-1
+        array.set(observations, _i, 50.0 + 100.0 * math.random())
 
 string g_config = 'Configuration:'
 string i_kernel = input.string(title='Kernel:', defval='gaussian', options=['uniform', 'triangle', 'epanechnikov', 'quartic', 'triweight', 'gaussian', 'cosine', 'logistic', 'sigmoid'], tooltip='Kernel used in kde function.', group=g_config)
@@ -67,81 +273,53 @@ float i_bandwidth = input.float(title='Bandwidth:', defval=0.618, tooltip='Bandw
 int i_nstep = input.int(title='Nº Bins:', defval=20, tooltip='Number of Bins to split range.', group=g_config)
 [x, y] = kde(observations, i_kernel, i_bandwidth, i_nstep)
 
-draw_horizontal(_X, _Y) =>
-    int _sizex = array.size(_X)
-    int _sizey = array.size(_Y)
-    int _previousx = 0
-    float _previousy = array.get(_Y, 0)
-    if _sizex == _sizey and _sizex > 1
-        int _nearest0_index = 0
-        for _i = 1 to _sizex - 1 by 1
-            _px = _i
-            _py = array.get(_Y, _i)
-            bool _xiscloserto0 = math.abs(array.get(_X, _i)) < math.abs(array.get(_X, _nearest0_index))
-            if _xiscloserto0
-                _nearest0_index := _i
-                _nearest0_index
-            line.new(bar_index + _previousx, _previousy, bar_index + _px, _py)
+na_str(string value) => value == 'na' ? na : value
+na_col(color value) => color.t(value) > 99 ? na : value
+na_width(int value) => value > 199 ? na : value
 
-            _previousx := _px
-            _previousy := _py
+bool horizontal = input.bool(true)
+bool histogram = input.bool(true)
+color line_color = na_col(input.color(defval=#ffffff00))
+string line_style = na_str(input.string(defval='na', options=['na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both]))
+int line_width = na_width(input.int(200))
 
-            _previousy
-        int _top_index = array.indexof(_Y, array.max(_Y))
-        float _top_value = array.get(_Y, _top_index)
-        float _std = array.stdev(_Y)
-        label.new(bar_index, 0.0, str.tostring(array.get(_X, 0)), style=label.style_label_up)
-        label.new(bar_index + _sizex, 0.0, str.tostring(array.get(_X, _sizex - 1)), style=label.style_label_up)
-        line.new(bar_index + _nearest0_index, 0.0 - _std, bar_index + _nearest0_index, _top_value + _std, extend=extend.none, color=color.gray, style=line.style_dotted, width=2)
-        label.new(bar_index + _top_index, 0.0, str.tostring(array.get(_X, _top_index)), style=label.style_label_up, tooltip='Highest value')
-        line.new(bar_index + _top_index, 0.0, bar_index + _top_index, _top_value, extend=extend.none, style=line.style_dashed)
-        label.new(bar_index, _top_value, str.format('Top probability: {0, number, #.###}\nSumY:{1, number, #.###}', nz(_top_value, 0.), array.sum(_Y)), style=label.style_label_right, textalign=text.align_right, tooltip=str.tostring(_X) + '\n' + str.tostring(_Y))
-        line.new(bar_index, _std, bar_index + _sizex, _std, color=color.navy, style=line.style_dashed)
-        label.new(bar_index, _std, str.format('Y std: {0, number, #.###}', _std), style=label.style_label_right, textalign=text.align_right, tooltip='Standard deviation')
+// graph options:
+color axis_x_color = na_col(input.color(defval=#ffffff00))
+string axis_x_style = na_str(input.string(defval='na', options=['na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both]))
+int axis_x_width = na_width(input.int(200))
+color axis_y_color = na_col(input.color(defval=#ffffff00))
+string axis_y_style = na_str(input.string(defval='na', options=['na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both]))
+int axis_y_width = na_width(input.int(200))
+color mostfreq_color = na_col(input.color(defval=#ffffff00))
+string mostfreq_style = na_str(input.string(defval='na', options=['na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both]))
+int mostfreq_width = na_width(input.int(200))
+color std_color = na_col(input.color(defval=#ffffff00))
+string std_style = na_str(input.string(defval='na', options=['na', line.style_solid, line.style_dotted, line.style_dashed, line.style_arrow_right, line.style_arrow_left, line.style_arrow_both]))
+int std_width = na_width(input.int(200))
+color labels_color = na_col(input.color(defval=#ffffff00))
+color labels_text_color = na_col(input.color(defval=#ffffff00))
+string labels_size = na_str(input.string(defval='na', options=['na', size.tiny, size.small, size.normal, size.large, size.huge, size.auto]))
 
-// if barstate.islast
-//     draw_horizontal(x, y)
-
-draw_vertical(_X, _Y) =>
-    int _sizex = array.size(_X)
-    int _sizey = array.size(_Y)
-    int _previousx = 0
-    float _previousy = array.get(_Y, 0)
-    if _sizex == _sizey and _sizex > 1
-        
-        float _range = array.range(_X)
-        float _bottom = array.min(_X)
-        float _top = _bottom + _range
-        float _step = _range / _sizex
-        for _i = 1 to _sizex - 1 by 1
-            _px = math.min(int(array.get(_Y, _i)*500), 500)//_i
-            _py = _bottom +_i*_step//array.get(_Y, _i)
-            line.new(bar_index + _previousx, _previousy, bar_index + _px, _py)
-
-            _previousx := _px
-            _previousy := _py
-
-        int _top_index = array.indexof(_Y, array.max(_Y))
-        float _top_value = array.get(_Y, _top_index)
-        float _std = array.stdev(_Y)
-        int _std_index = int(math.min(_std * 500, 500))
-        
-        float _most_dense_level = _bottom + _top_index * _step
-        int _most_dense_index = int(_top_value*500)
-        
-        label.new(bar_index, 0.0, str.tostring(array.get(_X, 0)), style=label.style_label_up)
-        label.new(bar_index, _top, str.tostring(array.get(_X, _sizex - 1)), style=label.style_label_down)
-        line.new(bar_index, _most_dense_level, bar_index + _most_dense_index, _most_dense_level, extend=extend.none, color=color.blue, style=line.style_dashed, width=1)
-        label.new(bar_index, _most_dense_level, str.tostring(array.get(_X, _top_index)), style=label.style_label_right, tooltip='Highest value')
-        line.new(bar_index, _bottom, bar_index, _top, extend=extend.none, style=line.style_dashed)
-        label.new(bar_index + _most_dense_index, _most_dense_level, str.format('\nTop probability: {0, number, #.###}\nSumY:{1, number, #.###}', nz(_top_value, 0.), array.sum(_Y)), style=label.style_label_left, textalign=text.align_left, tooltip=str.tostring(_X) + '\n' + str.tostring(_Y))
-        line.new(bar_index + _std_index, _bottom, bar_index + _std_index, _top, color=color.orange, style=line.style_dashed)
-        label.new(bar_index + _std_index, _bottom, str.format('Y std: {0, number, #.###}', _std), style=label.style_label_upper_left, textalign=text.align_right, tooltip='Standard deviation')
-
-bool draw_vert = input.bool(true)
+line[] distribution_lines = array.new_line(0)
+line[] graph_lines = array.new_line(0)
+label[] graph_labels = array.new_label(0)
 if barstate.islast
-    if draw_vert
-        draw_vertical(x, y)
+    if horizontal
+        draw_horizontal(x, y, distribution_lines, graph_lines, graph_labels)
     else
-        draw_horizontal(x, y)
+        draw_vertical(x, y, distribution_lines, graph_lines, graph_labels)
 
+    distribution_lines := array.copy(distribution_lines)
+    style_distribution(distribution_lines, horizontal, histogram, line_color, line_style, line_width)
+    style_graph(graph_lines, graph_labels,
+         axis_x_color, axis_x_style, axis_x_width,
+         axis_y_color, axis_y_style, axis_y_width,
+         mostfreq_color, mostfreq_style, mostfreq_width,
+         std_color, std_style, std_width,
+         labels_color, labels_text_color, labels_size
+         )
+    
+    
+    
+    
+    

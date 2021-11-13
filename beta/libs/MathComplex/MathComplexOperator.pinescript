@@ -18,7 +18,7 @@ import RicardoSantos/DebugConsole/2 as console
 // console.init(), console.queue(), console.update()
 [__T, __C] = console.init(20) //initiate console configuration variables.
 //
-import RicardoSantos/MathComplexCore/3 as complex
+import RicardoSantos/MathComplexCore/1 as complex
 // 
 import RicardoSantos/MathConstants/1 as mc
 // mc.Sqrt1Over2() -> sign()

@@ -17,7 +17,7 @@ library(title='MathComplexArray')
 //         https://github.com/infusion/Complex.js/
 
 // required imports:
-import RicardoSantos/MathComplexCore/3 as complex
+import RicardoSantos/MathComplexCore/1 as complex
 
 // @function Prototype to initialize a array of complex numbers.
 // @param size size of the array.

@@ -2,15 +2,18 @@
 // © RicardoSantos
 
 //@version=5
+// @description Methods to stringify date/time, altho there is already builtin support for it.
 library(title='FunctionDatestring')
 
-import RicardoSantos/DebugConsole/2 as console
+import RicardoSantos/DebugConsole/1 as console
 [__T, __C] = console.init(20)
 
 // @function check if string has 1 digits and prefixes a "0" if true.
 prefixdigit (string str) => (str.length(str) == 1 ? '0' : '') + str
 
 // @function a stringified date stamp at specified unix time.
+// @param unixtime int unix timestamp.
+// @returns string
 export datetime (int unixtime=timenow) => //{
     _year = str.tostring(year(unixtime))
     _month = prefixdigit(str.tostring(month(unixtime)))
@@ -22,6 +25,8 @@ export datetime (int unixtime=timenow) => //{
 //}
 
 // @function a stringified date stamp at specified unix time.
+// @param unixtime int unix timestamp.
+// @returns string
 export date_ (int unixtime=timenow) => //{
     _year = str.tostring(year(unixtime))
     _month = prefixdigit(str.tostring(month(unixtime)))
@@ -30,6 +35,8 @@ export date_ (int unixtime=timenow) => //{
 //}
 
 // @function a stringified date stamp at specified unix time.
+// @param unixtime int unix timestamp.
+// @returns string
 export time_ (int unixtime=timenow) => //{
     _hour = prefixdigit(str.tostring(hour(unixtime)))
     _min = prefixdigit(str.tostring(minute(unixtime)))

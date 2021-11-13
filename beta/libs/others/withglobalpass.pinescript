@@ -1,0 +1,114 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RicardoSantos
+
+//@version=5
+
+// @description Method for Linear Regression using array sample points.
+library(title='FunctionLinearRegression', overlay=true)
+
+// @function Performs Linear Regression over the provided sample points.
+// @param sample_x float array, sample points X value.
+// @param sample_y float array, sample points Y value.
+// @returns tuple with:
+//      _predictions:   Array with adjusted Y values.
+//      _max_dev:       Max deviation from the mean.
+//      _min_dev:       Min deviation from the mean.
+//      _stdev/_sizeX:  Average deviation from the mean.
+export linreg (float[] sample_x, float[] sample_y) => //{
+//| Returns a linear regression channel using (X,Y) vector points.
+    int _sizeX = array.size(id=sample_x)
+    int _sizeY = array.size(id=sample_y)
+    //
+    switch
+        (_sizeX < 1) => runtime.error('FunctionLinearRegression -> linreg(): "sample_x" has the wrong size.')
+        (_sizeX != _sizeY) => runtime.error('FunctionLinearRegression -> linreg(): "sample_x" and "sample_y" size must match.')
+    //
+    float _sumX = array.sum(id=sample_x)
+    float _sumY = array.sum(id=sample_y)
+    float _sumXY = 0.0
+    float _sumX2 = 0.0
+    float _sumY2 = 0.0
+    //
+    for _i = 0 to _sizeY - 1 by 1
+        float _Xi = nz(array.get(id=sample_x, index=_i))
+        float _Yi = nz(array.get(id=sample_y, index=_i))
+        _sumXY := _sumXY + _Xi * _Yi
+        _sumX2 := _sumX2 + math.pow(_Xi, 2)
+        _sumY2 := _sumY2 + math.pow(_Yi, 2)
+        _sumY2
+    //
+    float _a = (_sumY * _sumX2 - _sumX * _sumXY) / (_sizeX * _sumX2 - math.pow(_sumX, 2))
+    float _b = (_sizeX * _sumXY - _sumX * _sumY) / (_sizeX * _sumX2 - math.pow(_sumX, 2))
+    float[] _predictions = array.new_float(size=0, initial_value=0.0)
+    float _max_dev = 0.0
+    float _min_dev = 0.0
+    float _stdev = 0.0
+    //
+    for _i = 0 to _sizeX - 1 by 1
+        float _vector = _a + _b * array.get(id=sample_x, index=_i)
+        array.push(id=_predictions, value=_vector)
+        //
+        float _Yi = array.get(id=sample_y, index=_i)
+        float _diff = _Yi - _vector
+        if _diff > _max_dev
+            _max_dev := _diff
+            _max_dev
+        if _diff < _min_dev
+            _min_dev := _diff
+            _min_dev
+        _stdev := _stdev + math.abs(_diff)
+        _stdev
+    //
+    [_predictions, _max_dev, _min_dev, _stdev / _sizeX]
+//{ usage:
+//{ remarks:
+//      https://www.statisticshowto.com/probability-and-statistics/regression-analysis/find-a-linear-regression-equation/#FindaLinear
+//}}}
+
+
+
+int length = input(10)
+var float[] prices = array.new_float(size=length, initial_value=open)
+var int[] indices = array.new_int(size=length, initial_value=0)
+if ta.pivothigh(2, 2)
+    e = array.pop(id=prices)
+    i = array.pop(id=indices)
+    array.unshift(id=prices, value=high[2])
+    array.unshift(id=indices, value=bar_index[2])
+if ta.pivotlow(2, 2)
+    e = array.pop(id=prices)
+    i = array.pop(id=indices)
+    array.unshift(id=prices, value=low[2])
+    array.unshift(id=indices, value=bar_index[2])
+
+float[] sample_y=prices, string extend=extend.none, 
+color mid_color=color.blue, string mid_style=line.style_solid, int mid_width=2,
+color std_color=color.aqua, string std_style=line.style_dashed, int std_width=1,
+color max_color=color.purple, string max_style=line.style_dotted, int max_width=1
+
+[D, Dmax, Dmin, Dstdev] = linreg(indices, sample_y)
+string _xloc = xloc.bar_index
+var line ln_mid     = line.new(bar_index, open, bar_index, open, _xloc, extend, mid_color, mid_style, mid_width)
+var line ln_max     = line.new(bar_index, open, bar_index, open, _xloc, extend, max_color, max_style, max_width)
+var line ln_min     = line.new(bar_index, open, bar_index, open, _xloc, extend, max_color, max_style, max_width)
+var line ln_upper   = line.new(bar_index, open, bar_index, open, _xloc, extend, std_color, std_style, std_width)
+var line ln_lower   = line.new(bar_index, open, bar_index, open, _xloc, extend, std_color, std_style, std_width)
+
+int first = 0
+int last = array.size(id=indices) - 1
+ln_y1 = array.get(id=D, index=first)
+ln_y2 = array.get(id=D, index=last)
+
+line.set_xy1(id=ln_mid, x=(array.get(id=indices, index=first)), y=ln_y1)
+line.set_xy2(id=ln_mid, x=(array.get(id=indices, index=last)), y=ln_y2)
+line.set_xy1(id=ln_max, x=(array.get(id=indices, index=first)), y=ln_y1 + Dmax)
+line.set_xy2(id=ln_max, x=(array.get(id=indices, index=last)), y=ln_y2 + Dmax)
+line.set_xy1(id=ln_min, x=(array.get(id=indices, index=first)), y=ln_y1 + Dmin)
+line.set_xy2(id=ln_min, x=(array.get(id=indices, index=last)), y=ln_y2 + Dmin)
+line.set_xy1(id=ln_upper, x=(array.get(id=indices, index=first)), y=ln_y1 + Dstdev)
+line.set_xy2(id=ln_upper, x=(array.get(id=indices, index=last)), y=ln_y2 + Dstdev)
+line.set_xy1(id=ln_lower, x=(array.get(id=indices, index=first)), y=ln_y1 - Dstdev)
+line.set_xy2(id=ln_lower, x=(array.get(id=indices, index=last)), y=ln_y2 - Dstdev)
+
+
+

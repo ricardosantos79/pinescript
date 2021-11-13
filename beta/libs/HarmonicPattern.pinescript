@@ -3,7 +3,7 @@
 
 //@version=5
 
-// @description Functions to detect harmonic patterns
+// @description Functions to detect/check harmonic patterns from provided values.
 library("HarmonicPattern")
 
 // @function Compute the price rate of the line AB divided by the the line BC
